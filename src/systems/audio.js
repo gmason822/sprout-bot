@@ -6,7 +6,10 @@ const VOICE_DIR = 'assets/audio/voice/';
 const TTS_RATE = 0.85;
 
 /** Pure: decide how to say a line given which clips exist. */
-export function planSequence(clipIds, available, tts) {
+export function planSequence(clipIds, available, tts, ttsOnly = false) {
+  // "Computer voice only" is a parent setting. A line with no TTS text (a letter
+  // sound) still plays its recording, because there is no other way to say it.
+  if (ttsOnly && tts) return { mode: 'tts', text: tts };
   if (clipIds.length > 0 && clipIds.every((id) => available.has(id))) {
     return { mode: 'clips', ids: clipIds };
   }
@@ -28,6 +31,7 @@ export function createAudio(recorded = []) {
   let generation = 0;      // bumped by stop(); in-flight lines check it and bail out
   let current = null;
   let volume = 1;
+  let ttsOnly = false;
 
   const hasTts = () => typeof window !== 'undefined' && 'speechSynthesis' in window;
 
@@ -96,7 +100,7 @@ export function createAudio(recorded = []) {
     async say(clipIds, tts) {
       stop();
       const mine = generation;
-      const plan = planSequence(clipIds, names, tts);
+      const plan = planSequence(clipIds, names, tts, ttsOnly);
       if (plan.mode === 'tts') {
         await speak(plan.text);
         return;
@@ -108,5 +112,6 @@ export function createAudio(recorded = []) {
     },
     stop,
     setVolume(v) { volume = Math.max(0, Math.min(1, v)); },
+    setTtsOnly(on) { ttsOnly = Boolean(on); },
   };
 }

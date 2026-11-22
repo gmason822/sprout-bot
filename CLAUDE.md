@@ -43,6 +43,7 @@ src/
     paint.js           Recolours the truck SVG for paint rewards
     save.js            Versioned localStorage save, wrapped in try/catch
   skills/              One pure generator per request type, plus index.js (registry)
+  parent/              The hidden parent area: gate, settings panel, progress view (plain HTML)
 content/               JSON data (animals, skills, letters, words, rewards) — edit these, not code, to add content
 public/assets/         Art (Kenney CC0, OpenMoji) and audio
 hardware/              Button box firmware (CircuitPython for Raspberry Pi Pico)
@@ -58,7 +59,7 @@ docs/                  Design, roadmap, audio recording list
 | GO       | Big green ▶ send button   | `Space` or `Enter` (taps the highlighted thing) |
 | PICK_1–4 | —                         | `1` `2` `3` `4` (taps that choice directly) |
 
-Scenes listen for **actions**, never raw keys or pointers. Input is **locked while the truck is moving or a voice line that must be heard is playing**, so mashing does nothing. Do not use a fixed time debounce.
+Scenes listen for **actions**, never raw keys or pointers. The one exception is the parent gate (`src/parent/gate.js`), which reads raw pointer events because it is not part of the child's game. While the parent area is open, `setInputSuspended(true)` silences every action. Input is **locked while the truck is moving or a voice line that must be heard is playing**, so mashing does nothing. Do not use a fixed time debounce.
 
 ## Content and data
 - All learnable content lives in `content/*.json`. The formats are documented in `docs/DESIGN.md`. Adding a letter, an item, an animal or a reward must never need a code change.
@@ -94,6 +95,6 @@ Scenes listen for **actions**, never raw keys or pointers. Input is **locked whi
 - `npm run dev` / `npm run build` / `npm test` must always work.
 
 ## How to work with me
-- Milestones 0 to 3 are built. `docs/ROADMAP.md` lists what is still open in Milestone 2 and what comes next.
+- Milestones 0 to 4 are built. `docs/ROADMAP.md` lists what is still open in Milestone 2 and what comes next.
 - At the end of each milestone, explain how to test it on a PC and on the Samsung phone over the local network (`vite --host`).
 - Ask before adding a dependency that isn't listed above.

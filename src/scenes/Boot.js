@@ -51,6 +51,7 @@ export class Boot extends Phaser.Scene {
 
     const audio = this.registry.get('audio');
     audio.setVolume(state.settings.volume);
+    audio.setTtsOnly(state.settings.ttsOnly);
     this.registry.get('sfx').setVolume(state.settings.volume * 0.6);
     audio.preload();
     this.paintTrucks(content);

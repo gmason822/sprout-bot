@@ -6,6 +6,10 @@ import { Sunset } from './scenes/Sunset.js';
 import { createAudio } from './systems/audio.js';
 import { createSfx } from './systems/sfx.js';
 import { watchForUpdates } from './systems/update.js';
+import { setInputSuspended } from './systems/input.js';
+import { installParentGate } from './parent/gate.js';
+import { openParentPanel } from './parent/panel.js';
+import './parent/parent.css';
 import voiceClips from 'virtual:voice-clips';
 
 export const WIDTH = 1280;
@@ -39,3 +43,51 @@ game.registry.set('sfx', createSfx());
 // the two moments when a reload loses nothing.
 game.registry.set('updateReady', false);
 watchForUpdates(() => game.registry.set('updateReady', true));
+
+// ---------- the hidden parent area ----------
+
+let pausedScenes = [];
+
+function pauseGame() {
+  setInputSuspended(true);
+  game.registry.get('audio').stop();
+  pausedScenes = game.scene.getScenes(true);
+  pausedScenes.forEach((scene) => scene.scene.pause());
+}
+
+function resumeGame() {
+  pausedScenes.forEach((scene) => scene.scene.resume());
+  pausedScenes = [];
+  setInputSuspended(false);
+}
+
+installParentGate({
+  // Nothing to show until the save has been loaded.
+  canOpen: () => Boolean(game.registry.get('state')),
+  onOpen: pauseGame,
+  onCancel: resumeGame,
+  onPass: () => {
+    const state = game.registry.get('state');
+    const store = game.registry.get('store');
+    openParentPanel({
+      state,
+      content: game.registry.get('content'),
+      // Let the parent hear the volume they have just chosen.
+      onPreview: ({ volume }) => {
+        const sfx = game.registry.get('sfx');
+        sfx.setVolume(volume * 0.6);
+        sfx.pop(3);
+      },
+      onClose: ({ settings, reset }) => {
+        if (reset) store.reset();
+        else if (settings) store.save({ ...state, settings });
+        // A changed name or day length affects what is already on screen, so start
+        // cleanly from the saved state rather than patching a running scene.
+        if (reset || settings) return window.location.reload();
+        const sfx = game.registry.get('sfx');
+        sfx.setVolume(state.settings.volume * 0.6);
+        resumeGame();
+      },
+    });
+  },
+});

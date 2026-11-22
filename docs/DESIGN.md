@@ -21,7 +21,14 @@ A farm day is `deliveriesPerDay` deliveries, set by the parent (default 5, range
 - **Request**: animal on one side, the things to pick in the middle, the truck at the bottom.
 - **Sunset**: end-of-day celebration and reward.
 
-Hidden **Parent Gate**: hold the top-right corner for 3 seconds, then tap three numbers that are written out as words ("seven, two, five") on a keypad. It opens Settings: child name, deliveries per day, volume, TTS-only mode, progress view, reset save.
+Hidden **Parent Gate**: hold the top-right corner (where the sun is) for 3 seconds, then tap three numbers that are written out as words ("seven, two, five") on a keypad. The numbers change every time. One wrong tap, or 20 seconds of nothing, closes it and the game carries on.
+
+The **parent area** is plain HTML over the paused game, because a parent needs to read and type:
+- **Settings:** child name, deliveries per day (3 to 10), volume, computer-voice-only mode.
+- **Progress:** every item of every skill as a dot coloured by its box, hollow if he has not met it yet, with how often it was asked and how often he was right first time.
+- **Reset everything**, behind a second confirmation.
+
+Changing a setting saves it and restarts the game at the play button, so nothing on screen is left out of step with the new values. Closing without changes resumes exactly where he was.
 
 ## Requests
 

@@ -40,12 +40,11 @@ Built, waiting for its playtest:
 - Rewards live on the farm: friends and decorations stand around and wiggle when tapped; tapping a hat or paint pot puts it on or takes it off.
 - `save.js` with tests; the farm, rewards, mastery and the day so far survive a restart.
 
-The day length is 5 until the settings screen exists (Milestone 4).
-
 ## Milestone 4 — Parent area
-- Parent gate (corner hold, then the number words).
-- Settings: child name, deliveries per day, volume, TTS-only mode, reset.
-- Progress view showing mastery dots.
+Built, waiting for its playtest:
+- Parent gate: hold the top-right corner (the sun) for 3 seconds, then tap three numbers written as words.
+- Settings: child name, deliveries per day, volume, computer-voice-only mode, reset everything.
+- Progress view: every counting number, letter name, letter sound and side as a coloured dot.
 
 ## Milestone 5 — Button box
 - Build the Pico box (`hardware/`).

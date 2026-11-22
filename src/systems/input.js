@@ -48,6 +48,13 @@ export function moveFocus(index, dir, count) {
   return Math.max(0, Math.min(count - 1, index + dir));
 }
 
+// While the parent area is open nothing may reach the game: typing a name must not
+// pick answers. This is one switch for every scene.
+let suspended = false;
+export function setInputSuspended(on) {
+  suspended = Boolean(on);
+}
+
 /**
  * Wire a Phaser scene's pointer and keyboard to actions.
  * While locked nothing is emitted, which is how mashing during an animation
@@ -58,13 +65,13 @@ export function createInput(scene) {
   let locked = false;
 
   const emit = (action, payload) => {
-    if (locked) return;
+    if (locked || suspended) return;
     for (const fn of listeners.get(action) ?? []) fn(payload);
   };
 
   const onKey = (event) => {
     // A held button must not repeat: one press, one action.
-    if (event.repeat) return;
+    if (event.repeat || suspended) return;
     const action = keyToAction(event.code);
     if (!action) return;
     event.preventDefault();

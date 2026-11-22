@@ -19,6 +19,13 @@ describe('planSequence', () => {
       .toEqual({ mode: 'clips', ids: ['box-says'] });
   });
 
+  it('uses the computer voice for everything it can when asked to', () => {
+    expect(planSequence(line, new Set(line), 'I need three apples!', true)).toEqual({ mode: 'tts', text: 'I need three apples!' });
+    // A letter sound has no text to speak, so its recording still plays.
+    expect(planSequence(['box-says', 'sound-b'], new Set(['box-says', 'sound-b']), null, true))
+      .toEqual({ mode: 'clips', ids: ['box-says', 'sound-b'] });
+  });
+
   it('speaks when there are no clips at all', () => {
     expect(planSequence([], new Set(), 'Hello')).toEqual({ mode: 'tts', text: 'Hello' });
   });
