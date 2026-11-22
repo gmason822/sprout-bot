@@ -36,6 +36,7 @@ export class PickBoard {
       scene.tweens.add({ targets: glow, alpha: 0.3, duration: 450, yoyo: true, repeat: -1 });
 
       const image = scene.add.image(0, 0, choice.art).setDisplaySize(size, size);
+      if (choice.tint !== undefined) image.setTint(choice.tint);
       const obj = scene.add.container(x, y, [image]).setDepth(6);
       if (choice.label) {
         obj.add(scene.add.text(0, 0, choice.label, numberStyle(size * 0.55)).setOrigin(0.5));
@@ -67,7 +68,7 @@ export class PickBoard {
   /** What this delivery leaves in the day's row on the farm. */
   delivered() {
     const right = this.choices.find((c) => c.id === this.answer.correct);
-    return { art: right.art, ...(right.label ? { label: right.label } : {}) };
+    return { art: right.art, ...(right.label ? { label: right.label } : {}), ...(right.tint !== undefined ? { tint: right.tint } : {}) };
   }
 
   onTap(id) {
@@ -111,7 +112,7 @@ export class PickBoard {
     }
     bounce(s, s.animalSprite);
     await s.audio.say(choice.wrong.say, choice.wrong.tts);
-    choice.image.clearTint();
+    if (choice.side) choice.image.clearTint();
 
     await s.drive(choice.x - CARRY.x, [choice.obj]);
     await this.hop(choice.obj, choice.x, choice.y, 1);

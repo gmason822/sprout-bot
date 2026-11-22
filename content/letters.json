@@ -21,7 +21,7 @@
     {"id": "Q", "sound": "kw", "say": "kw, quick, no 'uh'", "example": "queen", "emoji": "👑", "looksLike": ["O"]},
     {"id": "R", "sound": "r", "say": "held: rrr", "example": "rabbit", "emoji": "🐰", "looksLike": ["B", "P", "K"]},
     {"id": "S", "sound": "s", "say": "held: sss", "example": "sun", "emoji": "☀️", "looksLike": ["Z"]},
-    {"id": "T", "sound": "t", "say": "clipped, no 'uh'", "example": "tractor", "emoji": "🚜", "looksLike": ["I", "L"]},
+    {"id": "T", "sound": "t", "say": "clipped, no 'uh'", "example": "tiger", "emoji": "🐯", "looksLike": ["I", "L"]},
     {"id": "U", "sound": "u", "say": "short u, as in umbrella", "example": "umbrella", "emoji": "☂️", "looksLike": ["V"]},
     {"id": "V", "sound": "v", "say": "held: vvv", "example": "van", "emoji": "🚐", "looksLike": ["U", "W", "Y"]},
     {"id": "W", "sound": "w", "say": "short, lips rounded, no 'uh'", "example": "worm", "emoji": "🪱", "looksLike": ["M", "V"]},

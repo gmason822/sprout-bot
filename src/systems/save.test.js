@@ -28,7 +28,7 @@ describe('migrate', () => {
       mastery: { 'count:3': { box: 4, seen: 6, correct: 5, lastSeen: 123 } },
       farm: { rewards: ['friend-duck', 'paint-blue'], paint: 'paint-blue', hat: null },
       days: 3,
-      today: [{ art: 'apple', numeral: 3 }, { art: 'crate', label: 'B' }],
+      today: [{ art: 'apple', numeral: 3 }, { art: 'crate', label: 'B' }, { art: 'shape-star', tint: 0xef4444 }],
       skillLog: ['count', 'letters'],
       lastItem: { count: 'count:3' },
     };

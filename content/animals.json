@@ -1,9 +1,12 @@
 {
   "version": 1,
-  "_comment": "Each animal owns one skill from skills.json. Two animals are offered at a time. 'icon' is the picture in its thought bubble on the farm.",
+  "_comment": "Each animal owns one game from skills.json. Two animals are offered at a time. 'id' is also the name of its picture. 'icon' is what its thought bubble shows on the farm: a picture name, or an emoji.",
   "animals": [
-    { "id": "hen", "name": "Hen", "skill": "count",     "emoji": "🐔", "icon": "apple" },
-    { "id": "cow", "name": "Cow", "skill": "letters",   "emoji": "🐮", "icon": "crate" },
-    { "id": "pig", "name": "Pig", "skill": "leftright", "emoji": "🐷", "icon": "barrel" }
+    { "id": "hen",    "name": "Hen",    "skill": "count",      "emoji": "🐔", "icon": "apple" },
+    { "id": "cow",    "name": "Cow",    "skill": "letters",    "emoji": "🐮", "icon": "crate" },
+    { "id": "pig",    "name": "Pig",    "skill": "leftright",  "emoji": "🐷", "icon": "barrel" },
+    { "id": "owl",    "name": "Owl",    "skill": "numbers",    "emoji": "🦉", "icon": "🔢" },
+    { "id": "rabbit", "name": "Rabbit", "skill": "firstsound", "emoji": "🐰", "icon": "👂" },
+    { "id": "mouse",  "name": "Mouse",  "skill": "shapes",     "emoji": "🐭", "icon": "shape-star" }
   ]
 }

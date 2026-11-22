@@ -8,7 +8,7 @@ Read `docs/DESIGN.md` for the full game design and `docs/ROADMAP.md` for the bui
 - Age 4. **Cannot read.** Short attention span (3–5 minute sittings). Small, imprecise fingers.
 - Loves robots, vehicles and animals.
 - Today: counts past 20 but skips numbers; names most uppercase letters; knows some letter sounds; knows left from right but often mixes them up.
-- Plays on **Android (Chrome)**: a Samsung phone for now, a tablet later. Sometimes with a **USB button box** (shows up as a keyboard).
+- Plays on **Android (Chrome)** by touch: a Samsung phone for now, a tablet later. A **USB button box** (shows up as a keyboard) is a long-term idea, not a current goal; keep keyboard actions working but do not prioritise them.
 
 ## Non-negotiable design rules
 1. **No reading required.** Every request is spoken (recorded voice, with TTS as a fallback). Every button is a picture.

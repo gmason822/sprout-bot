@@ -1,46 +1,58 @@
-// Turns the mastery records into something a parent can read: one group per kind
-// of item, every item shown, with its Leitner box (or null if he has not met it).
+// Turns the mastery records into something a parent can read: one group per tier
+// of each game, every item shown, with its Leitner box (or null if he has not met it).
 
-const SIDE_LABEL = { left: 'Left', right: 'Right' };
+const capital = (word) => word.charAt(0).toUpperCase() + word.slice(1);
 
 function entry(mastery, id, label) {
   const r = mastery[id];
   return { id, label, box: r?.box ?? null, seen: r?.seen ?? 0, correct: r?.correct ?? 0 };
 }
 
+/** The items one tier can ask about, as [id, label] pairs. */
+function tierItems(skill, tier, content) {
+  if (tier.min !== undefined && tier.max !== undefined) {
+    // The counting game keys its numbers as "count:3" whichever tier they came from.
+    const prefix = skill.answer === 'count' ? 'count' : tier.id;
+    const out = [];
+    for (let n = tier.min; n <= tier.max; n++) out.push([`${prefix}:${n}`, String(n)]);
+    return out;
+  }
+  if (tier.sides) return tier.sides.map((s) => [`${tier.id}:${s}`, capital(s)]);
+  if (tier.shapes) return tier.shapes.map((s) => [`${tier.id}:${s}`, capital(s)]);
+  if (skill.source === 'letters.json') {
+    return content.letters.map((l) => [`${tier.id}:${l.id}`, tier.case === 'lower' ? l.id.toLowerCase() : l.id]);
+  }
+  return [];
+}
+
 /**
- * Pure. Groups are built from the skills in the content, so a new skill that uses
- * numbers, letters or sides shows up without changes here. Anything else he has a
- * record for is listed under "Other" rather than hidden.
+ * Pure. Groups come straight from the tiers in skills.json and are labelled by each
+ * tier's `title`, so a new game shows up here without any change. Tiers that share
+ * a title are merged. Anything else he has a record for is listed under "Other"
+ * rather than hidden.
  */
 export function progressGroups(content, mastery) {
   const groups = [];
   const used = new Set();
-  const add = (title, items) => {
-    items.forEach((i) => used.add(i.id));
-    if (items.length > 0) groups.push({ title, items });
-  };
 
   for (const skill of content.skills) {
-    if (skill.answer === 'count') {
-      const numbers = new Set();
-      for (const t of skill.tiers) {
-        for (let n = t.min; n <= t.max; n++) numbers.add(n);
-      }
-      add('Counting', [...numbers].sort((a, b) => a - b).map((n) => entry(mastery, `count:${n}`, String(n))));
-      continue;
-    }
     for (const tier of skill.tiers) {
-      if (tier.ask) {
-        add(tier.ask === 'sound' ? 'Letter sounds' : 'Letter names',
-          content.letters.map((l) => entry(mastery, `${tier.id}:${l.id}`, l.id)));
-      } else if (tier.sides) {
-        add('Left and right', tier.sides.map((s) => entry(mastery, `${tier.id}:${s}`, SIDE_LABEL[s] ?? s)));
+      const title = tier.title ?? tier.id;
+      let group = groups.find((g) => g.title === title);
+      for (const [id, label] of tierItems(skill, tier, content)) {
+        if (used.has(id)) continue;
+        used.add(id);
+        if (!group) {
+          group = { title, items: [] };
+          groups.push(group);
+        }
+        group.items.push(entry(mastery, id, label));
       }
     }
   }
 
-  add('Other', Object.keys(mastery).filter((id) => !used.has(id)).sort().map((id) => entry(mastery, id, id)));
+  const other = Object.keys(mastery).filter((id) => !used.has(id)).sort().map((id) => entry(mastery, id, id));
+  if (other.length > 0) groups.push({ title: 'Other', items: other });
   return groups;
 }
 

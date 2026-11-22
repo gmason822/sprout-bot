@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- White with a dark edge, so the game can tint it any colour. -->
+  <rect x="24" y="24" width="152" height="152" rx="6" fill="#ffffff" stroke="#2b2118" stroke-width="9" stroke-linejoin="round"/>
+</svg>

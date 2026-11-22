@@ -4,7 +4,7 @@ import { makeRequest } from '../skills/index.js';
 import { chooseAnimals, isDayDone, toggleWear } from '../systems/day.js';
 import { drawFarmBackdrop } from './farmBackdrop.js';
 import { TRUCK_Y } from './layout.js';
-import { tween, makeTruck, drawFocusRing, drawDayRow, rewardPicture } from './ui.js';
+import { tween, makeTruck, drawFocusRing, drawDayRow, rewardPicture, emoji } from './ui.js';
 
 const ANIMAL_Y = 345;
 const ANIMAL_SIZE = 280;
@@ -146,6 +146,8 @@ export class Farm extends Phaser.Scene {
     bubble.lineStyle(5, 0x5b4636, 1).strokeCircle(bx, by, 66);
     if (this.textures.exists(animal.icon)) {
       this.add.image(bx, by, animal.icon).setDisplaySize(88, 88).setDepth(3);
+    } else if (animal.icon) {
+      emoji(this, bx, by, animal.icon, 72).setDepth(3);
     }
     return { animal, sprite, x };
   }

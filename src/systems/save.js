@@ -76,6 +76,7 @@ export function migrate(raw) {
         art: d.art,
         ...(typeof d.label === 'string' ? { label: d.label } : {}),
         ...(Number.isFinite(d.numeral) ? { numeral: d.numeral } : {}),
+        ...(Number.isFinite(d.tint) ? { tint: d.tint } : {}),
       }));
   }
 

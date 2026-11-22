@@ -4,11 +4,17 @@
 import { generateCount } from './count.js';
 import { generateLetters } from './letters.js';
 import { generateLeftRight } from './leftright.js';
+import { generateNumbers } from './numbers.js';
+import { generateFirstSound } from './firstsound.js';
+import { generateShapes } from './shapes.js';
 
 const GENERATORS = {
   count: generateCount,
   letters: generateLetters,
   leftright: generateLeftRight,
+  numbers: generateNumbers,
+  firstsound: generateFirstSound,
+  shapes: generateShapes,
 };
 
 export const GENERATOR_IDS = Object.keys(GENERATORS);

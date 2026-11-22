@@ -51,7 +51,7 @@ What is shown versus only spoken: a numeral is shown, because he still has to co
   itemId: "count:3",                 // mastery key
   say: ["need", "num-3", "item-apples"],   // voice clips, played in order
   tts: "I need three apples!",       // spoken if any clip is missing
-  bubble: { art: "apple", numeral: 3 },    // what the animal's speech bubble shows
+  bubble: { art: "apple", numeral: 3 },    // what the animal's speech bubble shows (see below)
   answer: { kind: "count", item: "apple", target: 3, available: 7 }
 }
 ```
@@ -73,23 +73,31 @@ What is shown versus only spoken: a numeral is shown, because he still has to co
 - A choice may have a `side` (`left` or `right`). Its correction and its 2-miss glow then use that side's colour and sound.
 - An optional `cue` (`left` or `right`) plays that side's sound with the request.
 - A request with `tts: null` is only offered when every one of its clips has been recorded.
+- `bubble` is one of: `{ art }` (a picture), `{ art, numeral }` (a picture and a number), `{ art, count }` (that many pictures, to be counted) or `{ emoji }`. It must never show the answer.
+- A choice may have a `tint`, a colour laid over its picture (shapes).
 
 In a `pick` request the truck fetches whatever he taps and takes it to the animal, so a wrong pick is still a delivery, just one that gets sent back.
 
-### Skills in version 1
-| Skill | Animal | Request | Answer kind | Starts at |
+### The games
+| Skill | Animal | Request | Answer kind | How it grows |
 |---|---|---|---|---|
 | `count` | Hen | "I need 3 apples!" | `count` | 1–5, then 1–10 |
-| `letters` | Cow | "Bring me the box with the letter B!" then "…the box that says /b/!" | `pick` from lettered crates | Names first, with the letters of his name; a letter's sound comes in once its name is solid |
-| `leftright` | Pig | "The tree on the LEFT!" | `pick` between two identical things | Left and right from day one |
+| `letters` | Cow | "Bring me the box with the letter B!", then the little letter b, then "…the box that says /b/!" | `pick` from lettered crates | Capitals first, starting with the letters of his name. A letter's lowercase and sound come in once its capital is solid. |
+| `leftright` | Pig | "The one on the LEFT!" | `pick` between identical things | Left and right, then "the one in the middle" with three things |
+| `numbers` | Owl | "Bring me the box with the number 4!" and "How many eggs? Bring me that number!" | `pick` from numbered crates | 1–5 for each kind of question, then up to 10 one number at a time |
+| `firstsound` | Rabbit | A picture and its word: "Bear. What letter does bear start with?" | `pick` from lettered crates | Six letters at first, then the rest one at a time |
+| `shapes` | Mouse | "Bring me the triangle!" | `pick` from three shapes | Circle, square, triangle, star, heart; then rectangle, oval, diamond |
 
 Notes:
 - **Counting** shows 2 more things than the biggest number in the tier, so over-counting is possible.
 - **Letters** never offers two letters with the same sound in a sound request (C and K). While a letter is new (box 1 or 2) its wrong choices look nothing like it (B with M, not B with D); once it is solid, lookalikes are allowed. Letter names use 3 crates, sounds use 2.
-- **Left/right**: the two things are identical and plain on the first try, so the word is the only clue. The blue/orange colors appear on the correction, on the 2-miss glow, and on the button box.
+- **Left/right**: the things are identical and plain on the first try, so the word is the only clue. The blue/orange colors appear on the correction, on the 2-miss glow, and on the button box.
+- **Numbers**: when he is asked to find a numeral, the bubble shows only a crate. When he is asked how many, the bubble shows the things to count, in rows of five. Wrong choices are always numbers he is already working with.
+- **First sounds** speaks the whole word, so it needs no letter-sound recordings. Words come from each letter's `example` and from `words.json`. A word marked `firstSound: false` is left out (fox for X, tree with its "tr").
+- **Shapes** in one request share one random colour, so colour is never the clue. The bubble shows a question mark, because any shape there would look like the answer.
 
 ### Later skills (same loop, same two answer kinds)
-First sounds ("something that starts with /b/"), one more / one less, colors, shapes, big/small, adding with objects, simple words. Each needs a generator, an entry in `skills.json`, voice clips and an animal.
+One more / one less, colors, big/small, adding with objects, simple words. Each needs a generator, an entry in `skills.json`, voice clips and an animal.
 
 ## Which animals are offered
 After each delivery the game picks two different animals:
@@ -120,7 +128,7 @@ With only three animals this simply rotates who sits out.
 ```json
 { "id": "hen", "name": "Hen", "skill": "count", "emoji": "🐔", "icon": "apple" }
 ```
-`id` is also the name of its picture. `icon` is the picture in its thought bubble on the farm.
+`id` is also the name of its picture. `icon` is what its thought bubble shows on the farm: a picture name, or an emoji.
 
 ### `content/skills.json`
 ```json
@@ -134,6 +142,9 @@ With only three animals this simply rotates who sits out.
   "items": ["apple", "carrot", "egg", "pumpkin"]
 }
 ```
+- Each tier is one group in the parent's progress view, labelled by its `title`. Tiers with the same title are merged.
+- A tier holds one kind of item: numbers (`min`, `max`), `sides`, `shapes`, or letters (when the skill has `"source": "letters.json"`).
+- `start`: how many of the tier's items are in play from the first day. The rest arrive one at a time.
 - `unlockAfter`: the tier opens when two thirds of the items in the earlier tier are in box 3 or higher.
 - `perItemAfter` (letters): each item opens separately, once the same letter in the earlier tier is in box 3 or higher. This is how a letter's sound follows its name.
 - `startWith: "childName"` (letters): the first active letters are the ones in his name, or `fallbackStart` if no name is set.
@@ -156,7 +167,10 @@ Types: `friend`, `paint`, `hat`, `decoration`. The order in the file is the orde
 - `paint` needs a `value`: a `#rrggbb` color or `rainbow`. The truck's SVG is recoloured with it.
 
 ### `content/words.json`
-Not used in version 1. It will need a `decodable` flag before a word skill uses it, because words like COW, CAR and FISH cannot be sounded out letter by letter.
+```json
+{ "id": "bus", "text": "BUS", "emoji": "🚌", "level": 1 }
+```
+Picture words for the first-sounds game, which uses each word's first letter. `firstSound: false` leaves a word out of that game. `level` and `text` are for a later word-reading game, which will also need a `decodable` flag, because words like COW, CAR and FISH cannot be sounded out letter by letter.
 
 ### Validation at boot
 - Every animal points at a skill that exists and has a generator, and has a picture.

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildCountRequest, generateCount, judgeCount, sendGlows, correctionLine, numberWord } from './count.js';
+import { buildCountRequest, generateCount, judgeCount, sendGlows, correctionLine, numberWord, plural } from './count.js';
 
 const apple = { id: 'apple', plural: 'apples' };
 const skill = {
@@ -105,5 +105,21 @@ describe('numberWord', () => {
   it('spells 1 to 12', () => {
     expect(numberWord(1)).toBe('one');
     expect(numberWord(12)).toBe('twelve');
+  });
+});
+
+describe('plural', () => {
+  it('handles the things on the farm', () => {
+    expect(plural('apple')).toBe('apples');
+    expect(plural('egg')).toBe('eggs');
+    expect(plural('strawberry')).toBe('strawberries');
+    expect(plural('tomato')).toBe('tomatoes');
+    expect(plural('box')).toBe('boxes');
+    expect(plural('peach')).toBe('peaches');
+    expect(plural('toy')).toBe('toys');
+  });
+  it('is used in what the animals say', () => {
+    const berries = { id: 'count', answer: 'count', tiers: [{ id: 't', min: 2, max: 2 }], items: ['strawberry'] };
+    expect(generateCount({ skill: berries }).tts).toBe('I need two strawberries!');
   });
 });

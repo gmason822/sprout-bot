@@ -60,9 +60,17 @@ describe('validateContent', () => {
     expect(errors).toHaveLength(4);
   });
 
+  it('skips bad words', () => {
+    const raw = good();
+    raw.words = { words: [{ id: 'cat', emoji: '🐱' }, { id: 'cat', emoji: '🐱' }, { id: 'Dog', emoji: '🐶' }, { id: 'sun' }] };
+    const { content, errors } = validateContent(raw, GEN);
+    expect(content.words.map((w) => w.id)).toEqual(['cat']);
+    expect(errors).toHaveLength(3);
+  });
+
   it('survives files that are missing or the wrong shape', () => {
     const { content, errors } = validateContent({}, GEN);
-    expect(content).toEqual({ animals: [], skills: [], letters: [], rewards: [] });
+    expect(content).toEqual({ animals: [], skills: [], letters: [], rewards: [], words: [] });
     expect(errors).toHaveLength(4);
   });
 });
@@ -72,7 +80,8 @@ describe('the real content files', () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const content = loadContent(GENERATOR_IDS);
     expect(spy).not.toHaveBeenCalled();
-    expect(content.animals.length).toBeGreaterThanOrEqual(3);
+    expect(content.animals.length).toBeGreaterThanOrEqual(6);
+    expect(content.words.length).toBeGreaterThan(20);
     expect(content.letters).toHaveLength(26);
     spy.mockRestore();
   });

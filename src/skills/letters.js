@@ -36,10 +36,10 @@ export function pickDistractors(letter, letters, howMany, { forSound, easy }, rn
   return shuffle(pool, rng).slice(0, howMany);
 }
 
-function nameRequest(letter) {
+function nameRequest(letter, lower) {
   return {
-    say: ['box-letter', `letter-${letter.id.toLowerCase()}`],
-    tts: `Bring me the box with the letter ${letter.id}!`,
+    say: [lower ? 'box-little-letter' : 'box-letter', `letter-${letter.id.toLowerCase()}`],
+    tts: `Bring me the box with the ${lower ? 'little ' : ''}letter ${letter.id}!`,
   };
 }
 
@@ -53,28 +53,30 @@ export function generateLetters({ skill, content, mastery = {}, rng = Math.rando
   const letters = content.letters;
   if (letters.length < 2) return null;
   const byId = new Map(letters.map((l) => [l.id, l]));
-  const tier = (ask) => skill.tiers.find((t) => t.ask === ask);
-  const nameTier = tier('name');
-  const soundTier = tier('sound');
+  // The first tier is uppercase letter names. Every other tier follows a letter by
+  // letter: lowercase and sounds are only asked once he reliably knows that name.
+  const nameTier = skill.tiers.find((t) => !t.perItemAfter);
   if (!nameTier) return null;
 
   const { order, startCount } = letterOrder(letters, childName, skill.fallbackStart ?? []);
-  const nameIds = activeItems(order.map((id) => `${nameTier.id}:${id}`), mastery, startCount);
+  const pool = activeItems(order.map((id) => `${nameTier.id}:${id}`), mastery, startCount);
+  for (const tier of skill.tiers) {
+    if (!tier.perItemAfter) continue;
+    for (const id of order) {
+      if (!isSolid(mastery, `${tier.perItemAfter}:${id}`)) continue;
+      // A sound can only be asked if it has been recorded.
+      if (tier.ask === 'sound' && !hasClip(`sound-${id.toLowerCase()}`)) continue;
+      pool.push(`${tier.id}:${id}`);
+    }
+  }
 
-  // A letter's sound is asked only once he reliably knows its name, and only if
-  // the sound has been recorded.
-  const soundIds = soundTier
-    ? order
-      .filter((id) => isSolid(mastery, `${nameTier.id}:${id}`) && hasClip(`sound-${id.toLowerCase()}`))
-      .map((id) => `${soundTier.id}:${id}`)
-    : [];
-
-  const itemId = pickItem([...nameIds, ...soundIds], mastery, rng, prevItemId);
+  const itemId = pickItem(pool, mastery, rng, prevItemId);
   if (!itemId) return null;
   const [tierId, letterId] = itemId.split(':');
   const letter = byId.get(letterId);
-  const forSound = soundTier && tierId === soundTier.id;
-  const usedTier = forSound ? soundTier : nameTier;
+  const usedTier = skill.tiers.find((t) => t.id === tierId);
+  const forSound = usedTier.ask === 'sound';
+  const lower = usedTier.case === 'lower';
 
   const howMany = Math.max(2, Math.min(4, usedTier.choices ?? 2)) - 1;
   const easy = boxOf(mastery, itemId) <= 2;
@@ -84,7 +86,7 @@ export function generateLetters({ skill, content, mastery = {}, rng = Math.rando
   const choices = shuffle([letter, ...others], rng).map((l) => ({
     id: l.id,
     art: 'crate',
-    label: l.id,
+    label: lower ? l.id.toLowerCase() : l.id,
     // Said when he brings this one by mistake, before the request is repeated.
     wrong: { say: ['thats', `letter-${l.id.toLowerCase()}`], tts: `That's ${l.id}.` },
   }));
@@ -92,7 +94,7 @@ export function generateLetters({ skill, content, mastery = {}, rng = Math.rando
   return {
     skill: 'letters',
     itemId,
-    ...(forSound ? soundRequest(letter) : nameRequest(letter)),
+    ...(forSound ? soundRequest(letter) : nameRequest(letter, lower)),
     // Only the kind of thing is shown. Showing the letter would make it shape matching.
     bubble: { art: 'crate' },
     answer: { kind: 'pick', correct: letter.id, choices },

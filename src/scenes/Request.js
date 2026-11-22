@@ -8,7 +8,7 @@ import { drawFarmBackdrop } from './farmBackdrop.js';
 import { CountBoard } from './boards/CountBoard.js';
 import { PickBoard } from './boards/PickBoard.js';
 import { ANIMAL, TRUCK_Y } from './layout.js';
-import { numberStyle, tween, wait, bounce, makeConfetti, makeTruck, drawFocusRing } from './ui.js';
+import { numberStyle, tween, wait, bounce, makeConfetti, makeTruck, drawFocusRing, emoji } from './ui.js';
 
 // The scene knows only these two ways of answering. A new skill reuses one of them,
 // which is why adding a skill never touches this file.
@@ -84,16 +84,31 @@ export class Request extends Phaser.Scene {
       new Phaser.Geom.Circle(this.animalSprite.width / 2, this.animalSprite.height / 2, 130 * k),
       Phaser.Geom.Circle.Contains);
 
-    // The bubble shows the kind of thing wanted, plus the numeral for a counting
-    // request. It never shows a letter or a side: those must be heard.
-    const { art, numeral } = this.request.bubble;
+    // The bubble shows what the request is about: the kind of thing wanted (with its
+    // numeral for a counting request), a picture of a word, or a pile to count.
+    // It never shows the answer itself: a letter, a side or a numeral to be found.
+    const { art, numeral, count, emoji: picture } = this.request.bubble;
     const bubble = this.add.graphics().setDepth(3);
     bubble.fillStyle(0xffffff, 1).fillRoundedRect(105, 40, 280, 170, 40);
     bubble.fillTriangle(250, 205, 300, 205, 290, 250);
     bubble.lineStyle(5, 0x5b4636, 1).strokeRoundedRect(105, 40, 280, 170, 40);
     const hasNumeral = numeral !== undefined;
     this.bubbleNumber = this.add.text(180, 125, '', numberStyle(130)).setOrigin(0.5).setDepth(3);
-    this.add.image(hasNumeral ? 305 : 245, 125, art).setDisplaySize(118, 118).setDepth(3);
+    if (count !== undefined) {
+      // A pile to count: rows of five, like fingers on a hand.
+      const size = 46;
+      const rows = Math.ceil(count / 5);
+      for (let i = 0; i < count; i++) {
+        const inRow = Math.min(5, count - Math.floor(i / 5) * 5);
+        const x = 245 + ((i % 5) - (inRow - 1) / 2) * (size + 5);
+        const y = 125 + (Math.floor(i / 5) - (rows - 1) / 2) * (size + 12);
+        this.add.image(x, y, art).setDisplaySize(size, size).setDepth(3);
+      }
+    } else if (picture) {
+      emoji(this, 245, 125, picture, 104).setDepth(3);
+    } else {
+      this.add.image(hasNumeral ? 305 : 245, 125, art).setDisplaySize(118, 118).setDepth(3);
+    }
   }
 
   // ---------- the request ----------

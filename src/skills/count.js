@@ -11,6 +11,13 @@ export function numberWord(n) {
   return WORDS[n] ?? String(n);
 }
 
+/** The plural of a thing to count: apples, strawberries, tomatoes, boxes. */
+export function plural(word) {
+  if (/[^aeiou]y$/.test(word)) return `${word.slice(0, -1)}ies`;
+  if (/(o|s|x|ch|sh)$/.test(word)) return `${word}es`;
+  return `${word}s`;
+}
+
 /** Build the request for one number of one thing. `item` is { id, plural }. */
 export function buildCountRequest(target, item, available) {
   const one = target === 1;
@@ -51,7 +58,7 @@ export function generateCount({ skill, mastery = {}, rng = Math.random, prevItem
   const itemId = pickItem(activeItems(candidates, mastery, startCount), mastery, rng, prevItemId);
   const target = Number(itemId.split(':')[1]);
   const thing = skill.items[Math.min(skill.items.length - 1, Math.floor(rng() * skill.items.length))];
-  return buildCountRequest(target, { id: thing, plural: `${thing}s` }, tierOf.get(itemId).max + EXTRA);
+  return buildCountRequest(target, { id: thing, plural: plural(thing) }, tierOf.get(itemId).max + EXTRA);
 }
 
 /** How a sent truck compares with what was asked for. */

@@ -5,6 +5,7 @@ import animalsJson from '../../content/animals.json';
 import skillsJson from '../../content/skills.json';
 import lettersJson from '../../content/letters.json';
 import rewardsJson from '../../content/rewards.json';
+import wordsJson from '../../content/words.json';
 
 const ANSWER_KINDS = ['count', 'pick'];
 const REWARD_TYPES = ['friend', 'paint', 'hat', 'decoration'];
@@ -75,13 +76,23 @@ export function validateContent(raw, generatorIds) {
     return true;
   });
 
-  return { content: { animals, skills, letters, rewards }, errors };
+  // Words are optional: a content set with none simply has fewer first-sound pictures.
+  const seenWords = new Set();
+  const words = (Array.isArray(raw.words?.words) ? raw.words.words : []).filter((w) => {
+    if (typeof w?.id !== 'string' || !/^[a-z][a-z-]*$/.test(w.id)) return bad(`words.json: "${w?.id}" is not a lowercase word`);
+    if (seenWords.has(w.id)) return bad(`words.json: word "${w.id}" appears twice`);
+    if (typeof w.emoji !== 'string' || !w.emoji) return bad(`words.json: word "${w.id}" has no emoji`);
+    seenWords.add(w.id);
+    return true;
+  });
+
+  return { content: { animals, skills, letters, rewards, words }, errors };
 }
 
 /** Load, validate and report. Called once at boot. */
 export function loadContent(generatorIds) {
   const { content, errors } = validateContent(
-    { animals: animalsJson, skills: skillsJson, letters: lettersJson, rewards: rewardsJson },
+    { animals: animalsJson, skills: skillsJson, letters: lettersJson, rewards: rewardsJson, words: wordsJson },
     generatorIds,
   );
   for (const message of errors) console.error(`[content] ${message}`);

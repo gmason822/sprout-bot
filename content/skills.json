@@ -1,15 +1,15 @@
 {
   "version": 1,
-  "_comment": "One entry per request type. 'answer' is how he answers: 'count' (load N, then send) or 'pick' (tap one of 2-4). A tier with 'unlockAfter' opens when two thirds of that earlier tier's items are in box 3+. 'perItemAfter' opens each item separately, once the same item in the earlier tier is in box 3+.",
+  "_comment": "One entry per game. 'answer' is how he answers: 'count' (load N, then send) or 'pick' (tap one of 2-4). Each tier is one group in the parent's progress view, labelled by its 'title'. 'unlockAfter': the tier opens when two thirds of the earlier tier's items are in box 3+. 'perItemAfter': each item opens separately, once the same item in the earlier tier is in box 3+. 'start': how many of the tier's items are in play from the first day; the rest arrive one at a time.",
   "skills": [
     {
       "id": "count",
       "answer": "count",
       "tiers": [
-        { "id": "count-1-5",  "min": 1, "max": 5 },
-        { "id": "count-1-10", "min": 1, "max": 10, "unlockAfter": "count-1-5" }
+        { "id": "count-1-5",  "title": "Counting", "min": 1, "max": 5 },
+        { "id": "count-1-10", "title": "Counting", "min": 1, "max": 10, "unlockAfter": "count-1-5" }
       ],
-      "items": ["apple", "carrot", "egg", "pumpkin"]
+      "items": ["apple", "carrot", "egg", "pumpkin", "strawberry", "tomato"]
     },
     {
       "id": "letters",
@@ -18,17 +18,45 @@
       "startWith": "childName",
       "fallbackStart": ["A", "B", "M", "O", "S", "T"],
       "tiers": [
-        { "id": "letter-name",  "ask": "name",  "choices": 3 },
-        { "id": "letter-sound", "ask": "sound", "choices": 2, "perItemAfter": "letter-name" }
+        { "id": "letter-name",  "title": "Letter names",      "ask": "name",  "choices": 3 },
+        { "id": "letter-lower", "title": "Lowercase letters", "ask": "name",  "case": "lower", "choices": 3, "perItemAfter": "letter-name" },
+        { "id": "letter-sound", "title": "Letter sounds",     "ask": "sound", "choices": 2, "perItemAfter": "letter-name" }
       ]
     },
     {
       "id": "leftright",
       "answer": "pick",
       "tiers": [
-        { "id": "side", "sides": ["left", "right"] }
+        { "id": "side", "title": "Left, right and middle", "sides": ["left", "right", "middle"], "start": 2 }
       ],
       "items": ["barrel", "haybale", "flowerpot"]
+    },
+    {
+      "id": "numbers",
+      "answer": "pick",
+      "tiers": [
+        { "id": "numeral", "title": "Finding numbers", "ask": "find",  "min": 1, "max": 10, "start": 5, "choices": 3 },
+        { "id": "howmany", "title": "How many?",       "ask": "count", "min": 1, "max": 10, "start": 5, "choices": 3 }
+      ],
+      "items": ["apple", "carrot", "egg", "pumpkin", "strawberry", "tomato"]
+    },
+    {
+      "id": "firstsound",
+      "answer": "pick",
+      "source": "letters.json",
+      "startWith": "childName",
+      "fallbackStart": ["S", "M", "B", "F", "D", "P"],
+      "tiers": [
+        { "id": "first-sound", "title": "First sounds", "start": 6, "choices": 3 }
+      ]
+    },
+    {
+      "id": "shapes",
+      "answer": "pick",
+      "tiers": [
+        { "id": "shape",  "title": "Shapes", "shapes": ["circle", "square", "triangle", "star", "heart"], "choices": 3 },
+        { "id": "shape2", "title": "Harder shapes", "shapes": ["rectangle", "oval", "diamond"], "choices": 3, "unlockAfter": "shape" }
+      ]
     }
   ]
 }

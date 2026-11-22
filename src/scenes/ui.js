@@ -116,7 +116,11 @@ export function rewardPicture(scene, x, y, reward, size) {
 /** One delivery as a small picture: the thing, plus its letter or how many. */
 export function deliveryIcon(scene, x, y, delivery, size) {
   const icon = scene.add.container(x, y);
-  if (scene.textures.exists(delivery.art)) icon.add(scene.add.image(0, 0, delivery.art).setDisplaySize(size, size));
+  if (scene.textures.exists(delivery.art)) {
+    const image = scene.add.image(0, 0, delivery.art).setDisplaySize(size, size);
+    if (delivery.tint !== undefined) image.setTint(delivery.tint);
+    icon.add(image);
+  }
   if (delivery.label) icon.add(scene.add.text(0, 0, delivery.label, numberStyle(size * 0.5)).setOrigin(0.5));
   if (delivery.numeral !== undefined) {
     icon.add(scene.add.text(size * 0.36, size * 0.3, String(delivery.numeral), numberStyle(size * 0.5)).setOrigin(0.5));

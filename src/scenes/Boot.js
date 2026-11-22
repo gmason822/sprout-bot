@@ -10,9 +10,11 @@ import { makePlayButton } from './ui.js';
 // Art is loaded at twice the drawn size so it stays sharp when the canvas is scaled up.
 const ART = {
   truck: [880, 480], basket: [320, 220],
-  hen: [520, 520], cow: [520, 520], pig: [520, 520],
-  apple: [300, 300], carrot: [300, 300], egg: [300, 300], pumpkin: [300, 300],
+  hen: [520, 520], cow: [520, 520], pig: [520, 520], owl: [520, 520], rabbit: [520, 520], mouse: [520, 520],
+  apple: [300, 300], carrot: [300, 300], egg: [300, 300], pumpkin: [300, 300], strawberry: [300, 300], tomato: [300, 300],
   crate: [420, 420], barrel: [420, 420], haybale: [420, 420], flowerpot: [420, 420],
+  'shape-circle': [420, 420], 'shape-square': [420, 420], 'shape-triangle': [420, 420], 'shape-star': [420, 420],
+  'shape-heart': [420, 420], 'shape-rectangle': [420, 420], 'shape-oval': [420, 420], 'shape-diamond': [420, 420],
 };
 
 /** Loads art and content, then shows one big play button. The first tap is what unlocks sound. */
@@ -90,7 +92,11 @@ export class Boot extends Phaser.Scene {
     return {
       ...content,
       animals: content.animals.filter((a) => has(a.id, 'animal')),
-      skills: content.skills.map((s) => (s.items ? { ...s, items: s.items.filter((i) => has(i, `${s.id} item`)) } : s)),
+      skills: content.skills.map((s) => ({
+        ...s,
+        ...(s.items ? { items: s.items.filter((i) => has(i, `${s.id} item`)) } : {}),
+        tiers: s.tiers.map((t) => (t.shapes ? { ...t, shapes: t.shapes.filter((x) => has(`shape-${x}`, 'shape')) } : t)),
+      })),
     };
   }
 

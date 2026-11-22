@@ -41,30 +41,49 @@ describe('progressGroups', () => {
   const content = loadContent(GENERATOR_IDS);
   const rec = (box, seen = box, correct = box) => ({ box, seen, correct, lastSeen: 0 });
 
-  it('lists every item of every skill, met or not', () => {
+  const group = (groups, title) => groups.find((g) => g.title === title);
+
+  it('lists every item of every game, met or not', () => {
     const groups = progressGroups(content, {});
-    expect(groups.map((g) => g.title)).toEqual(['Counting', 'Letter names', 'Letter sounds', 'Left and right']);
-    expect(groups[0].items.map((i) => i.label)).toEqual(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
-    expect(groups[1].items).toHaveLength(26);
-    expect(groups[3].items.map((i) => i.label)).toEqual(['Left', 'Right']);
+    expect(groups.map((g) => g.title)).toEqual([
+      'Counting', 'Letter names', 'Lowercase letters', 'Letter sounds', 'Left, right and middle',
+      'Finding numbers', 'How many?', 'First sounds', 'Shapes', 'Harder shapes',
+    ]);
+    // The two counting tiers share a title and are merged, with no number twice.
+    expect(group(groups, 'Counting').items.map((i) => i.label)).toEqual(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
+    expect(group(groups, 'Letter names').items).toHaveLength(26);
+    expect(group(groups, 'Lowercase letters').items[1].label).toBe('b');
+    expect(group(groups, 'Left, right and middle').items.map((i) => i.label)).toEqual(['Left', 'Right', 'Middle']);
+    expect(group(groups, 'Shapes').items.map((i) => i.label)).toEqual(['Circle', 'Square', 'Triangle', 'Star', 'Heart']);
     expect(groups.flatMap((g) => g.items).every((i) => i.box === null && i.seen === 0)).toBe(true);
+    // No id is listed twice.
+    const ids = groups.flatMap((g) => g.items.map((i) => i.id));
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
   it('shows the box and counts for what he has met', () => {
-    const groups = progressGroups(content, { 'count:3': rec(4, 6, 5), 'letter-sound:B': rec(2), 'side:left': rec(1, 3, 0) });
-    expect(groups[0].items.find((i) => i.label === '3')).toMatchObject({ box: 4, seen: 6, correct: 5 });
-    expect(groups[2].items.find((i) => i.label === 'B').box).toBe(2);
-    expect(groups[3].items[0]).toMatchObject({ label: 'Left', box: 1, seen: 3, correct: 0 });
+    const groups = progressGroups(content, {
+      'count:3': rec(4, 6, 5), 'letter-sound:B': rec(2), 'side:left': rec(1, 3, 0),
+      'numeral:7': rec(3), 'howmany:2': rec(5), 'first-sound:S': rec(2), 'shape2:oval': rec(1),
+    });
+    expect(group(groups, 'Counting').items.find((i) => i.label === '3')).toMatchObject({ box: 4, seen: 6, correct: 5 });
+    expect(group(groups, 'Letter sounds').items.find((i) => i.label === 'B').box).toBe(2);
+    expect(group(groups, 'Left, right and middle').items[0]).toMatchObject({ label: 'Left', box: 1, seen: 3, correct: 0 });
+    expect(group(groups, 'Finding numbers').items.find((i) => i.label === '7').box).toBe(3);
+    expect(group(groups, 'How many?').items.find((i) => i.label === '2').box).toBe(5);
+    expect(group(groups, 'First sounds').items.find((i) => i.label === 'S').box).toBe(2);
+    expect(group(groups, 'Harder shapes').items.find((i) => i.label === 'Oval').box).toBe(1);
+    expect(groups.some((g) => g.title === 'Other')).toBe(false);
   });
 
   it('never hides a record it does not recognise', () => {
-    const groups = progressGroups(content, { 'shape:circle': rec(2) });
-    expect(groups.at(-1)).toEqual({ title: 'Other', items: [{ id: 'shape:circle', label: 'shape:circle', box: 2, seen: 2, correct: 2 }] });
+    const groups = progressGroups(content, { 'colour:red': rec(2) });
+    expect(groups.at(-1)).toEqual({ title: 'Other', items: [{ id: 'colour:red', label: 'colour:red', box: 2, seen: 2, correct: 2 }] });
   });
 
   it('summarises met and solid items', () => {
     const groups = progressGroups(content, { 'count:1': rec(5), 'count:2': rec(3), 'count:3': rec(1) });
-    expect(progressSummary(groups)).toEqual({ met: 3, solid: 2, total: 64 });
+    expect(progressSummary(groups)).toEqual({ met: 3, solid: 2, total: 145 });
   });
 });
 

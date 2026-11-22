@@ -44,6 +44,25 @@ Animal lines are more fun in a silly voice for each animal. One voice for everyt
 | `that-was-left.mp3` | "That one is on the left." |
 | `that-was-right.mp3` | "That one is on the right." |
 
+## The newer games
+All of these fall back to text-to-speech, so record them whenever you like.
+
+| File | Say |
+|------|-----|
+| `box-little-letter.mp3` | "Bring me the box with the little letter…" |
+| `in-the-middle.mp3` | "The one in the MIDDLE!" |
+| `that-was-middle.mp3` | "That one is in the middle." |
+| `box-number.mp3` | "Bring me the box with the number…" |
+| `how-many.mp3` | "How many…" |
+| `that-number.mp3` | "Bring me that number!" |
+| `what-starts.mp3` | "What letter does that start with?" |
+| `bring-the.mp3` | "Bring me the…" |
+| `thats-a.mp3` | "That's a…" |
+
+- Counting items added: `item-strawberry.mp3` / `item-strawberries.mp3`, `item-tomato.mp3` / `item-tomatoes.mp3`.
+- Shapes: `shape-circle.mp3`, `shape-square.mp3`, `shape-triangle.mp3`, `shape-star.mp3`, `shape-heart.mp3`, `shape-rectangle.mp3`, `shape-oval.mp3`, `shape-diamond.mp3`.
+- First-sound words: `word-<id>.mp3` for each letter's example in `content/letters.json` and each entry in `content/words.json` (for example `word-bear.mp3`).
+
 ## Farm and day (Milestone 3)
 | File | Say |
 |------|-----|

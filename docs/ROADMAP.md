@@ -46,9 +46,17 @@ Built, waiting for its playtest:
 - Settings: child name, deliveries per day, volume, computer-voice-only mode, reset everything.
 - Progress view: every counting number, letter name, letter sound and side as a coloured dot.
 
-## Milestone 5 — Button box
-- Build the Pico box (`hardware/`).
-- Highlight + pick mapping for every request type, tested on PC and Android.
+## More games (after Milestone 4)
+Built, waiting for its playtest. Replay value was thin with three games, so there are now six, and the first three go further:
+- **Owl, numbers:** "Bring me the box with the number 4" and "How many eggs? Bring me that number" (he counts a picture, then finds the numeral).
+- **Rabbit, first sounds:** a picture and its word; he picks the letter it starts with. Works with the computer voice because the whole word is spoken.
+- **Mouse, shapes:** "Bring me the triangle" from three shapes in one colour; harder shapes arrive later.
+- **Cow** now also asks for lowercase letters, one letter at a time, once he knows that capital.
+- **Pig** adds "the one in the middle", with three things on the table, once left and right are going well.
+- **Hen** has strawberries and tomatoes to count as well.
+
+## Long-term
+- **Button box.** Not needed while he plays by touch. The firmware is in `hardware/`, and the game already answers to its keys (arrows move a highlight, Space picks, 1 to 4 pick directly), so building the box later needs no game changes beyond testing.
 
 ## Ideas for later
 - More skills: first sounds, one more / one less, colors, shapes, big/small, adding with objects, simple words.
