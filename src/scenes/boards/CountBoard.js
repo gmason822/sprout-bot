@@ -139,6 +139,11 @@ export class CountBoard {
     return [...things, { id: 'send', x: SEND.x, y: SEND.y, r: SEND.radius + 14 }];
   }
 
+  /** What this delivery leaves in the day's row on the farm. */
+  delivered() {
+    return { art: this.art, numeral: this.answer.target };
+  }
+
   onTap(id) {
     if (id === 'send') return this.send();
     if (id === 'truck') return this.unload();

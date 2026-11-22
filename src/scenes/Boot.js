@@ -2,6 +2,8 @@ import Phaser from 'phaser';
 import { createInput, ACTIONS } from '../systems/input.js';
 import { loadContent } from '../systems/content.js';
 import { GENERATOR_IDS } from '../skills/index.js';
+import { createStore, browserStorage } from '../systems/save.js';
+import { paintTruckSvg } from '../systems/paint.js';
 import { drawFarmBackdrop } from './farmBackdrop.js';
 import { makePlayButton } from './ui.js';
 
@@ -23,6 +25,8 @@ export class Boot extends Phaser.Scene {
     for (const [key, [width, height]] of Object.entries(ART)) {
       this.load.svg(key, `assets/art/${key}.svg`, { width, height });
     }
+    // The truck's drawing as text, so it can be repainted for each paint reward.
+    this.load.text('truck-svg', 'assets/art/truck.svg');
   }
 
   create() {
@@ -31,15 +35,18 @@ export class Boot extends Phaser.Scene {
 
     const content = this.checkArt(loadContent(GENERATOR_IDS));
     this.registry.set('content', content);
-    // Everything he has done this session. Milestone 3 saves and restores it.
-    this.registry.set('state', {
-      mastery: {},
-      skillLog: [],
-      lastItem: {},
-      settings: { childName: '' },
-    });
 
-    this.registry.get('audio').preload();
+    // His farm, progress and settings, restored from the last visit.
+    const store = createStore(browserStorage());
+    const state = store.load();
+    this.registry.set('store', store);
+    this.registry.set('state', state);
+
+    const audio = this.registry.get('audio');
+    audio.setVolume(state.settings.volume);
+    this.registry.get('sfx').setVolume(state.settings.volume * 0.6);
+    audio.preload();
+    this.paintTrucks(content);
 
     const truck = this.add.image(width / 2, 560, 'truck').setDisplaySize(440, 240);
     this.tweens.add({ targets: truck, y: 556, duration: 140, yoyo: true, repeat: -1 });
@@ -52,6 +59,17 @@ export class Boot extends Phaser.Scene {
     const start = () => this.start(input);
     input.on(ACTIONS.TAP, start);
     input.on(ACTIONS.GO, start);
+  }
+
+  /** One truck picture per paint reward, made by recolouring the truck's SVG. */
+  paintTrucks(content) {
+    const svg = this.cache.text.get('truck-svg');
+    const [width, height] = ART.truck;
+    for (const reward of content.rewards) {
+      if (reward.type !== 'paint' || !svg) continue;
+      const painted = paintTruckSvg(svg, reward.value, width, height);
+      this.textures.addBase64(`truck-${reward.id}`, `data:image/svg+xml;charset=utf-8,${encodeURIComponent(painted)}`);
+    }
   }
 
   /** Content can name things there is no picture for. Skip those rather than show a blank box. */

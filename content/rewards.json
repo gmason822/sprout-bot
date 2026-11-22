@@ -1,18 +1,18 @@
 {
   "version": 1,
-  "_comment": "One reward arrives at each sunset, in this order, and stays on the farm forever. Types: friend, paint (truck color, needs 'value'), hat (for the robot), decoration.",
+  "_comment": "One reward arrives at each sunset, in this order, and stays on the farm forever. Types: friend, paint (truck color, needs 'value': #rrggbb or rainbow), hat (for the robot), decoration. Everything except paint is drawn from its 'emoji'.",
   "rewards": [
     { "id": "friend-duck",       "type": "friend",     "name": "Duck",          "emoji": "🦆" },
     { "id": "paint-blue",        "type": "paint",      "name": "Blue paint",    "value": "#3b82f6" },
     { "id": "hat-straw",         "type": "hat",        "name": "Straw hat",     "emoji": "👒" },
     { "id": "friend-sheep",      "type": "friend",     "name": "Sheep",         "emoji": "🐑" },
-    { "id": "deco-scarecrow",    "type": "decoration", "name": "Scarecrow" },
+    { "id": "deco-sunflower",    "type": "decoration", "name": "Sunflower",     "emoji": "🌻" },
     { "id": "paint-red",         "type": "paint",      "name": "Red paint",     "value": "#ef4444" },
     { "id": "friend-dog",        "type": "friend",     "name": "Dog",           "emoji": "🐶" },
-    { "id": "hat-cowboy",        "type": "hat",        "name": "Cowboy hat",    "emoji": "🤠" },
-    { "id": "deco-windmill",     "type": "decoration", "name": "Windmill" },
+    { "id": "hat-top",           "type": "hat",        "name": "Top hat",       "emoji": "🎩" },
+    { "id": "deco-balloon",      "type": "decoration", "name": "Balloon",       "emoji": "🎈" },
     { "id": "friend-horse",      "type": "friend",     "name": "Horse",         "emoji": "🐴" },
-    { "id": "paint-green",       "type": "paint",      "name": "Green paint",   "value": "#22c55e" },
+    { "id": "paint-purple",      "type": "paint",      "name": "Purple paint",  "value": "#a855f7" },
     { "id": "friend-cat",        "type": "friend",     "name": "Cat",           "emoji": "🐱" },
     { "id": "hat-crown",         "type": "hat",        "name": "Crown",         "emoji": "👑" },
     { "id": "paint-rainbow",     "type": "paint",      "name": "Rainbow paint", "value": "rainbow" }

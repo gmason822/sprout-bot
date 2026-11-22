@@ -9,7 +9,7 @@ const good = () => ({
     { id: 'letters', answer: 'pick', tiers: [{ id: 'letter-name' }, { id: 'letter-sound', perItemAfter: 'letter-name' }] },
   ] },
   animals: { animals: [{ id: 'hen', skill: 'count' }, { id: 'cow', skill: 'letters' }] },
-  rewards: { rewards: [{ id: 'r1', type: 'friend' }, { id: 'p1', type: 'paint', value: '#fff' }] },
+  rewards: { rewards: [{ id: 'r1', type: 'friend', emoji: '🦆' }, { id: 'p1', type: 'paint', value: '#fff' }] },
 });
 const GEN = ['count', 'letters', 'leftright'];
 
@@ -54,10 +54,10 @@ describe('validateContent', () => {
 
   it('skips bad rewards', () => {
     const raw = good();
-    raw.rewards.rewards.push({ id: 'r1', type: 'friend' }, { id: 'x', type: 'car' }, { id: 'p2', type: 'paint' });
+    raw.rewards.rewards.push({ id: 'r1', type: 'friend', emoji: '🦆' }, { id: 'x', type: 'car' }, { id: 'p2', type: 'paint' }, { id: 'h1', type: 'hat' });
     const { content, errors } = validateContent(raw, GEN);
     expect(content.rewards.map((r) => r.id)).toEqual(['r1', 'p1']);
-    expect(errors).toHaveLength(3);
+    expect(errors).toHaveLength(4);
   });
 
   it('survives files that are missing or the wrong shape', () => {

@@ -12,7 +12,7 @@ Why this loop: he has to **understand the request** to succeed, the learning is 
    - Right: the truck delivers, the animal cheers, and what he delivered stays on the farm for the day.
    - Wrong: the animal says what that was and what it wants ("That's D. I want /b/!"), the thing goes back, and he tries again. After 2 misses the right answer glows.
 4. **Back to the farm** with two animals waiting again, until the day's deliveries are done.
-5. **Sunset.** The sky turns orange, the farm shows everything from today, one new farm thing arrives (see Rewards), and the robot goes to sleep. A big sun button starts a new day.
+5. **Sunset.** The sky turns orange, today's deliveries are counted back one by one, one new farm thing arrives (see Rewards), and the robot goes to sleep. A big sun button starts a new day whenever he wants one; nothing pushes him to.
 
 A farm day is `deliveriesPerDay` deliveries, set by the parent (default 5, range 3–10).
 
@@ -101,9 +101,10 @@ With only three animals this simply rotates who sits out.
 - Left/right has only two answers, so half of all guesses are right. Read its dots as a trend, not a score.
 
 ## Rewards
-- **During the day:** each delivery leaves something visible on the farm (apples in the hen's basket, crates by the cow).
-- **At sunset:** the next entry in `content/rewards.json` arrives: a new farm friend, a truck paint color, a robot hat or a decoration. It stays forever.
-- No stars, no counters, no shop. Tap a paint or hat on the farm to put it on right away.
+- **During the day:** each delivery fills the next ring in a row at the top of the farm (the thing, with its number or letter). Empty rings show how much of the day is left.
+- **At sunset:** the next entry in `content/rewards.json` arrives: a new farm friend, a truck paint color, a robot hat or a decoration. It stays forever. A new paint or hat goes straight on.
+- **On the farm:** friends and decorations stand around and wiggle when tapped. Hats sit on the road to the left of the truck and paint pots to the right; tapping one puts it on, tapping it again takes it off.
+- No stars, no counters, no shop.
 - When the reward list runs out, sunset still celebrates. Add more rewards in JSON.
 
 ## Content formats
@@ -143,7 +144,9 @@ With only three animals this simply rotates who sits out.
 ```json
 { "id": "friend-duck", "type": "friend", "name": "Duck", "emoji": "🦆" }
 ```
-Types: `friend`, `paint` (with a `value` color), `hat`, `decoration`. The order in the file is the order they arrive.
+Types: `friend`, `paint`, `hat`, `decoration`. The order in the file is the order they arrive.
+- Everything except paint is drawn from its `emoji`, using the device's own emoji font, so a new reward needs no art.
+- `paint` needs a `value`: a `#rrggbb` color or `rainbow`. The truck's SVG is recoloured with it.
 
 ### `content/words.json`
 Not used in version 1. It will need a `decodable` flag before a word skill uses it, because words like COW, CAR and FISH cannot be sounded out letter by letter.
@@ -163,7 +166,9 @@ Not used in version 1. It will need a `decodable` flag before a word skill uses 
   mastery: { "count:3": { box: 2, seen: 4, correct: 3, lastSeen: 0 } },
   farm: { rewards: ["friend-duck"], paint: null, hat: null },
   days: 0,
-  skillLog: []          // recent deliveries per skill, for choosing which animals to offer
+  today: [{ art: "apple", numeral: 3 }, { art: "crate", label: "B" }],   // today's deliveries so far
+  skillLog: [],         // recent deliveries per skill, for choosing which animals to offer
+  lastItem: {}          // last item asked per skill, so it is not asked twice running
 }
 ```
 

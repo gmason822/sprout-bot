@@ -39,7 +39,8 @@ src/
     audio.js           Plays recorded clips in sequence; falls back to speechSynthesis
     content.js         Loads and validates content/*.json
     mastery.js         Leitner-box tracking per content item
-    day.js             Farm-day state: which animals wait, deliveries left
+    day.js             Farm-day rules: which animals wait, when the day ends, rewards
+    paint.js           Recolours the truck SVG for paint rewards
     save.js            Versioned localStorage save, wrapped in try/catch
   skills/              One pure generator per request type, plus index.js (registry)
 content/               JSON data (animals, skills, letters, words, rewards) — edit these, not code, to add content
@@ -67,6 +68,7 @@ Scenes listen for **actions**, never raw keys or pointers. Input is **locked whi
 ## Saving
 - One localStorage key: `sproutbot.save.v1`. Include a `version` field and a migration hook.
 - Always wrap storage access in try/catch, and fall back to in-memory state if it fails.
+- Scenes share one `state` object from the registry and call `store.save(state)` after anything worth keeping. `migrate()` in `save.js` repairs a damaged save one field at a time.
 
 ## Assets and credits
 - Prefer **Kenney.nl** packs (CC0) for the world, robot, truck, UI and sound effects.
@@ -92,6 +94,6 @@ Scenes listen for **actions**, never raw keys or pointers. Input is **locked whi
 - `npm run dev` / `npm run build` / `npm test` must always work.
 
 ## How to work with me
-- Milestones 0 to 2 are built. `docs/ROADMAP.md` lists what is still open in Milestone 2 and what comes next.
+- Milestones 0 to 3 are built. `docs/ROADMAP.md` lists what is still open in Milestone 2 and what comes next.
 - At the end of each milestone, explain how to test it on a PC and on the Samsung phone over the local network (`vite --host`).
 - Ask before adding a dependency that isn't listed above.

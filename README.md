@@ -11,7 +11,7 @@ A homemade learning game for a 4-year-old. Farm animals ask out loud for things,
 On an Android phone or tablet, open that address in Chrome, then use the menu → "Add to Home screen" (or "Install app"). It then opens fullscreen in landscape and works with no connection.
 
 ## Status
-Milestones 1 and 2 are built: three animals ask for counting, letters and left/right. Nothing is saved between visits yet. See `docs/ROADMAP.md`.
+Milestones 1 to 3 are built: three animals ask for counting, letters and left/right; a farm day ends at sunset with a reward; and progress is saved on the device. See `docs/ROADMAP.md`.
 
 ## Publishing
 Every push to `main` runs the tests, builds the game and publishes it to GitHub Pages (`.github/workflows/deploy.yml`). An installed copy updates itself the next time it is opened with a connection.

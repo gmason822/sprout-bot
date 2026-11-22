@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Boot } from './scenes/Boot.js';
 import { Farm } from './scenes/Farm.js';
 import { Request } from './scenes/Request.js';
+import { Sunset } from './scenes/Sunset.js';
 import { createAudio } from './systems/audio.js';
 import { createSfx } from './systems/sfx.js';
 import voiceClips from 'virtual:voice-clips';
@@ -23,7 +24,7 @@ const game = new Phaser.Game({
     // One finger at a time: a resting palm must not count as extra taps.
     activePointers: 1,
   },
-  scene: [Boot, Farm, Request],
+  scene: [Boot, Farm, Request, Sunset],
 });
 
 // Handy in the browser console while developing; left out of the real build.

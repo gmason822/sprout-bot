@@ -33,10 +33,14 @@ Still to do:
 - Install it on the phone and playtest.
 
 ## Milestone 3 — Farm day
-- `day.js`: deliveries per day, which animals are offered, sunset.
-- Deliveries stay visible on the farm during the day.
-- Sunset scene with the next reward from `content/rewards.json`; paint and hats can be put on.
-- `save.js` with tests; the farm, rewards and mastery survive a restart.
+Built, waiting for its playtest:
+- `day.js`: deliveries per day, which animals are offered, sunset, wearing paint and hats (pure, tested).
+- A row at the top of the farm shows today's deliveries, with empty rings for the ones still to come.
+- Sunset scene: the day is counted back, the next reward from `content/rewards.json` arrives, the robot sleeps, and a sun button starts a new day.
+- Rewards live on the farm: friends and decorations stand around and wiggle when tapped; tapping a hat or paint pot puts it on or takes it off.
+- `save.js` with tests; the farm, rewards, mastery and the day so far survive a restart.
+
+The day length is 5 until the settings screen exists (Milestone 4).
 
 ## Milestone 4 — Parent area
 - Parent gate (corner hold, then the number words).

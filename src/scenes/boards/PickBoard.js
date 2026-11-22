@@ -64,6 +64,12 @@ export class PickBoard {
     return this.choices.map((c, i) => ({ id: `choice:${i}`, x: c.x, y: c.y, r: c.size / 2 + 12 }));
   }
 
+  /** What this delivery leaves in the day's row on the farm. */
+  delivered() {
+    const right = this.choices.find((c) => c.id === this.answer.correct);
+    return { art: right.art, ...(right.label ? { label: right.label } : {}) };
+  }
+
   onTap(id) {
     if (id.startsWith('choice:')) this.choose(Number(id.slice(7)));
   }

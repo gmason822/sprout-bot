@@ -3,6 +3,7 @@ import { createInput, moveFocus, ACTIONS } from '../systems/input.js';
 import { makeRequest } from '../skills/index.js';
 import { numberWord } from '../skills/count.js';
 import { recordAnswer } from '../systems/mastery.js';
+import { isDayDone } from '../systems/day.js';
 import { drawFarmBackdrop } from './farmBackdrop.js';
 import { CountBoard } from './boards/CountBoard.js';
 import { PickBoard } from './boards/PickBoard.js';
@@ -21,7 +22,7 @@ const PRAISE = [
 const IDLE_MS = 8000;
 const IDLE_REPEATS_MAX = 3;
 
-/** One request from one animal: hear it, answer it, celebrate, back to the farm. */
+/** One request from one animal: hear it, answer it, celebrate, then back to the farm (or to sunset). */
 export class Request extends Phaser.Scene {
   constructor() {
     super('Request');
@@ -149,6 +150,7 @@ export class Request extends Phaser.Scene {
     if (this.judged) return;
     this.judged = true;
     this.state.mastery = recordAnswer(this.state.mastery, this.request.itemId, right);
+    this.registry.get('store').save(this.state);
   }
 
   /** Drive the truck to x. `riders` are loose things that travel with it. */
@@ -180,7 +182,11 @@ export class Request extends Phaser.Scene {
 
     this.state.skillLog.push(this.request.skill);
     this.state.lastItem[this.request.skill] = this.request.itemId;
-    this.scene.start('Farm');
+    // What he delivered stays on the farm for the rest of the day.
+    this.state.today.push(this.board.delivered());
+    this.registry.get('store').save(this.state);
+    const done = isDayDone(this.state.today, this.state.settings.deliveriesPerDay);
+    this.scene.start(done ? 'Sunset' : 'Farm');
   }
 
   // ---------- actions ----------

@@ -70,6 +70,7 @@ export function validateContent(raw, generatorIds) {
     if (seenRewards.has(r.id)) return bad(`rewards.json: reward "${r.id}" appears twice`);
     if (!REWARD_TYPES.includes(r.type)) return bad(`rewards.json: reward "${r.id}" has unknown type "${r.type}"`);
     if (r.type === 'paint' && !r.value) return bad(`rewards.json: paint "${r.id}" has no value`);
+    if (r.type !== 'paint' && !r.emoji) return bad(`rewards.json: reward "${r.id}" has no emoji to draw it with`);
     seenRewards.add(r.id);
     return true;
   });
