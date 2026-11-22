@@ -13,28 +13,6 @@ const ART = {
   crate: [420, 420], barrel: [420, 420], haybale: [420, 420], flowerpot: [420, 420],
 };
 
-// Clips that do not depend on the content files.
-const FIXED_CLIPS = [
-  'need', 'one-more', 'more', 'too-many', 'thank-you', 'great-job', 'you-did-it', 'try-again',
-  'box-letter', 'box-says', 'thats',
-  'on-the-left', 'on-the-right', 'that-was-left', 'that-was-right', 'who-helps',
-];
-
-/** Every clip the current content could ask for. Missing ones fall back to text-to-speech. */
-function clipList(content) {
-  const clips = [...FIXED_CLIPS];
-  for (let n = 1; n <= 12; n++) clips.push(`num-${n}`);
-  for (const letter of content.letters) {
-    const l = letter.id.toLowerCase();
-    clips.push(`letter-${l}`, `sound-${l}`);
-  }
-  for (const skill of content.skills) {
-    if (skill.answer !== 'count') continue;
-    for (const item of skill.items ?? []) clips.push(`item-${item}`, `item-${item}s`);
-  }
-  return clips;
-}
-
 /** Loads art and content, then shows one big play button. The first tap is what unlocks sound. */
 export class Boot extends Phaser.Scene {
   constructor() {
@@ -61,8 +39,7 @@ export class Boot extends Phaser.Scene {
       settings: { childName: '' },
     });
 
-    // Start probing now so it is usually finished by the time he taps.
-    this.clipsReady = this.registry.get('audio').probe(clipList(content));
+    this.registry.get('audio').preload();
 
     const truck = this.add.image(width / 2, 560, 'truck').setDisplaySize(440, 240);
     this.tweens.add({ targets: truck, y: 556, duration: 140, yoyo: true, repeat: -1 });
@@ -91,13 +68,12 @@ export class Boot extends Phaser.Scene {
     };
   }
 
-  async start(input) {
+  start(input) {
     input.lock();
     this.registry.get('sfx').unlock();
     this.registry.get('audio').unlock();
     this.registry.get('sfx').beepBoop();
     goFullscreenLandscape(this);
-    await this.clipsReady;
     this.scene.start('Farm');
   }
 }

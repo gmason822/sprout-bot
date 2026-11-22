@@ -76,8 +76,14 @@ Scenes listen for **actions**, never raw keys or pointers. Input is **locked whi
 
 ## Audio
 - Recorded voice clips go in `public/assets/audio/voice/` using the names in `docs/AUDIO.md`.
-- A request is a list of clips played in order ("I need" + "three" + "apples"). `audio.js` plays each clip if it exists, otherwise speaks the request's `tts` text with speechSynthesis (slow rate, about 0.85).
+- A request is a list of clips played in order ("I need" + "three" + "apples"). If every clip of a line is recorded, `audio.js` plays them; otherwise it speaks the whole line's `tts` text with speechSynthesis (slow rate, about 0.85).
+- The game learns which clips exist at build time: `vite.config.js` lists the folder as the module `virtual:voice-clips`. Never probe the server for clips at runtime.
 - **Letter sounds cannot use TTS.** They must be recorded before the letter-sound requests ship.
+
+## Hosting
+- The game is public at https://gmason822.github.io/sprout-bot/ (GitHub Pages). Every push to `main` tests, builds and publishes it.
+- Keep `base: './'` in `vite.config.js`: the site is served from a sub-folder.
+- The repository is public. Never commit the child's name, photos, or anything else personal; his name belongs in the saved settings on the device only.
 
 ## Code conventions
 - Small modules, plain functions, and only as many classes as Phaser needs.

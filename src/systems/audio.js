@@ -21,34 +21,30 @@ export function ttsTimeoutMs(text) {
   return 1500 + words * 600;
 }
 
-export function createAudio() {
-  const clips = new Map(); // id → HTMLAudioElement, only for clips that loaded
+/** `recorded` is the list of clip names that exist in public/assets/audio/voice/. */
+export function createAudio(recorded = []) {
+  const names = new Set(recorded);
+  const clips = new Map(); // id → HTMLAudioElement, made the first time a clip is needed
   let generation = 0;      // bumped by stop(); in-flight lines check it and bail out
   let current = null;
   let volume = 1;
 
   const hasTts = () => typeof window !== 'undefined' && 'speechSynthesis' in window;
 
-  function probeOne(id) {
-    return new Promise((resolve) => {
+  function element(id) {
+    if (!names.has(id)) return null;
+    if (!clips.has(id)) {
       const el = new Audio();
-      const done = (ok) => {
-        el.oncanplaythrough = el.onerror = null;
-        if (ok) clips.set(id, el);
-        resolve(ok);
-      };
-      el.oncanplaythrough = () => done(true);
-      el.onerror = () => done(false);
-      // A stalled request must not hold up the game.
-      setTimeout(() => done(false), 3000);
       el.preload = 'auto';
       el.src = `${import.meta.env.BASE_URL}${VOICE_DIR}${id}.mp3`;
-    });
+      clips.set(id, el);
+    }
+    return clips.get(id);
   }
 
   function playClip(id) {
     return new Promise((resolve) => {
-      const el = clips.get(id);
+      const el = element(id);
       if (!el) return resolve();
       current = el;
       el.currentTime = 0;
@@ -85,13 +81,10 @@ export function createAudio() {
   }
 
   return {
-    /** Find out which recorded clips exist. Call once at boot. */
-    async probe(ids) {
-      await Promise.all(ids.map(probeOne));
-      return [...clips.keys()];
-    },
+    /** Start loading every recording, so the first request is not delayed. */
+    preload() { names.forEach(element); },
     /** Has this clip been recorded? */
-    has(id) { return clips.has(id); },
+    has(id) { return names.has(id); },
     /** Call from the first tap: browsers only allow sound after a user gesture. */
     unlock() {
       if (hasTts()) {
@@ -103,7 +96,7 @@ export function createAudio() {
     async say(clipIds, tts) {
       stop();
       const mine = generation;
-      const plan = planSequence(clipIds, new Set(clips.keys()), tts);
+      const plan = planSequence(clipIds, names, tts);
       if (plan.mode === 'tts') {
         await speak(plan.text);
         return;

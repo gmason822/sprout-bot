@@ -4,6 +4,7 @@ import { Farm } from './scenes/Farm.js';
 import { Request } from './scenes/Request.js';
 import { createAudio } from './systems/audio.js';
 import { createSfx } from './systems/sfx.js';
+import voiceClips from 'virtual:voice-clips';
 
 export const WIDTH = 1280;
 export const HEIGHT = 720;
@@ -29,5 +30,5 @@ const game = new Phaser.Game({
 if (import.meta.env.DEV) window.__game = game;
 
 // One audio and one sfx service for the whole game, shared through the registry.
-game.registry.set('audio', createAudio());
+game.registry.set('audio', createAudio(voiceClips));
 game.registry.set('sfx', createSfx());

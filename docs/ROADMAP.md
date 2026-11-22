@@ -25,9 +25,12 @@ Built, waiting for its playtest:
 - Request scene handles both answer kinds (`count` and `pick`) from request objects only.
 - Farm hub with two animals waiting; he picks who to help.
 
+- Hosted on GitHub Pages at https://gmason822.github.io/sprout-bot/, published on every push to `main`.
+- Installable and offline (vite-plugin-pwa): the whole game, including any recorded clips, is cached on the device.
+
 Still to do:
 - Record the letter-name and letter-sound clips. Letter-sound requests stay switched off until `sound-<letter>.mp3` exists, because they have no TTS fallback.
-- HTTPS static hosting and PWA install, so it runs offline from the home screen and the phone can reach it. Agree the host first.
+- Install it on the phone and playtest.
 
 ## Milestone 3 — Farm day
 - `day.js`: deliveries per day, which animals are offered, sunset.
