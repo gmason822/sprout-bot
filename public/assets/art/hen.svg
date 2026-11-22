@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <!-- legs -->
+  <g stroke="#f59e0b" stroke-width="7" stroke-linecap="round" fill="none">
+    <path d="M100 196 V222 M100 222 H84 M100 222 H116"/>
+    <path d="M140 196 V222 M140 222 H124 M140 222 H156"/>
+  </g>
+  <!-- tail -->
+  <path d="M52 132 C20 118 14 84 26 62 C36 78 44 84 54 86 C48 70 52 54 62 44 C68 66 78 84 92 100 Z" fill="#f3e9d8" stroke="#5b4636" stroke-width="5" stroke-linejoin="round"/>
+  <!-- body -->
+  <ellipse cx="118" cy="146" rx="76" ry="62" fill="#fffaf0" stroke="#5b4636" stroke-width="5"/>
+  <!-- wing -->
+  <path d="M82 140 C96 118 136 120 146 142 C138 168 98 172 82 140 Z" fill="#f3e9d8" stroke="#5b4636" stroke-width="5" stroke-linejoin="round"/>
+  <!-- comb -->
+  <path d="M148 46 C146 30 160 26 164 38 C168 22 184 24 182 40 C192 30 204 40 196 54 Z" fill="#e53935" stroke="#a31515" stroke-width="4" stroke-linejoin="round"/>
+  <!-- head -->
+  <circle cx="172" cy="82" r="40" fill="#fffaf0" stroke="#5b4636" stroke-width="5"/>
+  <!-- wattle -->
+  <path d="M196 106 C206 110 206 128 196 130 C188 128 188 112 196 106 Z" fill="#e53935" stroke="#a31515" stroke-width="3"/>
+  <!-- beak -->
+  <path d="M206 78 L234 88 L206 100 Z" fill="#f59e0b" stroke="#b45309" stroke-width="4" stroke-linejoin="round"/>
+  <!-- eye -->
+  <circle cx="184" cy="74" r="8" fill="#2b2118"/>
+  <circle cx="187" cy="71" r="2.6" fill="#ffffff"/>
+  <!-- cheek -->
+  <circle cx="170" cy="96" r="7" fill="#ffb4a8" opacity="0.8"/>
+</svg>

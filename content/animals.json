@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "_comment": "Each animal owns one skill from skills.json. Two animals are offered at a time. 'icon' is the picture in its thought bubble on the farm.",
+  "animals": [
+    { "id": "hen", "name": "Hen", "skill": "count",     "emoji": "🐔", "icon": "apple" },
+    { "id": "cow", "name": "Cow", "skill": "letters",   "emoji": "🐮", "icon": "crate" },
+    { "id": "pig", "name": "Pig", "skill": "leftright", "emoji": "🐷", "icon": "barrel" }
+  ]
+}

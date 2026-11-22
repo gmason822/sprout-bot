@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "_comment": "One reward arrives at each sunset, in this order, and stays on the farm forever. Types: friend, paint (truck color, needs 'value'), hat (for the robot), decoration.",
+  "rewards": [
+    { "id": "friend-duck",       "type": "friend",     "name": "Duck",          "emoji": "🦆" },
+    { "id": "paint-blue",        "type": "paint",      "name": "Blue paint",    "value": "#3b82f6" },
+    { "id": "hat-straw",         "type": "hat",        "name": "Straw hat",     "emoji": "👒" },
+    { "id": "friend-sheep",      "type": "friend",     "name": "Sheep",         "emoji": "🐑" },
+    { "id": "deco-scarecrow",    "type": "decoration", "name": "Scarecrow" },
+    { "id": "paint-red",         "type": "paint",      "name": "Red paint",     "value": "#ef4444" },
+    { "id": "friend-dog",        "type": "friend",     "name": "Dog",           "emoji": "🐶" },
+    { "id": "hat-cowboy",        "type": "hat",        "name": "Cowboy hat",    "emoji": "🤠" },
+    { "id": "deco-windmill",     "type": "decoration", "name": "Windmill" },
+    { "id": "friend-horse",      "type": "friend",     "name": "Horse",         "emoji": "🐴" },
+    { "id": "paint-green",       "type": "paint",      "name": "Green paint",   "value": "#22c55e" },
+    { "id": "friend-cat",        "type": "friend",     "name": "Cat",           "emoji": "🐱" },
+    { "id": "hat-crown",         "type": "hat",        "name": "Crown",         "emoji": "👑" },
+    { "id": "paint-rainbow",     "type": "paint",      "name": "Rainbow paint", "value": "rainbow" }
+  ]
+}

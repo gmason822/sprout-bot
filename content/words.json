@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "words": [
+    { "id": "cat", "text": "CAT", "emoji": "🐱", "level": 1 },
+    { "id": "dog", "text": "DOG", "emoji": "🐶", "level": 1 },
+    { "id": "sun", "text": "SUN", "emoji": "☀️", "level": 1 },
+    { "id": "pig", "text": "PIG", "emoji": "🐷", "level": 1 },
+    { "id": "bus", "text": "BUS", "emoji": "🚌", "level": 1 },
+    { "id": "hat", "text": "HAT", "emoji": "🎩", "level": 1 },
+    { "id": "bed", "text": "BED", "emoji": "🛏️", "level": 1 },
+    { "id": "bug", "text": "BUG", "emoji": "🐛", "level": 1 },
+    { "id": "cup", "text": "CUP", "emoji": "🥤", "level": 1 },
+    { "id": "fox", "text": "FOX", "emoji": "🦊", "level": 1 },
+    { "id": "hen", "text": "HEN", "emoji": "🐔", "level": 1 },
+    { "id": "box", "text": "BOX", "emoji": "📦", "level": 1 },
+    { "id": "cow", "text": "COW", "emoji": "🐮", "level": 1 },
+    { "id": "egg", "text": "EGG", "emoji": "🥚", "level": 1 },
+    { "id": "car", "text": "CAR", "emoji": "🚗", "level": 1 },
+    { "id": "frog", "text": "FROG", "emoji": "🐸", "level": 2 },
+    { "id": "fish", "text": "FISH", "emoji": "🐟", "level": 2 },
+    { "id": "duck", "text": "DUCK", "emoji": "🦆", "level": 2 },
+    { "id": "corn", "text": "CORN", "emoji": "🌽", "level": 2 },
+    { "id": "moon", "text": "MOON", "emoji": "🌙", "level": 2 },
+    { "id": "star", "text": "STAR", "emoji": "⭐", "level": 2 },
+    { "id": "tree", "text": "TREE", "emoji": "🌳", "level": 2 },
+    { "id": "goat", "text": "GOAT", "emoji": "🐐", "level": 2 }
+  ]
+}

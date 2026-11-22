@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "_comment": "One entry per request type. 'answer' is how he answers: 'count' (load N, then send) or 'pick' (tap one of 2-4). A tier with 'unlockAfter' opens when two thirds of that earlier tier's items are in box 3+. 'perItemAfter' opens each item separately, once the same item in the earlier tier is in box 3+.",
+  "skills": [
+    {
+      "id": "count",
+      "answer": "count",
+      "tiers": [
+        { "id": "count-1-5",  "min": 1, "max": 5 },
+        { "id": "count-1-10", "min": 1, "max": 10, "unlockAfter": "count-1-5" }
+      ],
+      "items": ["apple", "carrot", "egg", "pumpkin"]
+    },
+    {
+      "id": "letters",
+      "answer": "pick",
+      "source": "letters.json",
+      "startWith": "childName",
+      "fallbackStart": ["A", "B", "M", "O", "S", "T"],
+      "tiers": [
+        { "id": "letter-name",  "ask": "name",  "choices": 3 },
+        { "id": "letter-sound", "ask": "sound", "choices": 2, "perItemAfter": "letter-name" }
+      ]
+    },
+    {
+      "id": "leftright",
+      "answer": "pick",
+      "tiers": [
+        { "id": "side", "sides": ["left", "right"] }
+      ],
+      "items": ["barrel", "haybale", "flowerpot"]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "_comment": "'sound' and 'say' are notes for recording sound-<letter>.mp3; they are never sent to text-to-speech. 'sameSoundAs' stops both letters appearing in one sound request. 'looksLike' lists lookalikes, which are kept out of the choices while a letter is new. 'firstSound': false means the example word does not start with the sound.",
+  "letters": [
+    {"id": "A", "sound": "a", "say": "short a, as in apple", "example": "apple", "emoji": "🍎"},
+    {"id": "B", "sound": "b", "say": "clipped, no 'uh'", "example": "bear", "emoji": "🐻", "looksLike": ["D", "P", "R"]},
+    {"id": "C", "sound": "k", "say": "clipped, no 'uh'", "example": "cat", "emoji": "🐱", "sameSoundAs": ["K"], "looksLike": ["O", "G"]},
+    {"id": "D", "sound": "d", "say": "clipped, no 'uh'", "example": "dog", "emoji": "🐶", "looksLike": ["B", "P", "O"]},
+    {"id": "E", "sound": "e", "say": "short e, as in egg", "example": "egg", "emoji": "🥚", "looksLike": ["F"]},
+    {"id": "F", "sound": "f", "say": "held: fff", "example": "fish", "emoji": "🐟", "looksLike": ["E"]},
+    {"id": "G", "sound": "g", "say": "hard g, clipped, no 'uh'", "example": "goat", "emoji": "🐐", "looksLike": ["C", "O"]},
+    {"id": "H", "sound": "h", "say": "a short breath, no voice", "example": "hat", "emoji": "🎩", "looksLike": ["N"]},
+    {"id": "I", "sound": "i", "say": "short i, as in insect", "example": "insect", "emoji": "🐞", "looksLike": ["L", "T", "J"]},
+    {"id": "J", "sound": "j", "say": "clipped, no 'uh'", "example": "juice", "emoji": "🧃", "looksLike": ["I"]},
+    {"id": "K", "sound": "k", "say": "clipped, no 'uh'", "example": "kite", "emoji": "🪁", "sameSoundAs": ["C"], "looksLike": ["X", "R"]},
+    {"id": "L", "sound": "l", "say": "held: lll", "example": "lion", "emoji": "🦁", "looksLike": ["I", "T"]},
+    {"id": "M", "sound": "m", "say": "held: mmm", "example": "moon", "emoji": "🌙", "looksLike": ["N", "W"]},
+    {"id": "N", "sound": "n", "say": "held: nnn", "example": "nest", "emoji": "🪺", "looksLike": ["M", "H"]},
+    {"id": "O", "sound": "o", "say": "short o, as in octopus", "example": "octopus", "emoji": "🐙", "looksLike": ["Q", "C", "D"]},
+    {"id": "P", "sound": "p", "say": "clipped puff of air, no 'uh'", "example": "pig", "emoji": "🐷", "looksLike": ["B", "D", "R"]},
+    {"id": "Q", "sound": "kw", "say": "kw, quick, no 'uh'", "example": "queen", "emoji": "👑", "looksLike": ["O"]},
+    {"id": "R", "sound": "r", "say": "held: rrr", "example": "rabbit", "emoji": "🐰", "looksLike": ["B", "P", "K"]},
+    {"id": "S", "sound": "s", "say": "held: sss", "example": "sun", "emoji": "☀️", "looksLike": ["Z"]},
+    {"id": "T", "sound": "t", "say": "clipped, no 'uh'", "example": "tractor", "emoji": "🚜", "looksLike": ["I", "L"]},
+    {"id": "U", "sound": "u", "say": "short u, as in umbrella", "example": "umbrella", "emoji": "☂️", "looksLike": ["V"]},
+    {"id": "V", "sound": "v", "say": "held: vvv", "example": "van", "emoji": "🚐", "looksLike": ["U", "W", "Y"]},
+    {"id": "W", "sound": "w", "say": "short, lips rounded, no 'uh'", "example": "worm", "emoji": "🪱", "looksLike": ["M", "V"]},
+    {"id": "X", "sound": "ks", "say": "ks, as at the end of fox", "example": "fox", "emoji": "🦊", "firstSound": false, "looksLike": ["K"]},
+    {"id": "Y", "sound": "y", "say": "short, as at the start of yes", "example": "yo-yo", "emoji": "🪀", "looksLike": ["V"]},
+    {"id": "Z", "sound": "z", "say": "held: zzz", "example": "zebra", "emoji": "🦓", "looksLike": ["S"]}
+  ]
+}

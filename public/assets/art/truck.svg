@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 240">
+  <!-- The truck faces left, toward the animals. The open bed is on the right. -->
+  <!-- robot antenna, poking out of the roof -->
+  <path d="M104 50 V24" stroke="#5f6b7a" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="104" cy="18" r="10" fill="#ff5252" stroke="#b71c1c" stroke-width="3"/>
+  <!-- bed -->
+  <rect x="172" y="112" width="258" height="58" rx="8" fill="#b9793f" stroke="#6b4423" stroke-width="5"/>
+  <path d="M172 132 H430 M172 151 H430" stroke="#8d5a2b" stroke-width="3"/>
+  <path d="M238 112 V170 M302 112 V170 M366 112 V170" stroke="#8d5a2b" stroke-width="3"/>
+  <!-- hood -->
+  <path d="M14 170 V128 C14 116 22 110 34 110 H60 V170 Z" fill="#43a047" stroke="#1b5e20" stroke-width="5" stroke-linejoin="round"/>
+  <!-- cab -->
+  <path d="M48 170 V66 C48 56 56 48 66 48 H152 C162 48 170 56 170 66 V170 Z" fill="#4caf50" stroke="#1b5e20" stroke-width="5" stroke-linejoin="round"/>
+  <!-- window -->
+  <rect x="62" y="62" width="88" height="62" rx="10" fill="#d6f1ff" stroke="#1b5e20" stroke-width="5"/>
+  <!-- robot driver -->
+  <rect x="78" y="72" width="54" height="46" rx="10" fill="#cfd8dc" stroke="#5f6b7a" stroke-width="4"/>
+  <circle cx="94" cy="90" r="7" fill="#00bcd4"/>
+  <circle cx="116" cy="90" r="7" fill="#00bcd4"/>
+  <circle cx="92" cy="88" r="2.4" fill="#ffffff"/>
+  <circle cx="114" cy="88" r="2.4" fill="#ffffff"/>
+  <path d="M94 104 Q105 112 116 104" fill="none" stroke="#5f6b7a" stroke-width="4" stroke-linecap="round"/>
+  <!-- door line and handle -->
+  <path d="M150 132 H132" stroke="#1b5e20" stroke-width="5" stroke-linecap="round"/>
+  <!-- chassis -->
+  <rect x="10" y="166" width="422" height="26" rx="8" fill="#37474f" stroke="#1c262b" stroke-width="4"/>
+  <!-- headlight and bumper -->
+  <rect x="8" y="132" width="16" height="22" rx="6" fill="#ffeb3b" stroke="#b28900" stroke-width="3"/>
+  <!-- wheels -->
+  <g stroke="#111" stroke-width="5">
+    <circle cx="92" cy="196" r="36" fill="#263238"/>
+    <circle cx="352" cy="196" r="36" fill="#263238"/>
+  </g>
+  <circle cx="92" cy="196" r="15" fill="#b0bec5" stroke="#5f6b7a" stroke-width="4"/>
+  <circle cx="352" cy="196" r="15" fill="#b0bec5" stroke="#5f6b7a" stroke-width="4"/>
+</svg>
