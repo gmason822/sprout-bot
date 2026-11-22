@@ -1,33 +1,23 @@
 import Phaser from 'phaser';
 import { createInput, moveFocus, ACTIONS } from '../systems/input.js';
 import { makeRequest } from '../skills/index.js';
-import { chooseAnimals, isDayDone, toggleWear } from '../systems/day.js';
+import { chooseAnimals, isDayDone } from '../systems/day.js';
 import { drawFarmBackdrop } from './farmBackdrop.js';
 import { TRUCK_Y } from './layout.js';
-import { tween, makeTruck, drawFocusRing, drawDayRow, rewardPicture, emoji } from './ui.js';
+import { tween, makeTruck, drawFocusRing, drawDayRow, emoji } from './ui.js';
 
 const ANIMAL_Y = 345;
 const ANIMAL_SIZE = 280;
 const SPOTS = { 1: [640], 2: [340, 940] };
 
-// Where friends and decorations stand, in the order they arrive.
-const FRIEND_SPOTS = [
-  { x: 85, y: 545 }, { x: 1195, y: 545 }, { x: 640, y: 400 }, { x: 85, y: 440 },
-  { x: 1195, y: 440 }, { x: 560, y: 330 }, { x: 720, y: 330 }, { x: 640, y: 262 },
-];
-const FRIEND_SIZE = 84;
-// Hats line up on the road to the left of the truck, paint pots to the right.
-const SHELF_Y = 664;
-const HAT_XS = [60, 165, 270, 375];
-const PAINT_XS = [905, 1010, 1115, 1220];
-const SHELF_SIZE = 78;
+const HOUSE = { x: 100, y: 105, radius: 62 };
 
 const GOOD_MORNING = { say: ['good-morning'], tts: 'Good morning, farm!' };
 const WHO_HELPS = { say: ['who-helps'], tts: 'Who do you want to help?' };
 const IDLE_MS = 10000;
 const IDLE_REPEATS_MAX = 3;
 
-/** The hub: today's deliveries, everything he has earned, and two animals to choose from. */
+/** The animals screen: today's deliveries, two animals to choose from, and the way home. */
 export class Farm extends Phaser.Scene {
   constructor() {
     super('Farm');
@@ -53,8 +43,9 @@ export class Farm extends Phaser.Scene {
 
     drawFarmBackdrop(this);
     drawDayRow(this, this.state.today, this.state.settings.deliveriesPerDay);
-    this.buildRewards();
-    this.buildTruck();
+    this.buildHouseButton();
+    this.truck = makeTruck(this, 640, TRUCK_Y);
+    this.tweens.add({ targets: this.truck, y: TRUCK_Y - 4, duration: 140, yoyo: true, repeat: -1 });
     this.focusRing = this.add.graphics().setDepth(9).setVisible(false);
 
     // Only offer an animal that actually has something to ask right now.
@@ -85,44 +76,16 @@ export class Farm extends Phaser.Scene {
 
   // ---------- building ----------
 
-  buildTruck() {
-    if (this.truck) {
-      this.tweens.killTweensOf(this.truck);
-      this.truck.destroy();
-    }
-    this.truck = makeTruck(this, 640, TRUCK_Y);
-    this.tweens.add({ targets: this.truck, y: TRUCK_Y - 4, duration: 140, yoyo: true, repeat: -1 });
-  }
-
-  /** Everything he has earned lives here: friends and decorations stand around, hats and paint can be put on. */
-  buildRewards() {
-    const owned = this.content.rewards.filter((r) => this.state.farm.rewards.includes(r.id));
-    let standing = 0;
-    let hats = 0;
-    let paints = 0;
-    for (const reward of owned) {
-      let spot;
-      let size = FRIEND_SIZE;
-      let id = `friend:${reward.id}`;
-      if (reward.type === 'hat' || reward.type === 'paint') {
-        const xs = reward.type === 'hat' ? HAT_XS : PAINT_XS;
-        const n = reward.type === 'hat' ? hats++ : paints++;
-        if (n >= xs.length) continue;
-        spot = { x: xs[n], y: SHELF_Y };
-        size = SHELF_SIZE;
-        id = `wear:${reward.id}`;
-      } else {
-        if (standing >= FRIEND_SPOTS.length) continue;
-        spot = FRIEND_SPOTS[standing++];
-      }
-      const picture = rewardPicture(this, spot.x, spot.y, reward, size).setDepth(reward.type === 'friend' || reward.type === 'decoration' ? 2.5 : 6);
-      const half = size * 0.62;
-      const local = picture.type === 'Text'
-        ? new Phaser.Geom.Rectangle(picture.width / 2 - half, picture.height / 2 - half, half * 2, half * 2)
-        : new Phaser.Geom.Rectangle(-half, -half, half * 2, half * 2);
-      this.in.tappable(picture, id, local, Phaser.Geom.Rectangle.Contains);
-      this.rewardPictures ??= {};
-      this.rewardPictures[reward.id] = picture;
+  /** The way to the home farm. A gift bounces on it while something is waiting to be placed. */
+  buildHouseButton() {
+    const disc = this.add.graphics();
+    disc.fillStyle(0xffffff, 1).fillCircle(0, 0, HOUSE.radius);
+    disc.lineStyle(6, 0x5b4636, 1).strokeCircle(0, 0, HOUSE.radius);
+    const button = this.add.container(HOUSE.x, HOUSE.y, [disc, emoji(this, 0, -2, '🏡', 70)]).setDepth(6);
+    this.in.tappable(button, 'home', new Phaser.Geom.Circle(0, 0, HOUSE.radius + 22), Phaser.Geom.Circle.Contains);
+    if (this.state.farm.box.length > 0) {
+      const gift = emoji(this, HOUSE.x + 46, HOUSE.y - 44, '🎁', 46).setDepth(6);
+      this.tweens.add({ targets: gift, y: gift.y - 10, duration: 380, yoyo: true, repeat: -1, ease: 'Quad.out' });
     }
   }
 
@@ -178,26 +141,15 @@ export class Farm extends Phaser.Scene {
   onTap(id) {
     const [kind, value] = id.split(':');
     if (kind === 'animal') return this.choose(Number(value));
-    if (kind === 'friend') return this.wiggle(value);
-    if (kind === 'wear') return this.wear(value);
+    if (kind === 'home') return this.goHome();
   }
 
-  wiggle(rewardId) {
-    const picture = this.rewardPictures[rewardId];
-    this.sfx.pop(3);
-    this.tweens.killTweensOf(picture);
-    picture.setAngle(0);
-    this.tweens.add({ targets: picture, angle: { from: -14, to: 14 }, duration: 90, yoyo: true, repeat: 2, onComplete: () => picture.setAngle(0) });
-  }
-
-  /** Tap a hat or a paint pot to put it on the robot or the truck right away. */
-  wear(rewardId) {
-    const reward = this.content.rewards.find((r) => r.id === rewardId);
-    if (!reward || !toggleWear(this.state.farm, reward)) return;
-    this.registry.get('store').save(this.state);
-    this.sfx.pop(5);
-    this.wiggle(rewardId);
-    this.buildTruck();
+  goHome() {
+    this.in.lock();
+    this.idleTimer?.remove();
+    this.audio.stop();
+    this.sfx.pop(4);
+    this.scene.start('Home');
   }
 
   focusables() {

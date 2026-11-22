@@ -42,6 +42,8 @@ export class Sunset extends Phaser.Scene {
     this.truck = makeTruck(this, 640, TRUCK_Y);
     this.confetti = makeConfetti(this);
 
+    // If the reward is something for the home farm, the new day starts there.
+    this.next = reward && ['friend', 'decoration', 'upgrade'].includes(reward.type) ? 'Home' : 'Farm';
     this.in.on(ACTIONS.TAP, () => this.wakeUp());
     this.in.on(ACTIONS.GO, () => this.wakeUp());
 
@@ -94,6 +96,6 @@ export class Sunset extends Phaser.Scene {
     this.in.lock();
     this.sfx.beepBoop();
     this.registry.set('newDay', true);
-    this.scene.start('Farm');
+    this.scene.start(this.next);
   }
 }

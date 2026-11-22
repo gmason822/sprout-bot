@@ -17,9 +17,10 @@ Why this loop: he has to **understand the request** to succeed, the learning is 
 A farm day is `deliveriesPerDay` deliveries, set by the parent (default 5, range 3–10).
 
 ## Screens (child-facing)
-- **Farm**: the hub, also where the day's deliveries and all earned rewards live. Tapping things makes them wiggle and make a sound.
+- **Animals**: two animals waiting, the row of today's deliveries, and a house button to the home farm.
 - **Request**: animal on one side, the things to pick in the middle, the truck at the bottom.
 - **Sunset**: end-of-day celebration and reward.
+- **Home farm**: free play. Everything he has earned ends up here, and a green button leads back to the animals.
 
 Hidden **Parent Gate**: hold the sun in the top-right for 3 seconds, or tap it five times quickly, then tap three numbers that are written out as words ("seven, two, five") on a keypad. A white ring closes in around the finger from the second second of a hold, so a parent can see it counting. The hold zone is measured from the game picture rather than the screen, because a wide phone shows the picture with bars at the sides. The numbers change every time. One wrong tap, or 20 seconds of nothing, closes it and the game carries on.
 
@@ -115,12 +116,28 @@ With only three animals this simply rotates who sits out.
 - The parent progress view shows each item's box as a colored dot.
 - Left/right has only two answers, so half of all guesses are right. Read its dots as a trend, not a score.
 
-## Rewards
-- **During the day:** each delivery fills the next ring in a row at the top of the farm (the thing, with its number or letter). Empty rings show how much of the day is left.
-- **At sunset:** the next entry in `content/rewards.json` arrives: a new farm friend, a truck paint color, a robot hat or a decoration. It stays forever. A new paint or hat goes straight on.
-- **On the farm:** friends and decorations stand around and wiggle when tapped. Hats sit on the road to the left of the truck and paint pots to the right; tapping one puts it on, tapping it again takes it off.
+## Rewards and the home farm
+The home farm starts as bare grass with the truck parked on it. Everything else is earned by helping the animals, so the farm grows as he plays.
+
+**Earning**
+- **After every delivery:** one small thing, picked at random from a pool (flowers, vegetables, bugs, small trees). Repeats are fine. It pops up, then flies off toward the house button.
+- **At every sunset:** the next big reward, in a fixed order. It is one of:
+  - a **friend** or **decoration**, which he places on the farm;
+  - an **upgrade**, which becomes part of the farm itself (fence, barn, pond, apple tree, path, windmill, silo, rainbow);
+  - a **hat** or a **paint**, which goes straight on the robot or truck.
+- During the day, each delivery also fills the next ring in the row at the top of the animals screen, so he can see how much of the day is left.
 - No stars, no counters, no shop.
-- When the reward list runs out, sunset still celebrates. Add more rewards in JSON.
+
+**On the home farm**
+- Things he has earned but not placed wait on a shelf along the bottom, six at a time, oldest first.
+- Tapping one makes it hop onto the farm at a free spot. He can then drag it anywhere. Dragging it back down onto the shelf puts it away.
+- Tapping a placed thing or the truck makes it wiggle.
+- The paint pot and hat buttons try on the next paint or hat he owns, then none.
+- Things lower on the screen are drawn in front, so the farm has depth.
+- A house button with a bouncing gift on the animals screen tells him something is waiting. After a sunset whose reward belongs on the farm, the new day starts at home.
+- The farm holds up to 120 placed and waiting things. Past that, the oldest small thing makes room; friends and decorations are never dropped.
+
+There is no learning on the home farm on purpose. It is where the rewards for learning are enjoyed, and the only way to get more is to go back to the animals.
 
 ## Content formats
 
@@ -160,11 +177,15 @@ With only three animals this simply rotates who sits out.
 
 ### `content/rewards.json`
 ```json
-{ "id": "friend-duck", "type": "friend", "name": "Duck", "emoji": "🦆" }
+"small":   [{ "id": "small-tulip", "name": "Tulip", "emoji": "🌷" }],
+"rewards": [{ "id": "friend-duck", "type": "friend", "name": "Duck", "emoji": "🦆" },
+            { "id": "upgrade-barn", "type": "upgrade", "name": "Barn", "emoji": "🏠", "value": "barn" }]
 ```
-Types: `friend`, `paint`, `hat`, `decoration`. The order in the file is the order they arrive.
+- `small` is the pool for the after-delivery reward. Ids must start with `small-`.
+- `rewards` are the sunset rewards, in the order they arrive. Types: `friend`, `decoration`, `hat`, `paint`, `upgrade`.
 - Everything except paint is drawn from its `emoji`, using the device's own emoji font, so a new reward needs no art.
 - `paint` needs a `value`: a `#rrggbb` color or `rainbow`. The truck's SVG is recoloured with it.
+- `upgrade` needs a `value` naming a drawing in `src/scenes/homeUpgrades.js`. Its `emoji` is only what the sunset shows; on the farm it is drawn properly.
 
 ### `content/words.json`
 ```json
@@ -185,7 +206,12 @@ Picture words for the first-sounds game, which uses each word's first letter. `f
   version: 1,
   settings: { childName: "", deliveriesPerDay: 5, volume: 0.8, ttsOnly: false },
   mastery: { "count:3": { box: 2, seen: 4, correct: 3, lastSeen: 0 } },
-  farm: { rewards: ["friend-duck"], paint: null, hat: null },
+  farm: {
+    rewards: ["friend-duck"],                      // big rewards he owns
+    paint: null, hat: null,                        // what the truck and robot wear
+    box: ["small-tulip", "small-tulip"],           // waiting on the shelf, oldest first
+    placed: [{ item: "friend-duck", x: 470, y: 500 }]   // standing on the home farm
+  },
   days: 0,
   today: [{ art: "apple", numeral: 3 }, { art: "crate", label: "B" }],   // today's deliveries so far
   skillLog: [],         // recent deliveries per skill, for choosing which animals to offer

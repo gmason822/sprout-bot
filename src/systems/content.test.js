@@ -60,6 +60,16 @@ describe('validateContent', () => {
     expect(errors).toHaveLength(4);
   });
 
+  it('checks small things and upgrades', () => {
+    const raw = good();
+    raw.rewards.rewards.push({ id: 'u1', type: 'upgrade', emoji: '🏠', value: 'barn' }, { id: 'u2', type: 'upgrade', emoji: '🏠' });
+    raw.rewards.small = [{ id: 'small-rock', emoji: '🪨' }, { id: 'rock', emoji: '🪨' }, { id: 'small-x' }, { id: 'small-rock', emoji: '🪨' }];
+    const { content, errors } = validateContent(raw, GEN);
+    expect(content.rewards.map((r) => r.id)).toEqual(['r1', 'p1', 'u1']);
+    expect(content.small.map((r) => r.id)).toEqual(['small-rock']);
+    expect(errors).toHaveLength(4);
+  });
+
   it('skips bad words', () => {
     const raw = good();
     raw.words = { words: [{ id: 'cat', emoji: '🐱' }, { id: 'cat', emoji: '🐱' }, { id: 'Dog', emoji: '🐶' }, { id: 'sun' }] };
@@ -70,7 +80,7 @@ describe('validateContent', () => {
 
   it('survives files that are missing or the wrong shape', () => {
     const { content, errors } = validateContent({}, GEN);
-    expect(content).toEqual({ animals: [], skills: [], letters: [], rewards: [], words: [] });
+    expect(content).toEqual({ animals: [], skills: [], letters: [], rewards: [], small: [], words: [] });
     expect(errors).toHaveLength(4);
   });
 });
@@ -82,6 +92,8 @@ describe('the real content files', () => {
     expect(spy).not.toHaveBeenCalled();
     expect(content.animals.length).toBeGreaterThanOrEqual(6);
     expect(content.words.length).toBeGreaterThan(20);
+    expect(content.small.length).toBeGreaterThan(10);
+    expect(content.rewards.filter((r) => r.type === 'upgrade').length).toBeGreaterThan(5);
     expect(content.letters).toHaveLength(26);
     spy.mockRestore();
   });

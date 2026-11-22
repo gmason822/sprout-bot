@@ -5,6 +5,8 @@
 //   RIGHT     ArrowRight  moves the highlight
 //   GO        Space/Enter taps the highlighted thing
 //   PICK_1-4  1 2 3 4     taps that choice directly
+//   DRAG      a finger moving a draggable thing: { id, x, y }
+//   DROP      the finger lifting after a drag: { id }
 
 export const ACTIONS = Object.freeze({
   TAP: 'TAP',
@@ -15,6 +17,8 @@ export const ACTIONS = Object.freeze({
   PICK_2: 'PICK_2',
   PICK_3: 'PICK_3',
   PICK_4: 'PICK_4',
+  DRAG: 'DRAG',
+  DROP: 'DROP',
 });
 
 const KEY_MAP = {
@@ -93,6 +97,44 @@ export function createInput(scene) {
       if (hitArea) gameObject.setInteractive(hitArea, hitTest);
       else gameObject.setInteractive();
       gameObject.on('pointerdown', () => emit(ACTIONS.TAP, id));
+      return gameObject;
+    },
+    /**
+     * Make a game object draggable as well as tappable. A press that barely moves
+     * is a TAP; one that travels is a DRAG followed by a DROP. Small fingers wobble,
+     * so the scene's drag threshold decides which it is.
+     */
+    draggable(gameObject, id, hitArea, hitTest) {
+      if (hitArea) gameObject.setInteractive(hitArea, hitTest);
+      else gameObject.setInteractive();
+      scene.input.dragDistanceThreshold = 14;
+      scene.input.setDraggable(gameObject);
+      let dragged = false;
+      // Where on the thing the finger took hold, so it does not jump to the fingertip.
+      let grab = { x: 0, y: 0 };
+      const at = (pointer) => pointer.positionToCamera(scene.cameras.main);
+      // Taken when the finger first touches, not when the drag is recognised: by
+      // then the finger has already travelled, and the thing would trail behind it.
+      gameObject.on('pointerdown', (pointer) => {
+        dragged = false;
+        const p = at(pointer);
+        grab = { x: gameObject.x - p.x, y: gameObject.y - p.y };
+      });
+      // Once Phaser calls it a drag it is one, even if the finger lifts straight away.
+      gameObject.on('dragstart', () => { dragged = true; });
+      gameObject.on('drag', (pointer) => {
+        const p = at(pointer);
+        emit(ACTIONS.DRAG, { id, x: p.x + grab.x, y: p.y + grab.y });
+      });
+      gameObject.on('dragend', (pointer) => {
+        if (!dragged) return;
+        // The finger can lift somewhere it never reported moving to, so send where
+        // it actually ended before the drop.
+        const p = at(pointer);
+        emit(ACTIONS.DRAG, { id, x: p.x + grab.x, y: p.y + grab.y });
+        emit(ACTIONS.DROP, { id });
+      });
+      gameObject.on('pointerup', () => { if (!dragged) emit(ACTIONS.TAP, id); });
       return gameObject;
     },
     lock() { locked = true; },

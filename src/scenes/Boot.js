@@ -4,6 +4,8 @@ import { loadContent } from '../systems/content.js';
 import { GENERATOR_IDS } from '../skills/index.js';
 import { createStore, browserStorage } from '../systems/save.js';
 import { paintTruckSvg } from '../systems/paint.js';
+import { reconcileFarm } from '../systems/home.js';
+import { UPGRADE_IDS } from './homeUpgrades.js';
 import { drawFarmBackdrop } from './farmBackdrop.js';
 import { makePlayButton } from './ui.js';
 
@@ -48,6 +50,7 @@ export class Boot extends Phaser.Scene {
     // His farm, progress and settings, restored from the last visit.
     const store = createStore(browserStorage());
     const state = store.load();
+    reconcileFarm(state.farm, content.rewards, content.small);
     this.registry.set('store', store);
     this.registry.set('state', state);
 
@@ -89,8 +92,14 @@ export class Boot extends Phaser.Scene {
       console.error(`[content] ${what} "${key}" has no picture in public/assets/art/`);
       return false;
     };
+    const canDraw = (reward) => {
+      if (reward.type !== 'upgrade' || UPGRADE_IDS.includes(reward.value)) return true;
+      console.error(`[content] upgrade "${reward.id}" names "${reward.value}", which src/scenes/homeUpgrades.js cannot draw`);
+      return false;
+    };
     return {
       ...content,
+      rewards: content.rewards.filter(canDraw),
       animals: content.animals.filter((a) => has(a.id, 'animal')),
       skills: content.skills.map((s) => ({
         ...s,

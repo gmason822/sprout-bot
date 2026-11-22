@@ -55,6 +55,15 @@ Built, waiting for its playtest. Replay value was thin with three games, so ther
 - **Pig** adds "the one in the middle", with three things on the table, once left and right are going well.
 - **Hen** has strawberries and tomatoes to count as well.
 
+## Home farm (free play)
+Built, waiting for its playtest:
+- A home farm on its own screen, reached by the house button on the animals screen. It starts as bare grass.
+- Every delivery earns one small thing (a flower, a vegetable, a bug); every finished day earns a big one.
+- Things wait on a shelf. He taps one to put it on the farm and drags it wherever he likes; dragging it back onto the shelf puts it away.
+- Farm upgrades arrive as big rewards and become part of the farm itself: fence, barn, pond, apple tree, path, windmill, silo, rainbow.
+- The paint pot and hat buttons on the shelf change what the truck and robot wear.
+- After a sunset whose reward belongs on the farm, the new day starts at home.
+
 ## Long-term
 - **Button box.** Not needed while he plays by touch. The firmware is in `hardware/`, and the game already answers to its keys (arrows move a highlight, Space picks, 1 to 4 pick directly), so building the box later needs no game changes beyond testing.
 

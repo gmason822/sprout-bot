@@ -1,6 +1,8 @@
 // The farm day: which animals wait, how far through the day he is, and what
 // arrives at sunset. Pure functions over the saved state.
 
+import { isPlaceable } from './home.js';
+
 const RECENT = 20;
 
 /**
@@ -44,16 +46,10 @@ export function endDay(state, rewards) {
     state.farm.rewards.push(reward.id);
     if (reward.type === 'paint') state.farm.paint = reward.id;
     if (reward.type === 'hat') state.farm.hat = reward.id;
+    // A friend or decoration waits in the gift box for him to place at home.
+    if (isPlaceable(reward)) state.farm.box.push(reward.id);
   }
   state.days += 1;
   state.today = [];
   return { reward, delivered };
-}
-
-/** Tap a paint or hat he owns to put it on; tap the one he is wearing to take it off. */
-export function toggleWear(farm, reward) {
-  const slot = reward.type === 'paint' ? 'paint' : reward.type === 'hat' ? 'hat' : null;
-  if (!slot || !farm.rewards.includes(reward.id)) return false;
-  farm[slot] = farm[slot] === reward.id ? null : reward.id;
-  return true;
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { chooseAnimals, isDayDone, nextReward, endDay, toggleWear } from './day.js';
+import { chooseAnimals, isDayDone, nextReward, endDay } from './day.js';
 
 const hen = { id: 'hen', skill: 'count' };
 const cow = { id: 'cow', skill: 'letters' };
@@ -42,7 +42,7 @@ const REWARDS = [
   { id: 'paint-blue', type: 'paint', value: '#00f' },
   { id: 'hat-straw', type: 'hat' },
 ];
-const fresh = () => ({ farm: { rewards: [], paint: null, hat: null }, days: 0, today: [{ art: 'apple' }, { art: 'crate' }] });
+const fresh = () => ({ farm: { rewards: [], paint: null, hat: null, box: [], placed: [] }, days: 0, today: [{ art: 'apple' }, { art: 'crate' }] });
 
 describe('isDayDone', () => {
   it('ends the day at the chosen number of deliveries', () => {
@@ -70,6 +70,8 @@ describe('endDay', () => {
     expect(reward.id).toBe('friend-duck');
     expect(delivered).toHaveLength(2);
     expect(state.farm.rewards).toEqual(['friend-duck']);
+    // A friend waits in the gift box for him to place at home.
+    expect(state.farm.box).toEqual(['friend-duck']);
     expect(state.days).toBe(1);
     expect(state.today).toEqual([]);
   });
@@ -80,6 +82,8 @@ describe('endDay', () => {
     expect(state.farm.paint).toBe('paint-blue');
     endDay(state, REWARDS);
     expect(state.farm.hat).toBe('hat-straw');
+    // Things that are worn do not go in the box.
+    expect(state.farm.box).toEqual(['friend-duck']);
   });
   it('still ends the day when the rewards have run out', () => {
     const state = fresh();
@@ -88,23 +92,5 @@ describe('endDay', () => {
     expect(reward).toBeNull();
     expect(state.days).toBe(1);
     expect(state.farm.rewards).toHaveLength(3);
-  });
-});
-
-describe('toggleWear', () => {
-  it('puts on and takes off something he owns', () => {
-    const farm = { rewards: ['paint-blue', 'hat-straw'], paint: null, hat: null };
-    expect(toggleWear(farm, REWARDS[1])).toBe(true);
-    expect(farm.paint).toBe('paint-blue');
-    toggleWear(farm, REWARDS[1]);
-    expect(farm.paint).toBeNull();
-    toggleWear(farm, REWARDS[2]);
-    expect(farm.hat).toBe('hat-straw');
-  });
-  it('ignores things he does not own or cannot wear', () => {
-    const farm = { rewards: ['friend-duck'], paint: null, hat: null };
-    expect(toggleWear(farm, REWARDS[0])).toBe(false);
-    expect(toggleWear(farm, REWARDS[1])).toBe(false);
-    expect(farm).toEqual({ rewards: ['friend-duck'], paint: null, hat: null });
   });
 });

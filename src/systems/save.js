@@ -8,13 +8,14 @@ export const SAVE_VERSION = 1;
 export const DELIVERIES_MIN = 3;
 export const DELIVERIES_MAX = 10;
 const SKILL_LOG_MAX = 100;
+const THINGS_MAX = 400;
 
 export function defaultSave() {
   return {
     version: SAVE_VERSION,
     settings: { childName: '', deliveriesPerDay: 5, volume: 0.8, ttsOnly: false },
     mastery: {},
-    farm: { rewards: [], paint: null, hat: null },
+    farm: { rewards: [], paint: null, hat: null, box: [], placed: [] },
     days: 0,
     today: [],      // what he has delivered so far today, for the row on the farm
     skillLog: [],   // recent deliveries per skill, for choosing which animals to offer
@@ -63,6 +64,16 @@ export function migrate(raw) {
     // Only something he owns can be worn.
     for (const slot of ['paint', 'hat']) {
       if (save.farm.rewards.includes(raw.farm[slot])) save.farm[slot] = raw.farm[slot];
+    }
+    // The home farm: things waiting in the gift box, and things he has placed.
+    if (Array.isArray(raw.farm.box)) {
+      save.farm.box = raw.farm.box.filter((id) => typeof id === 'string').slice(0, THINGS_MAX);
+    }
+    if (Array.isArray(raw.farm.placed)) {
+      save.farm.placed = raw.farm.placed
+        .filter((p) => isObject(p) && typeof p.item === 'string' && Number.isFinite(p.x) && Number.isFinite(p.y))
+        .slice(0, THINGS_MAX)
+        .map((p) => ({ item: p.item, x: Math.round(p.x), y: Math.round(p.y) }));
     }
   }
 

@@ -15,7 +15,7 @@ Read `docs/DESIGN.md` for the full game design and `docs/ROADMAP.md` for the bui
 2. **Never show the answer in a form he can match by shape.** Numbers are shown as numerals as well as spoken (in the request, in the running count, and whenever something is counted aloud), because a numeral still has to be counted out. A requested letter or side is spoken only, because showing it would turn the task into shape matching.
 3. **Nothing to lose.** No game over, no lives, no timers. A wrong pick gets a gentle spoken correction and another try, and the right answer glows after 2 misses.
 4. **Huge tap targets.** At least 120 px on a tablet, with lots of space between them. They may scale down on the phone, but never below about 72 px.
-5. **No menus he can get lost in.** The child UI is the farm, a request, and the end of the day. Settings live behind a hidden parent gate.
+5. **No menus he can get lost in.** The child UI is the animals screen, a request, the end of the day, and the home farm. Each has at most one picture button leading elsewhere. Settings live behind a hidden parent gate.
 6. **Nothing is gated.** Every subject has its own difficulty. Struggling with one never blocks another.
 7. **One loop for everything.** New learning is a new kind of request, never a new screen or mode.
 8. **Celebrate a lot.** Every delivery gets a cheer and a happy robot. Every farm day ends on a high.
@@ -31,8 +31,9 @@ Read `docs/DESIGN.md` for the full game design and `docs/ROADMAP.md` for the bui
 ```
 src/
   main.js              Phaser game config, scene registration
-  scenes/              Boot, Farm (hub), Request, Sunset, ParentGate, Settings
+  scenes/              Boot, Farm (the animals screen), Request, Sunset, Home (the home farm)
     boards/            CountBoard and PickBoard: the two ways of answering a request
+    homeUpgrades.js    The home farm's backdrop and each earnable upgrade (barn, pond...)
     layout.js, ui.js   Shared positions, colours and small drawing helpers
   systems/
     input.js           Maps touch + keyboard → game actions (see below)
@@ -40,6 +41,7 @@ src/
     content.js         Loads and validates content/*.json
     mastery.js         Leitner-box tracking per content item
     day.js             Farm-day rules: which animals wait, when the day ends, rewards
+    home.js            Home-farm rules: earning, the gift box, placing, wearing
     paint.js           Recolours the truck SVG for paint rewards
     save.js            Versioned localStorage save, wrapped in try/catch
   skills/              One pure generator per request type, plus index.js (registry)
@@ -63,6 +65,7 @@ Scenes listen for **actions**, never raw keys or pointers. The one exception is 
 
 ## Content and data
 - All learnable content lives in `content/*.json`. The formats are documented in `docs/DESIGN.md`. Adding a letter, an item, an animal or a reward must never need a code change.
+- Adding a farm **upgrade** is one drawing function in `src/scenes/homeUpgrades.js` and one `upgrade` entry in `content/rewards.json`. Any other reward is JSON only.
 - Adding a new **skill** is one generator module in `src/skills/`, one entry in `content/skills.json`, and an animal that owns it. It must not change the scenes.
 - Validate content at boot. Log clear errors to the console, and skip bad items rather than crashing.
 

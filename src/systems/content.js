@@ -8,7 +8,7 @@ import rewardsJson from '../../content/rewards.json';
 import wordsJson from '../../content/words.json';
 
 const ANSWER_KINDS = ['count', 'pick'];
-const REWARD_TYPES = ['friend', 'paint', 'hat', 'decoration'];
+const REWARD_TYPES = ['friend', 'paint', 'hat', 'decoration', 'upgrade'];
 
 /**
  * Pure. `raw` is the parsed JSON files; `generatorIds` are the skills the code can generate.
@@ -71,7 +71,17 @@ export function validateContent(raw, generatorIds) {
     if (seenRewards.has(r.id)) return bad(`rewards.json: reward "${r.id}" appears twice`);
     if (!REWARD_TYPES.includes(r.type)) return bad(`rewards.json: reward "${r.id}" has unknown type "${r.type}"`);
     if (r.type === 'paint' && !r.value) return bad(`rewards.json: paint "${r.id}" has no value`);
+    if (r.type === 'upgrade' && !r.value) return bad(`rewards.json: upgrade "${r.id}" does not say which upgrade it is`);
     if (r.type !== 'paint' && !r.emoji) return bad(`rewards.json: reward "${r.id}" has no emoji to draw it with`);
+    seenRewards.add(r.id);
+    return true;
+  });
+
+  // Small things: one of these after every delivery. Optional.
+  const small = (Array.isArray(raw.rewards?.small) ? raw.rewards.small : []).filter((r) => {
+    if (typeof r?.id !== 'string' || !r.id.startsWith('small-')) return bad(`rewards.json: small thing "${r?.id}" must have an id starting with "small-"`);
+    if (seenRewards.has(r.id)) return bad(`rewards.json: "${r.id}" appears twice`);
+    if (!r.emoji) return bad(`rewards.json: small thing "${r.id}" has no emoji to draw it with`);
     seenRewards.add(r.id);
     return true;
   });
@@ -86,7 +96,7 @@ export function validateContent(raw, generatorIds) {
     return true;
   });
 
-  return { content: { animals, skills, letters, rewards, words }, errors };
+  return { content: { animals, skills, letters, rewards, small, words }, errors };
 }
 
 /** Load, validate and report. Called once at boot. */
