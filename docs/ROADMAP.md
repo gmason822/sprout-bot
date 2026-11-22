@@ -23,7 +23,7 @@ Built, waiting for its playtest:
 - Skill registry and generators for `count`, `letters` and `leftright` (pure, tested).
 - `mastery.js` (pure, tested), brought forward from Milestone 4 because the generators choose items by box. It lives in memory only until Milestone 3 saves it.
 - Request scene handles both answer kinds (`count` and `pick`) from request objects only.
-- Farm hub with two animals waiting; he picks who to help.
+- Animals screen with animals waiting (three at a time since the home-farm update); he picks who to help.
 
 - Hosted on GitHub Pages at https://gmason822.github.io/sprout-bot/, published on every push to `main`.
 - Installable and offline (vite-plugin-pwa): the whole game, including any recorded clips, is cached on the device.
@@ -58,11 +58,11 @@ Built, waiting for its playtest. Replay value was thin with three games, so ther
 ## Home farm (free play)
 Built, waiting for its playtest:
 - A home farm on its own screen, reached by the house button on the animals screen. It starts as bare grass.
-- Every delivery earns one small thing (a flower, a vegetable, a bug); every finished day earns a big one.
+- One reward per finished day, given at sunset: a big reward on its set day (days 1, 3, 5, then every third day), otherwise one small thing (a flower, a vegetable, a bug). The day then ends at home.
 - Things wait on a shelf. He taps one to put it on the farm and drags it wherever he likes; dragging it back onto the shelf puts it away.
-- Farm upgrades arrive as big rewards and become part of the farm itself: fence, barn, pond, apple tree, path, windmill, silo, rainbow.
-- The paint pot and hat buttons on the shelf change what the truck and robot wear.
-- After a sunset whose reward belongs on the farm, the new day starts at home.
+- Farm upgrades are among the big rewards and become part of the farm itself: fence, barn, pond, apple tree, path, windmill, silo, rainbow.
+- The palette and hat buttons on the shelf open every colour or hat he owns to choose from.
+- Three animals are offered at a time, and the counting game no longer shows a running total on the truck.
 
 ## Long-term
 - **Button box.** Not needed while he plays by touch. The firmware is in `hardware/`, and the game already answers to its keys (arrows move a highlight, Space picks, 1 to 4 pick directly), so building the box later needs no game changes beyond testing.

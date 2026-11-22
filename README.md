@@ -11,7 +11,7 @@ A homemade learning game for a 4-year-old. Farm animals ask out loud for things,
 On an Android phone or tablet, open that address in Chrome, then use the menu → "Add to Home screen" (or "Install app"). It then opens fullscreen in landscape and works with no connection.
 
 ## Status
-Milestones 1 to 4 are built, plus a second batch of games: six animals ask for counting, letters, left/right, numbers, first sounds and shapes; every delivery and every finished day earns something for a home farm that he builds up himself; progress is saved on the device; and a hidden parent area holds the settings and a progress view. See `docs/ROADMAP.md`.
+Milestones 1 to 4 are built, plus a second batch of games: six animals ask for counting, letters, left/right, numbers, first sounds and shapes; every finished farm day earns one reward for a home farm that he builds up himself; progress is saved on the device; and a hidden parent area holds the settings and a progress view. See `docs/ROADMAP.md`.
 
 ## Parent area
 Hold a finger on the sun in the top-right for three seconds (a white ring closes in around your finger while it counts), or tap the sun five times quickly. Then tap the three numbers shown as words. From there you can set his name, the length of a farm day and the volume, see what he has and hasn't mastered, or reset everything.

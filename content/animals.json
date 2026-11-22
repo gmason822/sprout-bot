@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "Each animal owns one game from skills.json. Two animals are offered at a time. 'id' is also the name of its picture. 'icon' is what its thought bubble shows on the farm: a picture name, or an emoji.",
+  "_comment": "Each animal owns one game from skills.json. Three animals are offered at a time. 'id' is also the name of its picture. 'icon' is what its thought bubble shows on the farm: a picture name, or an emoji.",
   "animals": [
     { "id": "hen",    "name": "Hen",    "skill": "count",      "emoji": "🐔", "icon": "apple" },
     { "id": "cow",    "name": "Cow",    "skill": "letters",    "emoji": "🐮", "icon": "crate" },

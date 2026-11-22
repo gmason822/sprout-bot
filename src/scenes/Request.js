@@ -4,7 +4,6 @@ import { makeRequest } from '../skills/index.js';
 import { numberWord } from '../skills/count.js';
 import { recordAnswer } from '../systems/mastery.js';
 import { isDayDone } from '../systems/day.js';
-import { earnSmall } from '../systems/home.js';
 import { drawFarmBackdrop } from './farmBackdrop.js';
 import { CountBoard } from './boards/CountBoard.js';
 import { PickBoard } from './boards/PickBoard.js';
@@ -196,10 +195,6 @@ export class Request extends Phaser.Scene {
     this.sfx.beepBoop();
     await wait(this, 250);
 
-    // Every delivery earns one small thing for the home farm.
-    const gift = earnSmall(this.state.farm, this.registry.get('content').small);
-    if (gift) await this.showGift(gift);
-
     this.state.skillLog.push(this.request.skill);
     this.state.lastItem[this.request.skill] = this.request.itemId;
     // What he delivered stays on the farm for the rest of the day.
@@ -207,16 +202,6 @@ export class Request extends Phaser.Scene {
     this.registry.get('store').save(this.state);
     const done = isDayDone(this.state.today, this.state.settings.deliveriesPerDay);
     this.scene.start(done ? 'Sunset' : 'Farm');
-  }
-
-  /** The small reward pops up, then flies off toward the house button on the next screen. */
-  async showGift(gift) {
-    const picture = emoji(this, 640, 300, gift.emoji, 150).setDepth(25).setScale(0);
-    this.sfx.pop(6);
-    await tween(this, { targets: picture, scale: 1, duration: 320, ease: 'Back.out' });
-    await wait(this, 450);
-    await tween(this, { targets: picture, x: 100, y: 105, scale: 0.3, duration: 420, ease: 'Quad.in' });
-    picture.destroy();
   }
 
   // ---------- actions ----------

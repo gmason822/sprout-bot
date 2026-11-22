@@ -109,15 +109,20 @@ export function freeSpot(farm, rng = Math.random) {
 }
 
 /**
- * Tap the paint pot or the hat stand: wear the next one he owns, and after the
- * last one go back to wearing none. `type` is 'paint' or 'hat'.
+ * Everything of one kind he can choose between: "none" first (the plain green truck,
+ * or a bare head), then each one he owns in the order he earned it.
+ * `type` is 'paint' or 'hat'. Returns [null, reward, reward...].
  */
-export function cycleWear(farm, rewards, type) {
-  const owned = rewards.filter((r) => r.type === type && farm.rewards.includes(r.id)).map((r) => r.id);
-  if (owned.length === 0) return null;
-  const options = [null, ...owned];
-  farm[type] = options[(options.indexOf(farm[type] ?? null) + 1) % options.length];
-  return farm[type];
+export function wearOptions(farm, rewards, type) {
+  return [null, ...rewards.filter((r) => r.type === type && farm.rewards.includes(r.id))];
+}
+
+/** Put on the paint or hat with this id, or take it off with null. Only what he owns. */
+export function setWear(farm, rewards, type, id) {
+  if (type !== 'paint' && type !== 'hat') return false;
+  if (id !== null && !wearOptions(farm, rewards, type).some((r) => r?.id === id)) return false;
+  farm[type] = id;
+  return true;
 }
 
 /** The names of the upgrades he owns, in the order he earned them. */

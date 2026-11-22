@@ -6,9 +6,12 @@ import { drawFarmBackdrop } from './farmBackdrop.js';
 import { TRUCK_Y } from './layout.js';
 import { tween, makeTruck, drawFocusRing, drawDayRow, emoji } from './ui.js';
 
-const ANIMAL_Y = 345;
-const ANIMAL_SIZE = 280;
-const SPOTS = { 1: [640], 2: [340, 940] };
+// How the waiting animals are laid out, by how many there are.
+const LAYOUT = {
+  1: { xs: [640], y: 345, size: 280 },
+  2: { xs: [340, 940], y: 345, size: 280 },
+  3: { xs: [245, 640, 1035], y: 340, size: 236 },
+};
 
 const HOUSE = { x: 100, y: 105, radius: 62 };
 
@@ -17,7 +20,7 @@ const WHO_HELPS = { say: ['who-helps'], tts: 'Who do you want to help?' };
 const IDLE_MS = 10000;
 const IDLE_REPEATS_MAX = 3;
 
-/** The animals screen: today's deliveries, two animals to choose from, and the way home. */
+/** The animals screen: today's deliveries, three animals to choose from, and the way home. */
 export class Farm extends Phaser.Scene {
   constructor() {
     super('Farm');
@@ -58,7 +61,8 @@ export class Farm extends Phaser.Scene {
     const ready = this.content.animals.filter((a) => makeRequest(a.skill, ctx) !== null);
     const pair = chooseAnimals(ready, this.state.skillLog);
     if (pair.length === 0) console.error('[farm] no animal has anything to ask; check the content files');
-    this.animals = pair.map((animal, i) => this.buildAnimal(animal, SPOTS[pair.length][i], i));
+    this.layout = LAYOUT[Math.min(3, pair.length)] ?? LAYOUT[1];
+    this.animals = pair.slice(0, 3).map((animal, i) => this.buildAnimal(animal, this.layout.xs[i], i));
 
     this.in.on(ACTIONS.TAP, (id) => this.onTap(id));
     this.in.on(ACTIONS.LEFT, () => this.moveFocus(-1));
@@ -69,6 +73,7 @@ export class Farm extends Phaser.Scene {
     });
     this.in.on(ACTIONS.PICK_1, () => this.choose(0));
     this.in.on(ACTIONS.PICK_2, () => this.choose(1));
+    this.in.on(ACTIONS.PICK_3, () => this.choose(2));
 
     this.idleRepeats = 0;
     this.time.delayedCall(400, () => this.greet());
@@ -90,27 +95,29 @@ export class Farm extends Phaser.Scene {
   }
 
   buildAnimal(animal, x, i) {
-    const sprite = this.add.image(x, ANIMAL_Y, animal.id).setDisplaySize(ANIMAL_SIZE, ANIMAL_SIZE).setDepth(3);
-    const k = sprite.width / ANIMAL_SIZE;
+    const { y, size } = this.layout;
+    const sprite = this.add.image(x, y, animal.id).setDisplaySize(size, size).setDepth(3);
+    const k = sprite.width / size;
     this.in.tappable(sprite, `animal:${i}`,
-      new Phaser.Geom.Circle(sprite.width / 2, sprite.height / 2, 160 * k), Phaser.Geom.Circle.Contains);
+      new Phaser.Geom.Circle(sprite.width / 2, sprite.height / 2, size * 0.57 * k), Phaser.Geom.Circle.Contains);
     // They take turns hopping, so it reads as "pick me!".
     this.tweens.add({
-      targets: sprite, y: ANIMAL_Y - 26, duration: 260, yoyo: true, repeat: -1,
+      targets: sprite, y: y - 26, duration: 260, yoyo: true, repeat: -1,
       repeatDelay: 900, delay: i * 600, ease: 'Quad.out',
     });
 
     // A thought bubble shows the kind of thing this animal asks for.
-    const bx = x + 150;
-    const by = ANIMAL_Y - 160;
+    const s = size / 280;
+    const bx = x + 150 * s;
+    const by = y - 160 * s;
     const bubble = this.add.graphics().setDepth(3);
     bubble.fillStyle(0xffffff, 1);
-    bubble.fillCircle(bx - 62, by + 78, 10).fillCircle(bx - 40, by + 58, 16).fillCircle(bx, by, 66);
-    bubble.lineStyle(5, 0x5b4636, 1).strokeCircle(bx, by, 66);
+    bubble.fillCircle(bx - 62 * s, by + 78 * s, 10 * s).fillCircle(bx - 40 * s, by + 58 * s, 16 * s).fillCircle(bx, by, 66 * s);
+    bubble.lineStyle(5, 0x5b4636, 1).strokeCircle(bx, by, 66 * s);
     if (this.textures.exists(animal.icon)) {
-      this.add.image(bx, by, animal.icon).setDisplaySize(88, 88).setDepth(3);
+      this.add.image(bx, by, animal.icon).setDisplaySize(88 * s, 88 * s).setDepth(3);
     } else if (animal.icon) {
-      emoji(this, bx, by, animal.icon, 72).setDepth(3);
+      emoji(this, bx, by, animal.icon, 72 * s).setDepth(3);
     }
     return { animal, sprite, x };
   }
@@ -153,7 +160,7 @@ export class Farm extends Phaser.Scene {
   }
 
   focusables() {
-    return this.animals.map((a, i) => ({ id: `animal:${i}`, x: a.x, y: ANIMAL_Y, r: 155 }));
+    return this.animals.map((a, i) => ({ id: `animal:${i}`, x: a.x, y: this.layout.y, r: this.layout.size * 0.55 }));
   }
 
   moveFocus(dir) {

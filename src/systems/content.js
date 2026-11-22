@@ -73,11 +73,12 @@ export function validateContent(raw, generatorIds) {
     if (r.type === 'paint' && !r.value) return bad(`rewards.json: paint "${r.id}" has no value`);
     if (r.type === 'upgrade' && !r.value) return bad(`rewards.json: upgrade "${r.id}" does not say which upgrade it is`);
     if (r.type !== 'paint' && !r.emoji) return bad(`rewards.json: reward "${r.id}" has no emoji to draw it with`);
+    if (!Number.isInteger(r.day) || r.day < 1) return bad(`rewards.json: reward "${r.id}" needs a "day" (1 or more) to arrive on`);
     seenRewards.add(r.id);
     return true;
   });
 
-  // Small things: one of these after every delivery. Optional.
+  // Small things: one of these on any day with no big reward. Optional.
   const small = (Array.isArray(raw.rewards?.small) ? raw.rewards.small : []).filter((r) => {
     if (typeof r?.id !== 'string' || !r.id.startsWith('small-')) return bad(`rewards.json: small thing "${r?.id}" must have an id starting with "small-"`);
     if (seenRewards.has(r.id)) return bad(`rewards.json: "${r.id}" appears twice`);

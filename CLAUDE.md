@@ -1,6 +1,6 @@
 # Sprout Bot — project brief for Claude Code
 
-Sprout Bot is a custom learning game for a 4-year-old. A helper robot drives a little farm truck. Farm animals ask out loud for things ("I need 3 apples!", "Bring me the box that says /b/!"), the child taps the right thing, and the robot fetches and delivers it. Every delivery makes the farm grow.
+Sprout Bot is a custom learning game for a 4-year-old. A helper robot drives a little farm truck. Farm animals ask out loud for things ("I need 3 apples!", "Bring me the box that says /b/!"), the child taps the right thing, and the robot fetches and delivers it. Each finished farm day earns one reward for his home farm.
 
 Read `docs/DESIGN.md` for the full game design and `docs/ROADMAP.md` for the build order. **Work one milestone at a time** and check in after each one.
 
@@ -12,7 +12,7 @@ Read `docs/DESIGN.md` for the full game design and `docs/ROADMAP.md` for the bui
 
 ## Non-negotiable design rules
 1. **No reading required.** Every request is spoken (recorded voice, with TTS as a fallback). Every button is a picture.
-2. **Never show the answer in a form he can match by shape.** Numbers are shown as numerals as well as spoken (in the request, in the running count, and whenever something is counted aloud), because a numeral still has to be counted out. A requested letter or side is spoken only, because showing it would turn the task into shape matching.
+2. **Never show the answer in a form he can match by shape.** The number an animal asks for is shown as a numeral as well as spoken, and a numeral pops up whenever something is counted aloud, because a numeral still has to be counted out. There is deliberately no running total on the truck: he could match it to the asked-for numeral and never count. A requested letter or side is spoken only, because showing it would turn the task into shape matching.
 3. **Nothing to lose.** No game over, no lives, no timers. A wrong pick gets a gentle spoken correction and another try, and the right answer glows after 2 misses.
 4. **Huge tap targets.** At least 120 px on a tablet, with lots of space between them. They may scale down on the phone, but never below about 72 px.
 5. **No menus he can get lost in.** The child UI is the animals screen, a request, the end of the day, and the home farm. Each has at most one picture button leading elsewhere. Settings live behind a hidden parent gate.

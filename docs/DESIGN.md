@@ -6,18 +6,18 @@ A helper robot drives a little farm truck. Farm animals ask out loud for things.
 Why this loop: he has to **understand the request** to succeed, the learning is the game rather than a side room, and new learning is added as data plus one small generator.
 
 ## The loop
-1. **Farm (hub).** Two animals hop and wait, each with a thought bubble showing the kind of thing it asks for. He taps one. Each animal owns one subject.
+1. **Animals.** Three animals hop and wait, each with a thought bubble showing the kind of thing it asks for. He taps one. Each animal owns one subject.
 2. **Request.** The animal says what it wants. The things he can pick appear. Tapping the animal repeats the request, and it repeats by itself after about 8 seconds of no taps.
 3. **Fetch.** He taps; the truck drives there on its own and loads it.
    - Right: the truck delivers, the animal cheers, and what he delivered stays on the farm for the day.
    - Wrong: the animal says what that was and what it wants ("That's D. I want /b/!"), the thing goes back, and he tries again. After 2 misses the right answer glows.
-4. **Back to the farm** with two animals waiting again, until the day's deliveries are done.
-5. **Sunset.** The sky turns orange, today's deliveries are counted back one by one, one new farm thing arrives (see Rewards), and the robot goes to sleep. A big sun button starts a new day whenever he wants one; nothing pushes him to.
+4. **Back to the animals** with three waiting again, until the day's deliveries are done.
+5. **Sunset.** The sky turns orange, today's deliveries are counted back one by one, the day's one reward arrives (see Rewards), and the robot goes to sleep. A big sun button then takes him to the home farm, where today's rewards are waiting; nothing pushes him to start another day.
 
 A farm day is `deliveriesPerDay` deliveries, set by the parent (default 5, range 3–10).
 
 ## Screens (child-facing)
-- **Animals**: two animals waiting, the row of today's deliveries, and a house button to the home farm.
+- **Animals**: three animals waiting, the row of today's deliveries, and a house button to the home farm.
 - **Request**: animal on one side, the things to pick in the middle, the truck at the bottom.
 - **Sunset**: end-of-day celebration and reward.
 - **Home farm**: free play. Everything he has earned ends up here, and a green button leads back to the animals.
@@ -41,7 +41,7 @@ Every skill produces a request that uses one of two answer kinds. The Request sc
   - Too few: the animal counts what arrived, "One, two. I need three. One more!", and he keeps loading.
   - Too many: "Too many! Take one out."
   - After 2 misses the send button glows exactly when the truck holds the right number.
-  - **Numerals are always shown with the spoken number**: the asked-for number in the animal's speech bubble, a running total on the truck, and a numeral that pops up each time the animal counts one aloud. He can compare the truck's numeral with the bubble's.
+  - **Numerals are shown with the spoken number**: the asked-for number in the animal's speech bubble, and a numeral that pops up each time the animal counts one aloud. There is no running total on the truck, because he could match it to the bubble's numeral without counting. Each thing he loads is still counted aloud.
 
 What is shown versus only spoken: a numeral is shown, because he still has to count it out. A requested letter or side is spoken only, because showing it would let him match shapes without listening.
 
@@ -101,11 +101,11 @@ Notes:
 One more / one less, colors, big/small, adding with objects, simple words. Each needs a generator, an entry in `skills.json`, voice clips and an animal.
 
 ## Which animals are offered
-After each delivery the game picks two different animals:
+After each delivery the game picks three different animals out of the six:
 - one owns the skill he has practised least over his last 20 deliveries, so nothing is avoided forever;
-- the other is random.
+- the other two are random.
 
-With only three animals this simply rotates who sits out.
+Their left-to-right order is random too.
 
 ## Mastery (`src/systems/mastery.js`)
 - Each item has a record `{ box: 1–5, seen, correct, lastSeen }`. Items are things like `count:3`, `letter-name:B`, `letter-sound:B`, `side:left`.
@@ -120,8 +120,10 @@ With only three animals this simply rotates who sits out.
 The home farm starts as bare grass with the truck parked on it. Everything else is earned by helping the animals, so the farm grows as he plays.
 
 **Earning**
-- **After every delivery:** one small thing, picked at random from a pool (flowers, vegetables, bugs, small trees). Repeats are fine. It pops up, then flies off toward the house button.
-- **At every sunset:** the next big reward, in a fixed order. It is one of:
+
+He earns exactly one reward for each finished farm day, given at sunset. Nothing is handed out after a single delivery, so finishing the day is what counts.
+- **On most days it is one small thing,** picked at random from a pool (flowers, vegetables, bugs, small trees). Repeats are fine.
+- **On set days it is a big reward instead.** Each big reward names the farm day it arrives on: days 1, 3 and 5, then every third day. If one was missed (the schedule was edited, or an older save is further on), the earliest one still owed is given, one per day. A big reward is one of:
   - a **friend** or **decoration**, which he places on the farm;
   - an **upgrade**, which becomes part of the farm itself (fence, barn, pond, apple tree, path, windmill, silo, rainbow);
   - a **hat** or a **paint**, which goes straight on the robot or truck.
@@ -132,9 +134,9 @@ The home farm starts as bare grass with the truck parked on it. Everything else 
 - Things he has earned but not placed wait on a shelf along the bottom, six at a time, oldest first.
 - Tapping one makes it hop onto the farm at a free spot. He can then drag it anywhere. Dragging it back down onto the shelf puts it away.
 - Tapping a placed thing or the truck makes it wiggle.
-- The paint pot and hat buttons try on the next paint or hat he owns, then none.
+- The palette and hat buttons each open a row of everything he owns of that kind, with "none" first and the current one ringed. He taps the one he wants. Tapping anywhere else closes the row.
 - Things lower on the screen are drawn in front, so the farm has depth.
-- A house button with a bouncing gift on the animals screen tells him something is waiting. After a sunset whose reward belongs on the farm, the new day starts at home.
+- Every day ends at home: after sunset the sun button always leads to the home farm. A house button on the animals screen leads there at any other time, with a bouncing gift on it while something is waiting.
 - The farm holds up to 120 placed and waiting things. Past that, the oldest small thing makes room; friends and decorations are never dropped.
 
 There is no learning on the home farm on purpose. It is where the rewards for learning are enjoyed, and the only way to get more is to go back to the animals.
@@ -178,11 +180,11 @@ There is no learning on the home farm on purpose. It is where the rewards for le
 ### `content/rewards.json`
 ```json
 "small":   [{ "id": "small-tulip", "name": "Tulip", "emoji": "🌷" }],
-"rewards": [{ "id": "friend-duck", "type": "friend", "name": "Duck", "emoji": "🦆" },
-            { "id": "upgrade-barn", "type": "upgrade", "name": "Barn", "emoji": "🏠", "value": "barn" }]
+"rewards": [{ "day": 1, "id": "friend-duck", "type": "friend", "name": "Duck", "emoji": "🦆" },
+            { "day": 11, "id": "upgrade-barn", "type": "upgrade", "name": "Barn", "emoji": "🏠", "value": "barn" }]
 ```
-- `small` is the pool for the after-delivery reward. Ids must start with `small-`.
-- `rewards` are the sunset rewards, in the order they arrive. Types: `friend`, `decoration`, `hat`, `paint`, `upgrade`.
+- `small` is the pool for ordinary days. Ids must start with `small-`.
+- `rewards` are the big rewards. `day` is the farm day each one arrives on (1 is his first finished day). To change how often big rewards come, edit the `day` numbers. Types: `friend`, `decoration`, `hat`, `paint`, `upgrade`.
 - Everything except paint is drawn from its `emoji`, using the device's own emoji font, so a new reward needs no art.
 - `paint` needs a `value`: a `#rrggbb` color or `rainbow`. The truck's SVG is recoloured with it.
 - `upgrade` needs a `value` naming a drawing in `src/scenes/homeUpgrades.js`. Its `emoji` is only what the sunset shows; on the farm it is drawn properly.

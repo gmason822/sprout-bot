@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  earnSmall, reconcileFarm, placeFromBox, moveThing, putAway, freeSpot, cycleWear, ownedUpgrades,
+  earnSmall, reconcileFarm, placeFromBox, moveThing, putAway, freeSpot, wearOptions, setWear, ownedUpgrades,
   clampToField, isPlaceable, MAX_THINGS, FIELD,
 } from './home.js';
 
@@ -116,20 +116,27 @@ describe('freeSpot', () => {
   });
 });
 
-describe('cycleWear', () => {
-  it('goes through the paints he owns, then back to none', () => {
-    const f = farm({ rewards: ['paint-blue', 'paint-red', 'hat-straw'] });
-    expect(cycleWear(f, REWARDS, 'paint')).toBe('paint-blue');
-    expect(cycleWear(f, REWARDS, 'paint')).toBe('paint-red');
-    expect(cycleWear(f, REWARDS, 'paint')).toBeNull();
-    expect(cycleWear(f, REWARDS, 'paint')).toBe('paint-blue');
-    expect(f.hat).toBeNull();
-    expect(cycleWear(f, REWARDS, 'hat')).toBe('hat-straw');
+describe('choosing what to wear', () => {
+  it('offers none first, then everything he owns of that kind', () => {
+    const f = farm({ rewards: ['paint-red', 'hat-straw', 'paint-blue'] });
+    expect(wearOptions(f, REWARDS, 'paint').map((r) => r?.id ?? null)).toEqual([null, 'paint-blue', 'paint-red']);
+    expect(wearOptions(f, REWARDS, 'hat').map((r) => r?.id ?? null)).toEqual([null, 'hat-straw']);
+    expect(wearOptions(farm(), REWARDS, 'paint')).toEqual([null]);
   });
-  it('does nothing when he owns none', () => {
-    const f = farm();
-    expect(cycleWear(f, REWARDS, 'hat')).toBeNull();
-    expect(f.hat).toBeNull();
+  it('puts on what he picks and takes it off again', () => {
+    const f = farm({ rewards: ['paint-blue', 'paint-red', 'hat-straw'] });
+    expect(setWear(f, REWARDS, 'paint', 'paint-red')).toBe(true);
+    expect(f.paint).toBe('paint-red');
+    expect(setWear(f, REWARDS, 'hat', 'hat-straw')).toBe(true);
+    expect(setWear(f, REWARDS, 'paint', null)).toBe(true);
+    expect(f).toMatchObject({ paint: null, hat: 'hat-straw' });
+  });
+  it('refuses what he does not own, or the wrong kind', () => {
+    const f = farm({ rewards: ['paint-blue'] });
+    expect(setWear(f, REWARDS, 'paint', 'paint-red')).toBe(false);
+    expect(setWear(f, REWARDS, 'hat', 'paint-blue')).toBe(false);
+    expect(setWear(f, REWARDS, 'box', null)).toBe(false);
+    expect(f).toMatchObject({ paint: null, hat: null });
   });
 });
 

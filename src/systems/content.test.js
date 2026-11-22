@@ -9,7 +9,7 @@ const good = () => ({
     { id: 'letters', answer: 'pick', tiers: [{ id: 'letter-name' }, { id: 'letter-sound', perItemAfter: 'letter-name' }] },
   ] },
   animals: { animals: [{ id: 'hen', skill: 'count' }, { id: 'cow', skill: 'letters' }] },
-  rewards: { rewards: [{ id: 'r1', type: 'friend', emoji: '🦆' }, { id: 'p1', type: 'paint', value: '#fff' }] },
+  rewards: { rewards: [{ id: 'r1', type: 'friend', emoji: '🦆', day: 1 }, { id: 'p1', type: 'paint', value: '#fff', day: 3 }] },
 });
 const GEN = ['count', 'letters', 'leftright'];
 
@@ -54,15 +54,17 @@ describe('validateContent', () => {
 
   it('skips bad rewards', () => {
     const raw = good();
-    raw.rewards.rewards.push({ id: 'r1', type: 'friend', emoji: '🦆' }, { id: 'x', type: 'car' }, { id: 'p2', type: 'paint' }, { id: 'h1', type: 'hat' });
+    raw.rewards.rewards.push({ id: 'r1', type: 'friend', emoji: '🦆', day: 2 }, { id: 'x', type: 'car', day: 2 }, { id: 'p2', type: 'paint', day: 2 }, { id: 'h1', type: 'hat', day: 2 }, { id: 'f2', type: 'friend', emoji: '🐑' }, { id: 'f3', type: 'friend', emoji: '🐑', day: 0 });
     const { content, errors } = validateContent(raw, GEN);
     expect(content.rewards.map((r) => r.id)).toEqual(['r1', 'p1']);
-    expect(errors).toHaveLength(4);
+    // A duplicate, an unknown type, a paint with no colour, a hat with no picture,
+    // and two friends with no usable day.
+    expect(errors).toHaveLength(6);
   });
 
   it('checks small things and upgrades', () => {
     const raw = good();
-    raw.rewards.rewards.push({ id: 'u1', type: 'upgrade', emoji: '🏠', value: 'barn' }, { id: 'u2', type: 'upgrade', emoji: '🏠' });
+    raw.rewards.rewards.push({ id: 'u1', type: 'upgrade', emoji: '🏠', value: 'barn', day: 5 }, { id: 'u2', type: 'upgrade', emoji: '🏠', day: 6 });
     raw.rewards.small = [{ id: 'small-rock', emoji: '🪨' }, { id: 'rock', emoji: '🪨' }, { id: 'small-x' }, { id: 'small-rock', emoji: '🪨' }];
     const { content, errors } = validateContent(raw, GEN);
     expect(content.rewards.map((r) => r.id)).toEqual(['r1', 'p1', 'u1']);

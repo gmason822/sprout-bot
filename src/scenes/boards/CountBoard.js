@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { judgeCount, sendGlows, correctionLine } from '../../skills/count.js';
 import { BASKET, TRUCK_AT_ANIMAL_X, ANIMAL, HINT_COLOR } from '../layout.js';
-import { numberStyle, makePlayButton, tween, wait, bounce, popNumber } from '../ui.js';
+import { makePlayButton, tween, wait, bounce, popNumber } from '../ui.js';
 
 // The "count" answer: a pile of identical things. Each tap loads one into the truck
 // while the voice counts it, and the green button sends the truck.
@@ -108,14 +108,8 @@ export class CountBoard {
     const { s } = this;
     // Tapping the bed takes the last thing out. One big target beats many small ones.
     s.in.tappable(s.truck, 'truck', new Phaser.Geom.Rectangle(-70, -170, 300, 220), Phaser.Geom.Rectangle.Contains);
-
-    // Running total on the truck, so he sees the numeral for what he has counted so far.
-    const disc = s.add.graphics();
-    disc.fillStyle(0xffffff, 1).fillCircle(0, 0, 48);
-    disc.lineStyle(5, 0x5b4636, 1).strokeCircle(0, 0, 48);
-    this.countText = s.add.text(0, 0, '', numberStyle(70)).setOrigin(0.5);
-    this.countBadge = s.add.container(254, -72, [disc, this.countText]).setVisible(false);
-    s.truck.add(this.countBadge);
+    // No running total is shown on the truck. With a numeral there, he could match it
+    // to the numeral in the animal's bubble and never count.
   }
 
   buildSendButton() {
@@ -214,14 +208,6 @@ export class CountBoard {
 
   refresh() {
     const loaded = this.loaded.length;
-    if (loaded !== this.shownCount) {
-      this.shownCount = loaded;
-      this.countBadge.setVisible(loaded > 0);
-      if (loaded > 0) {
-        this.countText.setText(String(loaded));
-        this.s.tweens.add({ targets: this.countBadge, scale: { from: 1.35, to: 1 }, duration: 180, ease: 'Quad.out' });
-      }
-    }
     this.sendButton.setAlpha(loaded > 0 ? 1 : 0.45);
     this.sendGlow.setVisible(sendGlows(this.s.misses, loaded, this.answer.target));
   }
@@ -280,8 +266,6 @@ export class CountBoard {
   async deliver() {
     const { s } = this;
     const size = this.bed.size;
-    // The animal's count takes over from the truck's total.
-    this.countBadge.setVisible(false);
     for (let n = 1; n <= this.bedThings.length; n++) {
       popNumber(s, ANIMAL.x - 130, ANIMAL.y - 70, n);
       const inBed = this.bedThings[n - 1];
