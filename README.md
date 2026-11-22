@@ -14,7 +14,7 @@ On an Android phone or tablet, open that address in Chrome, then use the menu â†
 Milestones 1 to 4 are built: three animals ask for counting, letters and left/right; a farm day ends at sunset with a reward; progress is saved on the device; and a hidden parent area holds the settings and a progress view. See `docs/ROADMAP.md`.
 
 ## Parent area
-Hold the top-right corner of the screen (where the sun is) for three seconds, then tap the three numbers shown as words. From there you can set his name, the length of a farm day and the volume, see what he has and hasn't mastered, or reset everything.
+Hold a finger on the sun in the top-right for three seconds (a white ring closes in around your finger while it counts), or tap the sun five times quickly. Then tap the three numbers shown as words. From there you can set his name, the length of a farm day and the volume, see what he has and hasn't mastered, or reset everything.
 
 ## Publishing
 Every push to `main` runs the tests, builds the game and publishes it to GitHub Pages (`.github/workflows/deploy.yml`). An installed copy updates itself the next time it is opened with a connection.

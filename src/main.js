@@ -44,6 +44,9 @@ game.registry.set('sfx', createSfx());
 game.registry.set('updateReady', false);
 watchForUpdates(() => game.registry.set('updateReady', true));
 
+// A long press must never bring up the browser's own menu over the game.
+window.addEventListener('contextmenu', (event) => event.preventDefault());
+
 // ---------- the hidden parent area ----------
 
 let pausedScenes = [];

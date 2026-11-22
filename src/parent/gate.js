@@ -8,8 +8,33 @@ import { makeChallenge, checkEntry } from './challenge.js';
 
 const HOLD_MS = 3000;
 const GIVE_UP_MS = 20000;
-// The corner is the top-right 12% by 18% of the screen, where the sun is drawn.
-const inCorner = (e) => e.clientX > window.innerWidth * 0.88 && e.clientY < window.innerHeight * 0.18;
+// A second way in, for any device where a long press is taken over by the browser:
+// five quick taps on the sun. The number words still keep a child out.
+const TAPS = 5;
+const TAPS_WITHIN_MS = 2500;
+
+/** Pure. Given the times of recent taps (oldest first), have enough landed close together? */
+export function isTapBurst(times, now) {
+  return times.filter((t) => now - t <= TAPS_WITHIN_MS).length >= TAPS;
+}
+
+/**
+ * Pure. Is (x, y) in the hold zone? The zone is measured from the game picture, not
+ * the screen: on a wide phone the picture sits in the middle with bars at the sides,
+ * and the sun the parent is told to hold is well inside the screen's corner. It covers
+ * the sun and everything above and to the right of it, bars included.
+ * `rect` is the game canvas's { left, top, width, height } on screen.
+ */
+export function inHoldZone(x, y, rect) {
+  return x >= rect.left + rect.width * 0.84 && y <= rect.top + rect.height * 0.24;
+}
+
+function inCorner(e) {
+  const canvas = document.querySelector('#game canvas');
+  const rect = canvas?.getBoundingClientRect()
+    ?? { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+  return inHoldZone(e.clientX, e.clientY, rect);
+}
 
 /** Overlays must live inside whatever is fullscreen, or they would not be visible. */
 export function overlayRoot() {
@@ -23,17 +48,31 @@ export function overlayRoot() {
  */
 export function installParentGate({ canOpen, onOpen, onPass, onCancel }) {
   let holdTimer = null;
+  let ring = null;
   let open = false;
+  let taps = [];
 
   const stopHold = () => {
     clearTimeout(holdTimer);
     holdTimer = null;
+    ring?.remove();
+    ring = null;
   };
 
   window.addEventListener('pointerdown', (e) => {
     if (open || !inCorner(e) || !canOpen()) return;
     stopHold();
+    const now = performance.now();
+    taps = [...taps.filter((t) => now - t <= TAPS_WITHIN_MS), now];
+    if (isTapBurst(taps, now)) return showChallenge();
     holdTimer = setTimeout(showChallenge, HOLD_MS);
+    // A ring closes in around the finger, so a parent can see the hold is counting.
+    // It stays invisible for the first second, so an ordinary tap never shows it.
+    ring = document.createElement('div');
+    ring.className = 'parent-hold';
+    ring.style.left = `${e.clientX}px`;
+    ring.style.top = `${e.clientY}px`;
+    overlayRoot().appendChild(ring);
   }, true);
   window.addEventListener('pointerup', stopHold, true);
   window.addEventListener('pointercancel', stopHold, true);
@@ -41,6 +80,7 @@ export function installParentGate({ canOpen, onOpen, onPass, onCancel }) {
 
   function showChallenge() {
     stopHold();
+    taps = [];
     open = true;
     onOpen();
 

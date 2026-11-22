@@ -21,7 +21,7 @@ A farm day is `deliveriesPerDay` deliveries, set by the parent (default 5, range
 - **Request**: animal on one side, the things to pick in the middle, the truck at the bottom.
 - **Sunset**: end-of-day celebration and reward.
 
-Hidden **Parent Gate**: hold the top-right corner (where the sun is) for 3 seconds, then tap three numbers that are written out as words ("seven, two, five") on a keypad. The numbers change every time. One wrong tap, or 20 seconds of nothing, closes it and the game carries on.
+Hidden **Parent Gate**: hold the sun in the top-right for 3 seconds, or tap it five times quickly, then tap three numbers that are written out as words ("seven, two, five") on a keypad. A white ring closes in around the finger from the second second of a hold, so a parent can see it counting. The hold zone is measured from the game picture rather than the screen, because a wide phone shows the picture with bars at the sides. The numbers change every time. One wrong tap, or 20 seconds of nothing, closes it and the game carries on.
 
 The **parent area** is plain HTML over the paused game, because a parent needs to read and type:
 - **Settings:** child name, deliveries per day (3 to 10), volume, computer-voice-only mode.

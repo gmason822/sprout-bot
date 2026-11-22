@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { makeChallenge, checkEntry } from './challenge.js';
+import { inHoldZone, isTapBurst } from './gate.js';
 import { progressGroups, progressSummary } from './progress.js';
 import { loadContent } from '../systems/content.js';
 import { GENERATOR_IDS } from '../skills/index.js';
@@ -64,5 +65,47 @@ describe('progressGroups', () => {
   it('summarises met and solid items', () => {
     const groups = progressGroups(content, { 'count:1': rec(5), 'count:2': rec(3), 'count:3': rec(1) });
     expect(progressSummary(groups)).toEqual({ met: 3, solid: 2, total: 64 });
+  });
+});
+
+describe('inHoldZone', () => {
+  // The sun is drawn at (1160, 90) in a 1280 x 720 picture.
+  const sunIn = (rect) => [rect.left + (1160 / 1280) * rect.width, rect.top + (90 / 720) * rect.height];
+
+  it('covers the sun when the picture fills the screen', () => {
+    const rect = { left: 0, top: 0, width: 1280, height: 720 };
+    expect(inHoldZone(...sunIn(rect), rect)).toBe(true);
+  });
+
+  it('covers the sun on a wide phone, where the picture has bars at the sides', () => {
+    const rect = { left: 91, top: 0, width: 732, height: 412 };
+    expect(inHoldZone(...sunIn(rect), rect)).toBe(true);
+    // The bar to the right of the picture counts too.
+    expect(inHoldZone(905, 10, rect)).toBe(true);
+  });
+
+  it('covers the sun on a tall screen, where the bars are above and below', () => {
+    const rect = { left: 0, top: 75, width: 800, height: 450 };
+    expect(inHoldZone(...sunIn(rect), rect)).toBe(true);
+    expect(inHoldZone(790, 5, rect)).toBe(true);
+  });
+
+  it('leaves the rest of the game alone', () => {
+    const rect = { left: 91, top: 0, width: 732, height: 412 };
+    expect(inHoldZone(457, 206, rect)).toBe(false);  // middle
+    expect(inHoldZone(100, 20, rect)).toBe(false);   // top-left
+    expect(inHoldZone(800, 380, rect)).toBe(false);  // bottom-right, the send button
+    expect(inHoldZone(640, 40, rect)).toBe(false);   // top, left of the sun
+  });
+});
+
+describe('isTapBurst', () => {
+  it('needs five taps close together', () => {
+    expect(isTapBurst([0, 300, 600, 900], 900)).toBe(false);
+    expect(isTapBurst([0, 300, 600, 900, 1200], 1200)).toBe(true);
+  });
+  it('does not count taps that are spread out', () => {
+    expect(isTapBurst([0, 1000, 2000, 3000, 4000], 4000)).toBe(false);
+    expect(isTapBurst([0, 2000, 2100, 2200, 2300, 2400], 2400)).toBe(true);
   });
 });

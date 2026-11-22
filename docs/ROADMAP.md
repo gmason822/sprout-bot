@@ -42,7 +42,7 @@ Built, waiting for its playtest:
 
 ## Milestone 4 — Parent area
 Built, waiting for its playtest:
-- Parent gate: hold the top-right corner (the sun) for 3 seconds, then tap three numbers written as words.
+- Parent gate: hold the sun for 3 seconds (or tap it five times quickly), then tap three numbers written as words.
 - Settings: child name, deliveries per day, volume, computer-voice-only mode, reset everything.
 - Progress view: every counting number, letter name, letter sound and side as a coloured dot.
 
