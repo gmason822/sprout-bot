@@ -33,6 +33,13 @@ export class Boot extends Phaser.Scene {
     const { width } = this.scale;
     drawFarmBackdrop(this);
 
+    // Nothing has started yet, so if a newer version arrives while the play button
+    // is showing, switch to it straight away.
+    const reloadIfUpdated = () => { if (this.registry.get('updateReady')) window.location.reload(); };
+    reloadIfUpdated();
+    this.registry.events.on('changedata-updateReady', reloadIfUpdated);
+    this.events.once('shutdown', () => this.registry.events.off('changedata-updateReady', reloadIfUpdated));
+
     const content = this.checkArt(loadContent(GENERATOR_IDS));
     this.registry.set('content', content);
 

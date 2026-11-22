@@ -5,6 +5,7 @@ import { Request } from './scenes/Request.js';
 import { Sunset } from './scenes/Sunset.js';
 import { createAudio } from './systems/audio.js';
 import { createSfx } from './systems/sfx.js';
+import { watchForUpdates } from './systems/update.js';
 import voiceClips from 'virtual:voice-clips';
 
 export const WIDTH = 1280;
@@ -33,3 +34,8 @@ if (import.meta.env.DEV) window.__game = game;
 // One audio and one sfx service for the whole game, shared through the registry.
 game.registry.set('audio', createAudio(voiceClips));
 game.registry.set('sfx', createSfx());
+
+// A newer version is ready. The Boot and Farm scenes reload for it, because those are
+// the two moments when a reload loses nothing.
+game.registry.set('updateReady', false);
+watchForUpdates(() => game.registry.set('updateReady', true));

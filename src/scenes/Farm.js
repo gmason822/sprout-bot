@@ -42,6 +42,10 @@ export class Farm extends Phaser.Scene {
     this.focus = -1;
     this.events.once('shutdown', () => this.audio.stop());
 
+    // Between requests everything is saved, so this is a safe moment to switch to a
+    // newer version. He lands on the play button and carries on with one tap.
+    if (this.registry.get('updateReady')) return window.location.reload();
+
     // A finished day goes to sunset, even if the game was closed before it got there.
     if (isDayDone(this.state.today, this.state.settings.deliveriesPerDay)) {
       return this.scene.start('Sunset');
