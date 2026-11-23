@@ -19,8 +19,12 @@ function voiceClips() {
     },
     load(id) {
       if (id !== resolved) return null;
+      // Hand-recorded clips sit in the folder itself; generated whole lines in lines/.
       const names = existsSync(VOICE_DIR)
-        ? readdirSync(VOICE_DIR).filter((f) => f.endsWith('.mp3')).map((f) => f.slice(0, -4))
+        ? readdirSync(VOICE_DIR, { recursive: true })
+          .map((f) => String(f).replaceAll('\\', '/'))
+          .filter((f) => f.endsWith('.mp3'))
+          .map((f) => f.slice(0, -4))
         : [];
       return `export default ${JSON.stringify(names.sort())};`;
     },

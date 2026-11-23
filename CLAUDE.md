@@ -37,7 +37,9 @@ src/
     layout.js, ui.js   Shared positions, colours and small drawing helpers
   systems/
     input.js           Maps touch + keyboard → game actions (see below)
-    audio.js           Plays recorded clips in sequence; falls back to speechSynthesis
+    audio.js           Plays the generated voice; falls back to speechSynthesis
+    lines.js           Every line the game can say, and the file name for each
+    phrases.js         The fixed phrases (praise, greetings, sunset)
     content.js         Loads and validates content/*.json
     mastery.js         Leitner-box tracking per content item
     day.js             Farm-day rules: which animals wait, when the day ends, rewards
@@ -48,6 +50,7 @@ src/
   parent/              The hidden parent area: gate, settings panel, progress view (plain HTML)
 content/               JSON data (animals, skills, letters, words, rewards) — edit these, not code, to add content
 public/assets/         Art (Kenney CC0, OpenMoji) and audio
+tools/voice/           Generates the voice files (`npm run voice`)
 hardware/              Button box firmware (CircuitPython for Raspberry Pi Pico)
 docs/                  Design, roadmap, audio recording list
 ```
@@ -81,10 +84,13 @@ Scenes listen for **actions**, never raw keys or pointers. The one exception is 
 - The current art (`public/assets/art/*.svg`) was drawn for this project and the sound effects are synthesized in `src/systems/sfx.js`. Swap in Kenney packs when wanted. Never block a milestone on art.
 
 ## Audio
-- Recorded voice clips go in `public/assets/audio/voice/` using the names in `docs/AUDIO.md`.
-- A request is a list of clips played in order ("I need" + "three" + "apples"). If every clip of a line is recorded, `audio.js` plays them; otherwise it speaks the whole line's `tts` text with speechSynthesis (slow rate, about 0.85).
+- **The voice is generated ahead of time.** Every line the game can say is an MP3 in `public/assets/audio/voice/lines/`, made with the Kokoro text-to-speech model by `npm run voice`. Settings and per-line fixes are in `content/voice.json`. See `docs/AUDIO.md`.
+- **After adding or changing anything that is spoken** (a word, an item, a shape, a phrase, a new game), run `npm run voice` and commit the new MP3s with it. Otherwise that line falls back to the device's own voice.
+- Every spoken line must be discoverable: a skill exports a `...Lines` function listing all it can say, and fixed phrases live in `src/systems/phrases.js`. `src/systems/lines.test.js` fails if a game can say something that is not listed.
+- At play time `audio.js` uses, in order: hand-recorded clips for the line if all exist, the generated line, then speechSynthesis (slow rate, about 0.85).
 - The game learns which clips exist at build time: `vite.config.js` lists the folder as the module `virtual:voice-clips`. Never probe the server for clips at runtime.
-- **Letter sounds cannot use TTS.** They must be recorded before the letter-sound requests ship.
+- **Letter sounds cannot be generated or spoken by TTS.** They must be recorded before the letter-sound requests ship.
+- Sound effects are synthesized in `src/systems/sfx.js`.
 
 ## Hosting
 - The game is public at https://gmason822.github.io/sprout-bot/ (GitHub Pages). Every push to `main` tests, builds and publishes it.

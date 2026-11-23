@@ -10,4 +10,4 @@
 - _Add Kenney audio packs here as you use them (CC0)._
 
 ## Voice
-- Recorded by Dad.
+- Generated with [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M) (Apache 2.0), voice "af_heart", run locally through [kokoro-onnx](https://github.com/thewh1teagle/kokoro-onnx) (MIT).

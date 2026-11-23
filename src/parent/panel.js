@@ -16,10 +16,12 @@ function el(tag, className, text) {
 
 /**
  * Open the panel. `onPreview({ volume })` lets a setting be heard before saving.
+ * `voiceCheck` is { lines, has(text), speak(text) }: every line the game can say, whether
+ * it has a generated clip, and a way to hear it.
  * `onClose({ settings, reset })` gets the new settings (or null if unchanged),
  * and `reset: true` if the parent chose to wipe everything.
  */
-export function openParentPanel({ state, content, onPreview, onClose }) {
+export function openParentPanel({ state, content, voiceCheck, onPreview, onClose }) {
   const draft = { ...state.settings };
   const overlay = el('div', 'parent-overlay');
   const card = el('div', 'parent-card');
@@ -127,6 +129,35 @@ export function openParentPanel({ state, content, onPreview, onClose }) {
   progress.appendChild(el('p', 'parent-hint',
     'Only the first try at each request counts. Left and right has two answers, so half of all guesses are right: read it as a trend.'));
   card.appendChild(progress);
+
+  // ----- voice check -----
+  if (voiceCheck?.lines?.length) {
+    const section = el('section', 'parent-section');
+    section.appendChild(el('h2', '', 'Voice check'));
+    const missing = voiceCheck.lines.filter((line) => !voiceCheck.has(line)).length;
+    section.appendChild(el('p', 'parent-hint',
+      `Every line the game can say (${voiceCheck.lines.length}). Tap one to hear it. ` +
+      (missing === 0
+        ? 'All of them use the generated voice.'
+        : `${missing} have no generated clip yet and use this device's own voice; they are marked with a dot.`) +
+      ' If one sounds wrong, note its exact words: it can be respelled for the speech engine in content/voice.json.'));
+    const details = el('details', 'parent-details');
+    details.appendChild(el('summary', '', 'Show all lines'));
+    const list = el('div', 'parent-lines');
+    // Built only when opened: a few hundred buttons are not worth making every time.
+    details.addEventListener('toggle', () => {
+      if (!details.open || list.childElementCount > 0) return;
+      for (const line of voiceCheck.lines) {
+        const button = el('button', `parent-line${voiceCheck.has(line) ? '' : ' parent-line-device'}`, line);
+        button.type = 'button';
+        button.addEventListener('click', () => voiceCheck.speak(line));
+        list.appendChild(button);
+      }
+    });
+    details.appendChild(list);
+    section.appendChild(details);
+    card.appendChild(section);
+  }
 
   // ----- reset -----
   const danger = el('section', 'parent-section');

@@ -1,13 +1,10 @@
 import Phaser from 'phaser';
 import { createInput, ACTIONS } from '../systems/input.js';
 import { endDay } from '../systems/day.js';
+import { NEW_THING, ALL_DONE, SLEEPY } from '../systems/phrases.js';
 import { drawFarmBackdrop } from './farmBackdrop.js';
 import { TRUCK_Y } from './layout.js';
 import { tween, wait, makeTruck, makeConfetti, drawDayRow, rewardPicture, emoji, makeSunButton } from './ui.js';
-
-const NEW_THING = { say: ['new-friend'], tts: 'Look! Something new on the farm!' };
-const ALL_DONE = { say: ['you-did-it'], tts: 'You did it!' };
-const SLEEPY = { say: ['sleepy'], tts: 'The robot is sleepy. Good night!' };
 
 /**
  * The end of a farm day, and the only time a reward is given: everything he

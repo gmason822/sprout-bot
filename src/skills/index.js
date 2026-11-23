@@ -1,12 +1,12 @@
 // The skill registry. Adding a skill is one generator here, one entry in
 // content/skills.json and an animal in content/animals.json. Scenes never change.
 
-import { generateCount } from './count.js';
-import { generateLetters } from './letters.js';
-import { generateLeftRight } from './leftright.js';
-import { generateNumbers } from './numbers.js';
-import { generateFirstSound } from './firstsound.js';
-import { generateShapes } from './shapes.js';
+import { generateCount, countLines } from './count.js';
+import { generateLetters, letterLines } from './letters.js';
+import { generateLeftRight, leftRightLines } from './leftright.js';
+import { generateNumbers, numberLines } from './numbers.js';
+import { generateFirstSound, firstSoundLines } from './firstsound.js';
+import { generateShapes, shapeLines } from './shapes.js';
 
 const GENERATORS = {
   count: generateCount,
@@ -18,6 +18,21 @@ const GENERATORS = {
 };
 
 export const GENERATOR_IDS = Object.keys(GENERATORS);
+
+// Each skill also lists every line it can say, so the whole voice can be made ahead of time.
+const LINES = {
+  count: countLines,
+  letters: letterLines,
+  leftright: leftRightLines,
+  numbers: numberLines,
+  firstsound: firstSoundLines,
+  shapes: shapeLines,
+};
+
+/** Every line the skills in this content can say. */
+export function skillLines(content) {
+  return content.skills.flatMap((skill) => LINES[skill.id]?.(skill, content) ?? []);
+}
 
 /**
  * Build the next request for a skill, or null when there is nothing it can ask.

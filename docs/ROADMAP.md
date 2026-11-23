@@ -65,6 +65,13 @@ Built, waiting for its playtest:
 - Small things wait on a shelf. He taps one to put it on the farm and drags it wherever he likes; dragging it back onto the shelf puts it away.
 - Three animals are offered at a time, and the counting game no longer shows a running total on the truck.
 
+## Voice
+Built, waiting for a listen on the phone:
+- Every line is generated ahead of time with a neural voice (Kokoro, "Heart", at 80% speed) and shipped as audio files, instead of using each device's built-in voice.
+- `npm run voice` regenerates whatever changed; `content/voice.json` holds the settings and per-line pronunciation fixes.
+- The parent area has a voice check that plays any line.
+- Still open: lines that sound unnatural need to be found by ear and fixed one by one, and letter sounds still need hand recordings.
+
 ## Long-term
 - **Button box.** Not needed while he plays by touch. The firmware is in `hardware/`, and the game already answers to its keys (arrows move a highlight, Space picks, 1 to 4 pick directly), so building the box later needs no game changes beyond testing.
 

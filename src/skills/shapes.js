@@ -6,6 +6,14 @@ import { activeItems, mostlySolid, pickItem, shuffle } from '../systems/mastery.
 // All the shapes in one request share a colour, so colour is never the clue.
 const COLOURS = [0xef4444, 0xf59e0b, 0x22c55e, 0x3b82f6, 0xa855f7, 0xec4899];
 const article = (word) => (/^[aeiou]/.test(word) ? 'an' : 'a');
+const bringShape = (shape) => ({ say: ['bring-the', `shape-${shape}`], tts: `Bring me the ${shape}!` });
+const thatsShape = (shape) => ({ say: ['thats-a', `shape-${shape}`], tts: `That's ${article(shape)} ${shape}.` });
+
+/** Every line this game can say, for the voice generator. */
+export function shapeLines(skill) {
+  return skill.tiers.flatMap((tier) => tier.shapes ?? []).flatMap((s) => [bringShape(s).tts, thatsShape(s).tts]);
+}
+
 const pickFrom = (list, rng) => list[Math.min(list.length - 1, Math.floor(rng() * list.length))];
 
 export function generateShapes({ skill, mastery = {}, rng = Math.random, prevItemId = null }) {
@@ -42,8 +50,7 @@ export function generateShapes({ skill, mastery = {}, rng = Math.random, prevIte
   return {
     skill: 'shapes',
     itemId,
-    say: ['bring-the', `shape-${shape}`],
-    tts: `Bring me the ${shape}!`,
+    ...bringShape(shape),
     // Showing any shape here could be mistaken for the answer.
     bubble: { emoji: '❓' },
     answer: {
@@ -53,7 +60,7 @@ export function generateShapes({ skill, mastery = {}, rng = Math.random, prevIte
         id: s,
         art: `shape-${s}`,
         tint,
-        wrong: { say: ['thats-a', `shape-${s}`], tts: `That's ${article(s)} ${s}.` },
+        wrong: thatsShape(s),
       })),
     },
   };

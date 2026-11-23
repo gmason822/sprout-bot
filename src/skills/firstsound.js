@@ -4,10 +4,21 @@
 // Pure functions only, no Phaser.
 
 import { activeItems, boxOf, pickItem, shuffle } from '../systems/mastery.js';
-import { letterOrder, pickDistractors } from './letters.js';
+import { letterOrder, pickDistractors, thatsLetter } from './letters.js';
 
 const pickFrom = (list, rng) => list[Math.min(list.length - 1, Math.floor(rng() * list.length))];
 const capital = (word) => word.charAt(0).toUpperCase() + word.slice(1);
+
+const startsWith = (word) => ({
+  say: [`word-${word.id}`, 'what-starts'],
+  tts: `${capital(word.id)}. What letter does ${word.id} start with?`,
+});
+
+/** Every line this game can say, for the voice generator. */
+export function firstSoundLines(skill, content) {
+  const words = [...wordsByLetter(content).values()].flat();
+  return [...words.map((word) => startsWith(word).tts), ...content.letters.map((l) => thatsLetter(l).tts)];
+}
 
 /**
  * Every picture word, grouped by the letter it starts with. Words come from each
@@ -53,8 +64,7 @@ export function generateFirstSound({ skill, content, mastery = {}, rng = Math.ra
   return {
     skill: 'firstsound',
     itemId,
-    say: [`word-${word.id}`, 'what-starts'],
-    tts: `${capital(word.id)}. What letter does ${word.id} start with?`,
+    ...startsWith(word),
     // The picture of the word. The letter itself is never shown.
     bubble: { emoji: word.emoji },
     answer: {
@@ -64,7 +74,7 @@ export function generateFirstSound({ skill, content, mastery = {}, rng = Math.ra
         id: l.id,
         art: 'crate',
         label: l.id,
-        wrong: { say: ['thats', `letter-${l.id.toLowerCase()}`], tts: `That's ${l.id}.` },
+        wrong: thatsLetter(l),
       })),
     },
   };

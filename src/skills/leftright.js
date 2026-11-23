@@ -41,3 +41,8 @@ export function generateLeftRight({ skill, mastery = {}, rng = Math.random }) {
     },
   };
 }
+
+/** Every line this game can say, for the voice generator. */
+export function leftRightLines(skill) {
+  return skill.tiers.flatMap((tier) => (tier.sides ?? []).filter((s) => SIDES[s]).flatMap((s) => [SIDES[s].tts, SIDES[s].wrong.tts]));
+}

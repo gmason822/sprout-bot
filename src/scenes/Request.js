@@ -4,6 +4,7 @@ import { makeRequest } from '../skills/index.js';
 import { numberWord } from '../skills/count.js';
 import { recordAnswer } from '../systems/mastery.js';
 import { isDayDone } from '../systems/day.js';
+import { PRAISE, THANK_YOU } from '../systems/phrases.js';
 import { drawFarmBackdrop } from './farmBackdrop.js';
 import { CountBoard } from './boards/CountBoard.js';
 import { PickBoard } from './boards/PickBoard.js';
@@ -13,11 +14,6 @@ import { numberStyle, tween, wait, bounce, makeConfetti, makeTruck, drawFocusRin
 // The scene knows only these two ways of answering. A new skill reuses one of them,
 // which is why adding a skill never touches this file.
 const BOARDS = { count: CountBoard, pick: PickBoard };
-
-const PRAISE = [
-  { say: ['great-job'], tts: 'Great job!' },
-  { say: ['you-did-it'], tts: 'You did it!' },
-];
 
 const IDLE_MS = 8000;
 const IDLE_REPEATS_MAX = 3;
@@ -189,7 +185,7 @@ export class Request extends Phaser.Scene {
     const dance = tween(this, { targets: this.truck, angle: { from: -6, to: 6 }, duration: 130, yoyo: true, repeat: 4 })
       .then(() => this.truck.setAngle(0));
 
-    await this.audio.say(['thank-you'], 'Thank you!');
+    await this.audio.say(THANK_YOU.say, THANK_YOU.tts);
     const praise = Phaser.Utils.Array.GetRandom(PRAISE);
     await Promise.all([dance, this.audio.say(praise.say, praise.tts)]);
     this.sfx.beepBoop();

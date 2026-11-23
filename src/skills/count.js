@@ -86,3 +86,21 @@ export function correctionLine(target, loaded) {
     tts: `I need ${numberWord(target)}. ${oneShort ? 'One more!' : 'More!'}`,
   };
 }
+
+/** Every line this game can say, for the voice generator. */
+export function countLines(skill) {
+  const numbers = new Set();
+  let top = 0;
+  for (const tier of skill.tiers) {
+    for (let n = tier.min; n <= tier.max; n++) numbers.add(n);
+    top = Math.max(top, tier.max + EXTRA);
+  }
+  const lines = [correctionLine(1, 2).tts];
+  // Each thing is counted aloud as it is loaded, up to the biggest pile.
+  for (let n = 1; n <= top; n++) lines.push(numberWord(n));
+  for (const n of numbers) {
+    for (const thing of skill.items ?? []) lines.push(buildCountRequest(n, { id: thing, plural: plural(thing) }, 0).tts);
+    lines.push(correctionLine(n, n - 1).tts, correctionLine(n, n - 2).tts);
+  }
+  return lines;
+}

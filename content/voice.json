@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "_comment": "The voice every line is generated with (see tools/voice/). After changing anything here, run `npm run voice`: only the lines affected are made again. 'voice' is a Kokoro voice id, 'speed' 1.0 is normal pace, 'sentencePause' is the gap in seconds between sentences in one line, 'bitrate' is the MP3 quality in kbps. 'say' fixes lines that sound wrong: the key is the exact text the game says, the value is what to hand the speech engine instead (respell a word, change the punctuation). The words on screen and in the code do not change.",
+  "voice": "af_heart",
+  "lang": "en-us",
+  "speed": 0.8,
+  "sentencePause": 0.35,
+  "bitrate": 48,
+  "say": {}
+}

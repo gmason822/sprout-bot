@@ -16,6 +16,9 @@ Milestones 1 to 4 are built, plus a second batch of games: six animals ask for c
 ## Parent area
 Hold a finger on the sun in the top-right for three seconds (a white ring closes in around your finger while it counts), or tap the sun five times quickly. Then tap the three numbers shown as words. From there you can set his name, the length of a farm day and the volume, see what he has and hasn't mastered, or reset everything.
 
+## Voice
+The game's voice is generated ahead of time with the open Kokoro text-to-speech model and shipped as audio files. `npm run voice` remakes it after content changes; see `docs/AUDIO.md`.
+
 ## Publishing
 Every push to `main` runs the tests, builds the game and publishes it to GitHub Pages (`.github/workflows/deploy.yml`). An installed copy updates itself the next time it is opened with a connection.
 

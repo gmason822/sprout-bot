@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { createInput, moveFocus, ACTIONS } from '../systems/input.js';
 import { makeRequest } from '../skills/index.js';
 import { chooseAnimals, isDayDone } from '../systems/day.js';
+import { GOOD_MORNING, WHO_HELPS } from '../systems/phrases.js';
 import { drawFarmBackdrop } from './farmBackdrop.js';
 import { TRUCK_Y } from './layout.js';
 import { tween, makeTruck, drawFocusRing, drawDayRow, emoji } from './ui.js';
@@ -15,8 +16,6 @@ const LAYOUT = {
 
 const HOUSE = { x: 100, y: 105, radius: 62 };
 
-const GOOD_MORNING = { say: ['good-morning'], tts: 'Good morning, farm!' };
-const WHO_HELPS = { say: ['who-helps'], tts: 'Who do you want to help?' };
 const IDLE_MS = 10000;
 const IDLE_REPEATS_MAX = 3;
 

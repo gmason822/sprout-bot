@@ -43,6 +43,11 @@ function nameRequest(letter, lower) {
   };
 }
 
+/** "That's D." */
+export function thatsLetter(letter) {
+  return { say: ['thats', `letter-${letter.id.toLowerCase()}`], tts: `That's ${letter.id}.` };
+}
+
 function soundRequest(letter) {
   // No TTS: speechSynthesis cannot say a bare letter sound.
   return { say: ['box-says', `sound-${letter.id.toLowerCase()}`], tts: null };
@@ -88,7 +93,7 @@ export function generateLetters({ skill, content, mastery = {}, rng = Math.rando
     art: 'crate',
     label: lower ? l.id.toLowerCase() : l.id,
     // Said when he brings this one by mistake, before the request is repeated.
-    wrong: { say: ['thats', `letter-${l.id.toLowerCase()}`], tts: `That's ${l.id}.` },
+    wrong: thatsLetter(l),
   }));
 
   return {
@@ -99,4 +104,15 @@ export function generateLetters({ skill, content, mastery = {}, rng = Math.rando
     bubble: { art: 'crate' },
     answer: { kind: 'pick', correct: letter.id, choices },
   };
+}
+
+/** Every line this game can say, for the voice generator. Sound requests have no text. */
+export function letterLines(skill, content) {
+  const lines = [];
+  for (const tier of skill.tiers) {
+    if (tier.ask === 'sound') continue;
+    for (const letter of content.letters) lines.push(nameRequest(letter, tier.case === 'lower').tts);
+  }
+  for (const letter of content.letters) lines.push(thatsLetter(letter).tts);
+  return lines;
 }

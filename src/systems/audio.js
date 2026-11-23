@@ -2,20 +2,30 @@
 // If any clip is missing, the whole line is spoken with speechSynthesis instead, so a sentence
 // is never half recorded voice and half robot voice.
 
+import { lineClipId } from './lines.js';
+
 const VOICE_DIR = 'assets/audio/voice/';
 const TTS_RATE = 0.85;
 
-/** Pure: decide how to say a line given which clips exist. */
-export function planSequence(clipIds, available, tts, ttsOnly = false) {
-  // "Computer voice only" is a parent setting. A line with no TTS text (a letter
-  // sound) still plays its recording, because there is no other way to say it.
-  if (ttsOnly && tts) return { mode: 'tts', text: tts };
-  if (clipIds.length > 0 && clipIds.every((id) => available.has(id))) {
-    return { mode: 'clips', ids: clipIds };
-  }
+/**
+ * Pure: decide how to say a line given which clips exist. In order:
+ *   1. hand-recorded clips, if every one for this line exists (unless the parent has
+ *      asked for the computer voice only);
+ *   2. the whole line as one pre-generated clip (`lineId`), made by tools/voice/;
+ *   3. the device's own text-to-speech;
+ *   4. whatever recorded clips there are, for a line with no text (a letter sound).
+ */
+export function planSequence(clipIds, available, tts, ttsOnly = false, lineId = null) {
+  const allRecorded = clipIds.length > 0 && clipIds.every((id) => available.has(id));
+  if (allRecorded && !(ttsOnly && tts)) return { mode: 'clips', ids: clipIds };
+  if (lineId && available.has(lineId)) return { mode: 'clips', ids: [lineId] };
   if (tts) return { mode: 'tts', text: tts };
-  // No TTS allowed for this line (letter sounds): play whatever was recorded.
   return { mode: 'clips', ids: clipIds.filter((id) => available.has(id)) };
+}
+
+/** Pure: how long to wait for a recorded clip of `seconds` length before moving on. */
+export function clipTimeoutMs(seconds) {
+  return (Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : 6000) + 1500;
 }
 
 /** Pure: how long to wait for a spoken line before giving up on the "end" event. */
@@ -30,6 +40,7 @@ export function createAudio(recorded = []) {
   const clips = new Map(); // id → HTMLAudioElement, made the first time a clip is needed
   let generation = 0;      // bumped by stop(); in-flight lines check it and bail out
   let current = null;
+  let currentDone = null;
   let volume = 1;
   let ttsOnly = false;
 
@@ -50,11 +61,23 @@ export function createAudio(recorded = []) {
     return new Promise((resolve) => {
       const el = element(id);
       if (!el) return resolve();
+      let guard = null;
+      const finish = () => {
+        clearTimeout(guard);
+        el.onended = el.onerror = null;
+        if (currentDone === finish) currentDone = null;
+        resolve();
+      };
       current = el;
+      // stop() calls this, so whoever is waiting for the line is never left hanging.
+      currentDone = finish;
       el.currentTime = 0;
       el.volume = volume;
-      el.onended = el.onerror = () => resolve();
-      el.play().catch(() => resolve());
+      el.onended = el.onerror = finish;
+      // A clip can fail to finish (the page goes to the background, the phone takes
+      // the sound away for a call). The game must carry on regardless.
+      guard = setTimeout(finish, clipTimeoutMs(el.duration));
+      el.play().catch(finish);
     });
   }
 
@@ -81,6 +104,7 @@ export function createAudio(recorded = []) {
   function stop() {
     generation++;
     if (current) { current.pause(); current = null; }
+    currentDone?.();
     if (hasTts()) window.speechSynthesis.cancel();
   }
 
@@ -100,7 +124,7 @@ export function createAudio(recorded = []) {
     async say(clipIds, tts) {
       stop();
       const mine = generation;
-      const plan = planSequence(clipIds, names, tts, ttsOnly);
+      const plan = planSequence(clipIds, names, tts, ttsOnly, tts ? lineClipId(tts) : null);
       if (plan.mode === 'tts') {
         await speak(plan.text);
         return;

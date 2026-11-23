@@ -8,6 +8,7 @@ import { createAudio } from './systems/audio.js';
 import { createSfx } from './systems/sfx.js';
 import { watchForUpdates } from './systems/update.js';
 import { setInputSuspended } from './systems/input.js';
+import { allLines, lineClipId } from './systems/lines.js';
 import { installParentGate } from './parent/gate.js';
 import { openParentPanel } from './parent/panel.js';
 import './parent/parent.css';
@@ -73,9 +74,17 @@ installParentGate({
   onPass: () => {
     const state = game.registry.get('state');
     const store = game.registry.get('store');
+    const audio = game.registry.get('audio');
+    const content = game.registry.get('content');
     openParentPanel({
       state,
-      content: game.registry.get('content'),
+      content,
+      // Lets a parent audition any line and spot ones that sound wrong.
+      voiceCheck: {
+        lines: allLines(content),
+        has: (text) => audio.has(lineClipId(text)),
+        speak: (text) => audio.say([], text),
+      },
       // Let the parent hear the volume they have just chosen.
       onPreview: ({ volume }) => {
         const sfx = game.registry.get('sfx');

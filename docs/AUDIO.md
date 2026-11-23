@@ -1,10 +1,55 @@
-# Voice recording list
+# Voice
+
+Every line the game says is a pre-made audio file, generated ahead of time with a neural text-to-speech voice. The files ship with the game, so it sounds the same on every device and works offline.
+
+## The generated voice
+- **Engine:** [Kokoro](https://huggingface.co/hexgrad/Kokoro-82M) (open weights, Apache 2.0), run on the PC. Nothing is sent to a cloud service.
+- **Settings:** `content/voice.json` holds the voice (`af_heart`), the speed (0.8 of normal, for a 4-year-old), the pause between sentences and the MP3 quality.
+- **Files:** one MP3 per line in `public/assets/audio/voice/lines/`, about 280 lines and 3.6 MB in total. Each is named after its words plus a short code, for example `i-need-three-apples-4fd0bbc0.mp3`.
+- **Which lines:** every skill lists everything it can say (`src/skills/`), and the fixed phrases are in `src/systems/phrases.js`. A test checks that nothing the game can say is missing from the list.
+
+### Making the voice again
+```bash
+npm run voice
+```
+Run this after adding content (a new word, shape, counting item or game) or changing `content/voice.json`. Only lines that are new or whose settings changed are generated; lines the game no longer says are deleted. Commit the changed MP3s and `tools/voice/built.json` with the content change. A full run of every line takes about seven minutes.
+
+### Fixing a line that sounds wrong
+1. In the game, open the parent area and use **Voice check**: it lists every line and plays the one you tap.
+2. Note the exact words of the line that sounds off.
+3. Add it to `"say"` in `content/voice.json`, with what the engine should be told instead. For example, to change how a word is said or to slow a phrase with a comma:
+   ```json
+   "say": { "That's D.": "That's the letter D." }
+   ```
+   The words in the game do not change, only what is spoken.
+4. Run `npm run voice` and listen again.
+
+### One-time setup on a new PC
+The model and its Python environment live outside the repository, in `~/.cache/sprout-bot-voice/` (or wherever `SPROUT_VOICE_HOME` points):
+```bash
+mkdir -p ~/.cache/sprout-bot-voice/model && cd ~/.cache/sprout-bot-voice
+python3 -m venv venv && venv/bin/pip install kokoro-onnx lameenc
+curl -L -o model/kokoro-v1.0.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx
+curl -L -o model/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
+```
+That is about 340 MB. It is only needed to make the voice, not to build or play the game.
+
+## How a line is chosen at play time
+1. Hand-recorded clips for that line, if every one of them exists (see below).
+2. Otherwise the generated file for the whole line.
+3. Otherwise the device's own text-to-speech, so a line added without running `npm run voice` is still spoken.
+
+The parent setting "Use the computer voice only" skips step 1.
+
+**Letter sounds** ("the box that says /b/") have no generated voice: a speech engine cannot say a bare sound reliably. That game stays switched off until `sound-<letter>.mp3` is recorded by hand.
+
+# Recording your own voice (optional)
+
+Nothing below is needed. If you ever want a real voice for some lines, record them with these names and they take over from the generated voice for any line where every clip exists.
 
 Record in a quiet room on a phone, and speak slowly and cheerfully. Export as `.mp3` (mono, 44.1 kHz is fine). Trim the silence at the start and end. Put files in `public/assets/audio/voice/`.
 
-Requests are built by playing clips one after another ("I need" + "three" + "apples"), so say each clip on its own with a natural ending.
-
-Missing clips fall back to text-to-speech, **except letter sounds**, which TTS cannot say properly.
+Recorded lines are built by playing clips one after another ("I need" + "three" + "apples"), so say each clip on its own with a natural ending.
 
 Animal lines are more fun in a silly voice for each animal. One voice for everything is fine to start.
 
