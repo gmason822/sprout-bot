@@ -7,6 +7,8 @@ import { GENERATOR_IDS, makeRequest } from './index.js';
 import { EVERYTHING_SOLID } from '../systems/tryGame.js';
 import { generateColours, colourLines } from './colours.js';
 import { generateSame, sameLines } from './same.js';
+import { generateWhoSays, whoSaysLines } from './whosays.js';
+import { ANIMAL_CLIPS } from '../systems/animalClips.js';
 
 const content = loadContent(GENERATOR_IDS);
 const skillOf = (id) => content.skills.find((s) => s.id === id);
@@ -131,5 +133,44 @@ describe('find the same one', () => {
 
   it('says only two things', () => {
     expect(sameLines()).toEqual(['Find the same one!', 'That one is different.']);
+  });
+});
+
+describe('who says that?', () => {
+  const skill = skillOf('whosays');
+
+  it('asks only about real recordings', () => {
+    for (const noise of skill.tiers.flatMap((t) => t.items)) expect(Object.keys(ANIMAL_CLIPS), noise).toContain(noise);
+  });
+
+  it('plays a noise as the question and offers the animal that makes it', () => {
+    ask('whosays', EVERYTHING_SOLID, (request) => {
+      const noise = request.itemId.split(':')[1];
+      expect(request.cue).toBe(noise);
+      const right = content.animals.find((a) => a.id === request.answer.correct);
+      expect(right.sound).toBe(noise);
+      for (const choice of request.answer.choices) {
+        // Each choice is an animal's drawing, and answers in its own voice if picked wrongly.
+        const animal = content.animals.find((a) => a.id === choice.id);
+        expect(choice.art).toBe(animal.id);
+        expect(choice.cue).toBe(animal.sound);
+        expect(choice.wrong.tts).toBe(`That's a ${animal.name.toLowerCase()}.`);
+      }
+      // The bubble gives nothing away.
+      expect(request.bubble).toEqual({ emoji: '🔊' });
+    });
+  });
+
+  it('leaves out a noise no animal makes, and lists what it can say', () => {
+    const lines = whoSaysLines(skill, content);
+    expect(lines[0]).toBe('Who says that?');
+    expect(lines).toContain("That's a cow.");
+    const noCow = { ...content, animals: content.animals.filter((a) => a.id !== 'cow') };
+    expect(whoSaysLines(skill, noCow)).not.toContain("That's a cow.");
+    for (let i = 0; i < 100; i++) {
+      const request = generateWhoSays({ skill, content: noCow, mastery: EVERYTHING_SOLID });
+      expect(request.cue).not.toBe('moo');
+      expect(request.answer.choices.map((c) => c.id)).not.toContain('cow');
+    }
   });
 });

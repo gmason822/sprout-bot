@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "One entry per game. 'answer' is how he answers: 'count' (load N, then send) or 'pick' (tap one of 2-4). Each tier is one group in the parent's progress view, labelled by its 'title'. 'unlockAfter': the tier opens when two thirds of the earlier tier's items are in box 3+. 'perItemAfter': each item opens separately, once the same item in the earlier tier is in box 3+. 'start': how many of the tier's items are in play from the first day; the rest arrive one at a time. 'items': what a tier asks about, for the newer games. In 'same', 'match' says what kind of matching the tier is: 'kind' (items are kinds from groups.json), 'colour' (items are shapes) or 'turned' (items are the pictures themselves, which must look different when turned). 'title' on a game is its name in the parent area.",
+  "_comment": "One entry per game. 'answer' is how he answers: 'count' (load N, then send) or 'pick' (tap one of 2-4). Each tier is one group in the parent's progress view, labelled by its 'title'. 'unlockAfter': the tier opens when two thirds of the earlier tier's items are in box 3+. 'perItemAfter': each item opens separately, once the same item in the earlier tier is in box 3+. 'start': how many of the tier's items are in play from the first day; the rest arrive one at a time. 'items': what a tier asks about, for the newer games. In 'whosays' the items are noises: each must be a recording (see src/systems/animalClips.js) and the 'sound' of an animal in animals.json. In 'same', 'match' says what kind of matching the tier is: 'kind' (items are kinds from groups.json), 'colour' (items are shapes) or 'turned' (items are the pictures themselves, which must look different when turned). 'title' on a game is its name in the parent area.",
   "skills": [
     {
       "id": "count",
@@ -77,6 +77,14 @@
         { "id": "same",        "title": "Find the same one",   "match": "kind",   "items": ["animals", "vehicles", "fruit", "clothes", "food", "toys", "vegetables"], "start": 4, "choices": 3 },
         { "id": "same-colour", "title": "The same colour",     "match": "colour", "items": ["circle", "square", "star", "heart", "triangle"], "choices": 4, "unlockAfter": "same" },
         { "id": "same-turned", "title": "The same way round",  "match": "turned", "items": ["🚗", "🐟", "🚀", "🐌", "🦆", "👟", "🚜", "🔑"], "choices": 4, "unlockAfter": "same-colour" }
+      ]
+    },
+    {
+      "id": "whosays",
+      "title": "Who says that?",
+      "answer": "pick",
+      "tiers": [
+        { "id": "says", "title": "Who says that?", "items": ["moo", "oink", "cluck", "woof", "meow", "neigh"], "start": 4, "choices": 3 }
       ]
     }
   ]
