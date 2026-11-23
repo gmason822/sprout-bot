@@ -5,6 +5,7 @@ import { chooseAnimals, isDayDone } from '../systems/day.js';
 import { GOOD_MORNING, WHO_HELPS } from '../systems/phrases.js';
 import { drawFarmBackdrop } from './farmBackdrop.js';
 import { dayTime } from '../systems/sky.js';
+import { masteryFor, animalsToOffer } from '../systems/tryGame.js';
 import { TRUCK_Y } from './layout.js';
 import { tween, wait, makeTruck, drawFocusRing, drawDayRow, emoji } from './ui.js';
 
@@ -40,7 +41,9 @@ export class Farm extends Phaser.Scene {
     if (this.registry.get('updateReady')) return window.location.reload();
 
     // A finished day goes to sunset, even if the game was closed before it got there.
-    if (isDayDone(this.state.today, this.state.settings.deliveriesPerDay)) {
+    // (Not while a parent is trying a game: then nothing is delivered or ended.)
+    const trying = this.registry.get('trying');
+    if (!trying && isDayDone(this.state.today, this.state.settings.deliveriesPerDay)) {
       return this.scene.start('Sunset');
     }
 
@@ -61,12 +64,20 @@ export class Farm extends Phaser.Scene {
     // Only offer an animal that actually has something to ask right now.
     const ctx = {
       content: this.content,
-      mastery: this.state.mastery,
+      mastery: masteryFor(trying, this.state.mastery),
       hasClip: (id) => this.audio.has(id),
       childName: this.state.settings.childName,
     };
     const ready = this.content.animals.filter((a) => makeRequest(a.skill, ctx) !== null);
-    const pair = chooseAnimals(ready, this.state.skillLog);
+    const only = animalsToOffer(trying, ready);
+    // A game being tried that has nothing to ask is dropped, rather than half applied.
+    if (trying && !only) this.registry.set('trying', null);
+    const pair = only ?? chooseAnimals(ready, this.state.skillLog);
+    if (only) {
+      this.add.text(18, 710, 'Trying this game. Nothing is recorded.', {
+        fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif', fontSize: '22px', color: '#5b4636', resolution: 2,
+      }).setOrigin(0, 1).setAlpha(0.85).setDepth(3);
+    }
     if (pair.length === 0) console.error('[farm] no animal has anything to ask; check the content files');
     this.layout = LAYOUT[Math.min(3, pair.length)] ?? LAYOUT[1];
     this.animals = pair.slice(0, 3).map((animal, i) => this.buildAnimal(animal, this.layout.xs[i], i));

@@ -7,6 +7,7 @@ import { isDayDone } from '../systems/day.js';
 import { PRAISE, THANK_YOU } from '../systems/phrases.js';
 import { drawFarmBackdrop } from './farmBackdrop.js';
 import { dayTime } from '../systems/sky.js';
+import { masteryFor } from '../systems/tryGame.js';
 import { CountBoard } from './boards/CountBoard.js';
 import { PickBoard } from './boards/PickBoard.js';
 import { ANIMAL, TRUCK_Y } from './layout.js';
@@ -39,12 +40,15 @@ export class Request extends Phaser.Scene {
     this.in = createInput(this);
     this.events.once('shutdown', () => this.audio.stop());
 
+    // A parent trying a game out: it is asked from a pretend record if they want
+    // every level, and nothing that happens is written down.
+    this.trying = this.registry.get('trying') ?? null;
     this.request = makeRequest(this.animal.skill, {
       content: this.registry.get('content'),
-      mastery: this.state.mastery,
+      mastery: masteryFor(this.trying, this.state.mastery),
       hasClip: (id) => this.audio.has(id),
       childName: this.state.settings.childName,
-      prevItemId: this.state.lastItem[this.animal.skill] ?? null,
+      prevItemId: (this.trying ? this.registry.get('tryLast') : this.state.lastItem[this.animal.skill]) ?? null,
     });
     const Board = this.request && BOARDS[this.request.answer.kind];
     if (!Board) {
@@ -213,6 +217,7 @@ export class Request extends Phaser.Scene {
   judge(right) {
     if (this.judged) return;
     this.judged = true;
+    if (this.trying) return;
     this.state.mastery = recordAnswer(this.state.mastery, this.request.itemId, right);
     this.registry.get('store').save(this.state);
   }
@@ -244,6 +249,10 @@ export class Request extends Phaser.Scene {
     this.sfx.beepBoop();
     await wait(this, 250);
 
+    if (this.trying) {
+      this.registry.set('tryLast', this.request.itemId);
+      return this.scene.start('Farm');
+    }
     this.state.skillLog.push(this.request.skill);
     this.state.lastItem[this.request.skill] = this.request.itemId;
     // What he delivered stays on the farm for the rest of the day.

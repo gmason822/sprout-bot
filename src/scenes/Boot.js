@@ -10,6 +10,7 @@ import { drawFarmBackdrop } from './farmBackdrop.js';
 import { makeGoButton, numberStyle } from './ui.js';
 import { VERSION } from '../systems/version.js';
 import { dayTime } from '../systems/sky.js';
+import { loadTrying } from '../systems/tryGame.js';
 
 // Art is loaded at twice the drawn size so it stays sharp when the canvas is scaled up.
 const ART = {
@@ -59,6 +60,8 @@ export class Boot extends Phaser.Scene {
     reconcileFarm(state.farm, content.rewards, content.small);
     this.registry.set('store', store);
     this.registry.set('state', state);
+    // A game the parent is trying out, if any (see src/systems/tryGame.js).
+    this.registry.set('trying', loadTrying());
     // The title screen shows the time of day he left off at.
     drawFarmBackdrop(this, dayTime(state.today.length, state.settings.deliveriesPerDay));
 

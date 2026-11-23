@@ -80,6 +80,9 @@
 .parent-testing { padding: 12px 14px; border-radius: 10px; background: #33465a; }
 .parent-testing .parent-button { margin-top: 6px; }
 
+.parent-games { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+.parent-games .parent-button { padding: 10px 14px; }
+
 .parent-confirm { margin-top: 10px; }
 .parent-confirm .parent-button { margin-right: 10px; }
 

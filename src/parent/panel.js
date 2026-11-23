@@ -3,6 +3,7 @@
 
 import { DELIVERIES_MIN, DELIVERIES_MAX, DAYS_MAX } from '../systems/save.js';
 import { buildingsAt } from '../systems/dayTravel.js';
+import { gameList } from '../systems/tryGame.js';
 import { progressGroups, progressSummary } from './progress.js';
 import { overlayRoot } from './gate.js';
 import { VERSION } from '../systems/version.js';
@@ -20,12 +21,14 @@ function el(tag, className, text) {
  * Open the panel. `onPreview({ volume })` lets a setting be heard before saving.
  * `voiceCheck` is { lines, has(text), speak(text) }: every line the game can say, whether
  * it has a generated clip, and a way to hear it.
- * `onClose({ settings, reset, days, restore, keep })` gets the new settings (or null if
- * unchanged), `reset: true` if the parent chose to wipe everything, `days` if the farm
- * should move to that many finished days (else null), `restore: true` to put his real
- * farm back, and `keep: true` to make the farm being tested the real one.
+ * `trying` is the game being tried just now ({ skill, allLevels }), or null.
+ * `onClose({ settings, reset, days, restore, keep, tryGame })` gets the new settings (or
+ * null if unchanged), `reset: true` if the parent chose to wipe everything, `days` if
+ * the farm should move to that many finished days (else null), `restore: true` to put
+ * his real farm back, `keep: true` to make the farm being tested the real one, and
+ * `tryGame`: a game to try, null to stop trying, or undefined for no change.
  */
-export function openParentPanel({ state, content, voiceCheck, onPreview, onClose }) {
+export function openParentPanel({ state, content, voiceCheck, trying = null, onPreview, onClose }) {
   const draft = { ...state.settings };
   const overlay = el('div', 'parent-overlay');
   const card = el('div', 'parent-card');
@@ -156,6 +159,41 @@ export function openParentPanel({ state, content, voiceCheck, onPreview, onClose
     travel.appendChild(testing);
   }
   card.appendChild(travel);
+
+  // ----- try a game -----
+  const games = gameList(content);
+  const tryIt = el('section', 'parent-section');
+  tryIt.appendChild(el('h2', '', 'Try a game'));
+  tryIt.appendChild(el('p', 'parent-hint',
+    'For testing. Pick a game and the animals screen offers only that one, over and over. ' +
+    'Nothing he does is recorded while it is on, and it switches itself off when the game is closed.'));
+  if (trying) {
+    const now = el('div', 'parent-confirm parent-testing');
+    const label = games.find((g) => g.skill === trying.skill)?.label ?? trying.skill;
+    now.appendChild(el('p', '', `Trying now: ${label}${trying.allLevels ? ', every level' : ''}.`));
+    const stop = el('button', 'parent-button', 'Back to all the games');
+    stop.type = 'button';
+    stop.addEventListener('click', () => finish({ ...closing(), tryGame: null }));
+    now.appendChild(stop);
+    tryIt.appendChild(now);
+  }
+  const levelsRow = el('label', 'parent-row');
+  levelsRow.appendChild(el('span', 'parent-label', 'Include the harder levels'));
+  const levels = el('input', 'parent-check');
+  levels.type = 'checkbox';
+  levels.checked = trying?.allLevels ?? true;
+  levelsRow.appendChild(levels);
+  tryIt.appendChild(levelsRow);
+  tryIt.appendChild(el('p', 'parent-hint', 'On: every level of the game is mixed in. Off: it asks what he would be asked today.'));
+  const gameButtons = el('div', 'parent-games');
+  for (const game of games) {
+    const button = el('button', 'parent-button parent-quiet', game.label);
+    button.type = 'button';
+    button.addEventListener('click', () => finish({ ...closing(), tryGame: { skill: game.skill, allLevels: levels.checked } }));
+    gameButtons.appendChild(button);
+  }
+  tryIt.appendChild(gameButtons);
+  card.appendChild(tryIt);
 
   // ----- progress -----
   const progress = el('section', 'parent-section');
