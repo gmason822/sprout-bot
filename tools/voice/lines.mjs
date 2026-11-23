@@ -34,7 +34,10 @@ for (const key of Object.keys(voice.say ?? {})) {
 }
 
 const jobs = {
-  settings: { voice: voice.voice, lang: voice.lang, speed: voice.speed, sentencePause: voice.sentencePause, bitrate: voice.bitrate },
+  settings: {
+    voice: voice.voice, lang: voice.lang, speed: voice.speed, engineSpeed: voice.engineSpeed ?? 1,
+    sentencePause: voice.sentencePause, bitrate: voice.bitrate,
+  },
   lines: lines.map((text) => ({ key: lineKey(text), text, spoken: spoken(text) })),
 };
 writeFileSync(process.argv[2], JSON.stringify(jobs, null, 1));

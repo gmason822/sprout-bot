@@ -68,7 +68,7 @@ Scenes listen for **actions**, never raw keys or pointers. The one exception is 
 
 ## Content and data
 - All learnable content lives in `content/*.json`. The formats are documented in `docs/DESIGN.md`. Adding a letter, an item, an animal or a reward must never need a code change.
-- Adding a farm **building** (a big reward) is one builder in `src/scenes/homeUpgrades.js`, which draws it and returns what happens when it is tapped, plus one entry in `content/rewards.json`. Every building must do something when tapped. A small reward is JSON only.
+- Adding a farm **building** (a big reward) is one builder in `src/scenes/homeUpgrades.js`, which draws it through `add`/`put` and returns what happens when it is tapped, one line in that file's `PLACE` table saying where it stands and how big, plus one entry in `content/rewards.json`. Every building must do something when tapped, and must be large and clear of the fence. A small reward is JSON only.
 - Adding a new **skill** is one generator module in `src/skills/`, one entry in `content/skills.json`, and an animal that owns it. It must not change the scenes.
 - Validate content at boot. Log clear errors to the console, and skip bad items rather than crashing.
 
@@ -101,6 +101,7 @@ Scenes listen for **actions**, never raw keys or pointers. The one exception is 
 - Small modules, plain functions, and only as many classes as Phaser needs.
 - Keep game logic (skill generators, mastery, day rules, validation) in pure functions that Vitest tests without Phaser.
 - Comment the *why*, not the *what*.
+- **A Phaser scene object is reused every time the scene starts.** Anything stored on `this` survives from the last visit and may point at destroyed objects. Set every field a scene uses in `create()`, and never write `this.x ??= ...`.
 - `npm run dev` / `npm run build` / `npm test` must always work.
 
 ## How to work with me

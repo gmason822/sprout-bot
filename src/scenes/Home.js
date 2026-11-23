@@ -1,8 +1,10 @@
 import Phaser from 'phaser';
 import { createInput, ACTIONS } from '../systems/input.js';
-import { placeFromBox, moveThing, putAway, freeSpot, wearOptions, setWear, ownedUpgrades, FIELD } from '../systems/home.js';
-import { drawHomeBackdrop, buildUpgrades, depthAt } from './homeUpgrades.js';
-import { makeTruck, makePlayButton, emoji, tween } from './ui.js';
+import {
+  placeFromBox, moveThing, putAway, freeSpot, wearOptions, setWear, ownedUpgrades, previousHomeStage, FIELD,
+} from '../systems/home.js';
+import { drawHomeBackdrop, buildUpgrade, upgradeSpot, depthAt } from './homeUpgrades.js';
+import { makeTruck, makePlayButton, makeConfetti, emoji, tween, wait } from './ui.js';
 
 // The shelf along the bottom: things waiting to be placed, then the way back.
 const SHELF = { y: 668, top: 618 };
@@ -10,7 +12,9 @@ const BOX_SLOTS = 8;
 const slotX = (i) => 100 + i * 112;
 const GO_BUTTON = { x: 1185, y: SHELF.y };
 // The truck parks in front of where the garage goes.
-const TRUCK = { x: 1010, y: 452, scale: 0.72 };
+const TRUCK = { x: 1030, y: 506, scale: 0.72 };
+// Every so often a building gives a little hop, to show it can be played with.
+const INVITE_MS = 6500;
 // Dropping a thing lower than this puts it back on the shelf.
 const PUT_AWAY_BELOW = 608;
 const DRAG_DEPTH = 1000;
@@ -44,7 +48,12 @@ export class Home extends Phaser.Scene {
     this.things = new Map(); // key → { thing (the saved record), obj (its picture), size }
     this.nextKey = 0;
     this.shelfObjects = [];
+    // A scene object is reused each time the scene starts, so anything left on it
+    // from the last visit points at things that no longer exist. Start clean.
     this.wardrobe = null;
+    this.pointer = null;
+    this.truck = null;
+    this.confetti = makeConfetti(this);
 
     // Leaving and coming back must not lose where he put things.
     this.events.once('shutdown', () => this.store.save(this.state));
@@ -53,15 +62,19 @@ export class Home extends Phaser.Scene {
     // Empty ground counts as a tap too, so tapping away from the open wardrobe closes it.
     this.in.tappable(this.add.zone(640, 360, 1280, 720).setDepth(0.1), 'ground');
 
-    // The buildings he has earned, each with its own tap toy.
+    // The buildings he has earned, each with its own tap toy. If one has just been
+    // earned, the farm is first shown as it was, and then it is built in front of him.
     this.upgrades = new Map();
-    const api = { sfx: this.sfx, openWardrobe: () => this.openWardrobe() };
-    for (const upgrade of buildUpgrades(this, ownedUpgrades(this.farm, content.rewards), api)) {
-      const { x, y, width, height } = upgrade.zone;
-      const zone = this.add.zone(x + width / 2, y + height / 2, width, height).setDepth(upgrade.depth);
-      this.in.tappable(zone, `up:${upgrade.id}`);
-      this.upgrades.set(upgrade.id, upgrade);
+    this.api = { sfx: this.sfx, openWardrobe: () => this.openWardrobe() };
+    const owned = ownedUpgrades(this.farm, content.rewards);
+    const fresh = this.registry.get('justBuilt');
+    this.registry.set('justBuilt', null);
+    const building = owned.includes(fresh) ? fresh : null;
+    const before = building ? previousHomeStage(this.farm, content.rewards, building) : null;
+    for (const id of owned) {
+      if (id !== building) this.addUpgrade(id);
     }
+    if (before) this.addUpgrade(before);
 
     this.buildShelf();
     this.buildTruck();
@@ -72,9 +85,113 @@ export class Home extends Phaser.Scene {
     this.in.on(ACTIONS.DRAG, (drag) => this.onDrag(drag));
     this.in.on(ACTIONS.DROP, (drop) => this.onDrop(drop));
     this.in.on(ACTIONS.GO, () => this.leave());
+
+    if (building) this.construct(building, before);
+    this.time.addEvent({ delay: INVITE_MS, loop: true, callback: () => this.invite() });
   }
 
-  // ---------- building ----------
+  // ---------- the buildings ----------
+
+  /** Draw a building on the farm and make it tappable. */
+  addUpgrade(id) {
+    const upgrade = buildUpgrade(this, id, this.api);
+    if (!upgrade) return null;
+    const { x, y, width, height } = upgrade.zone;
+    upgrade.hit = this.add.zone(x + width / 2, y + height / 2, width, height).setDepth(upgrade.depth);
+    this.in.tappable(upgrade.hit, `up:${id}`);
+    this.upgrades.set(id, upgrade);
+    return upgrade;
+  }
+
+  removeUpgrade(id) {
+    const upgrade = this.upgrades.get(id);
+    if (!upgrade) return;
+    this.tweens.killTweensOf(upgrade.pivot);
+    upgrade.hit.destroy();
+    upgrade.pivot.destroy();
+    this.upgrades.delete(id);
+  }
+
+  /** Puffs of dust at a building site. */
+  dust(x, y, depth) {
+    for (let i = 0; i < 9; i++) {
+      const puff = this.add.circle(x + (i - 4) * 26, y - 6, 16, 0xe6d3b3, 0.9).setDepth(depth);
+      this.tweens.add({
+        targets: puff, y: y - 46 - (i % 3) * 18, x: puff.x + (i - 4) * 9, scale: 2.2, alpha: 0,
+        delay: (i % 3) * 110, duration: 800, onComplete: () => puff.destroy(),
+      });
+    }
+  }
+
+  /**
+   * A big reward is not handed over: it is built. He sees his farm as it was, the
+   * old home (if this replaces one) comes down, there is hammering and dust, and the
+   * new building grows out of the ground. Then it shows what it does, once, and a
+   * finger points at it until he tries it himself.
+   */
+  async construct(id, before) {
+    this.in.lock();
+    const spot = upgradeSpot(id);
+    const top = 600;
+    await wait(this, 900);
+
+    if (before) {
+      const old = this.upgrades.get(before);
+      this.sfx.creak();
+      this.dust(spot.x, spot.y, top);
+      await tween(this, { targets: old.pivot, scaleX: 0, scaleY: 0, duration: 420, ease: 'Back.in' });
+      this.removeUpgrade(before);
+    }
+
+    // Hammering.
+    for (let i = 0; i < 3; i++) {
+      this.sfx.thud();
+      this.dust(spot.x, spot.y, top);
+      await wait(this, 300);
+    }
+
+    const upgrade = this.addUpgrade(id);
+    if (!upgrade) return this.in.unlock();
+    upgrade.pivot.setScale(0);
+    this.sfx.cheer();
+    this.confetti.explode(60, spot.x, spot.y - 80);
+    for (let i = 0; i < 6; i++) {
+      const angle = (i / 6) * Math.PI * 2;
+      const spark = emoji(this, spot.x, spot.y - 90, '✨', 44).setDepth(top);
+      this.tweens.add({
+        targets: spark, x: spot.x + Math.cos(angle) * 190, y: spot.y - 90 + Math.sin(angle) * 130, alpha: 0,
+        duration: 900, ease: 'Quad.out', onComplete: () => spark.destroy(),
+      });
+    }
+    await tween(this, { targets: upgrade.pivot, scale: upgrade.scale, duration: 650, ease: 'Back.out' });
+    await wait(this, 500);
+
+    // Show what it does, so he knows it is a toy and not scenery.
+    await upgrade.tap();
+
+    const finger = emoji(this, upgrade.zone.centerX, upgrade.zone.y - 6, '👇', 62).setDepth(top);
+    this.tweens.add({ targets: finger, y: finger.y - 22, duration: 420, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+    this.pointer = { id, finger };
+    this.in.unlock();
+  }
+
+  /** One building, picked at random, gives a little hop: "tap me". */
+  invite() {
+    if (this.in.locked || this.wardrobe || this.upgrades.size === 0) return;
+    const upgrade = Phaser.Utils.Array.GetRandom([...this.upgrades.values()]);
+    if (this.tweens.isTweening(upgrade.pivot)) return;
+    this.tweens.add({ targets: upgrade.pivot, scale: upgrade.scale * 1.05, duration: 160, yoyo: true, repeat: 1, ease: 'Sine.inOut' });
+  }
+
+  tapUpgrade(id) {
+    if (this.pointer?.id === id) {
+      this.pointer.finger.destroy();
+      this.pointer = null;
+    }
+    this.upgrades.get(id)?.tap();
+  }
+
+  // ---------- building the rest ----------
 
   buildShelf() {
     const g = this.add.graphics().setDepth(500);
@@ -142,7 +259,7 @@ export class Home extends Phaser.Scene {
     }
     // Tapping anything else closes it.
     this.closeWardrobe();
-    if (id.startsWith('up:')) return this.upgrades.get(id.slice(3))?.tap();
+    if (id.startsWith('up:')) return this.tapUpgrade(id.slice(3));
     if (id === 'go') return this.leave();
     if (id === 'truck') return this.wiggle(this.truck, this.sfx.honk);
     if (id.startsWith('box:')) return this.place(Number(id.slice(4)));

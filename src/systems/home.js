@@ -11,7 +11,8 @@
 export const MAX_THINGS = 120;
 
 // Where things may stand on the home farm, in game pixels.
-export const FIELD = { left: 50, right: 1230, top: 315, bottom: 590 };
+// The buildings stand along the back, so the field starts below their feet.
+export const FIELD = { left: 50, right: 1230, top: 378, bottom: 590 };
 
 const PLACEABLE = ['friend', 'decoration'];
 
@@ -68,7 +69,8 @@ export function earnSmall(farm, small, rng = Math.random, upgrades = []) {
 export function reconcileFarm(farm, rewards, small) {
   const known = new Map([...rewards, ...small].map((r) => [r.id, r]));
   farm.box = farm.box.filter((id) => known.has(id));
-  farm.placed = farm.placed.filter((p) => known.has(p.item));
+  // Things placed before the field changed shape are nudged back inside it.
+  farm.placed = farm.placed.filter((p) => known.has(p.item)).map((p) => ({ ...p, ...clampToField(p.x, p.y) }));
   const accounted = new Set([...farm.box, ...farm.placed.map((p) => p.item)]);
   for (const id of farm.rewards) {
     if (isPlaceable(known.get(id)) && !accounted.has(id)) farm.box.push(id);
@@ -118,7 +120,7 @@ export function freeSpot(farm, rng = Math.random) {
   let best = null;
   let bestGap = -1;
   for (let attempt = 0; attempt < 12; attempt++) {
-    const spot = clampToField(280 + rng() * 620, 350 + rng() * 210);
+    const spot = clampToField(260 + rng() * 560, FIELD.top + 10 + rng() * (FIELD.bottom - FIELD.top - 30));
     const gap = Math.min(...farm.placed.map((p) => Math.hypot(p.x - spot.x, p.y - spot.y)), Infinity);
     if (gap > bestGap) {
       best = spot;
@@ -157,4 +159,15 @@ export function ownedUpgrades(farm, rewards) {
   const owned = rewards.filter((r) => r.type === 'upgrade' && farm.rewards.includes(r.id)).map((r) => r.value);
   const best = HOME_STAGES.filter((s) => owned.includes(s)).at(-1);
   return owned.filter((v) => !HOME_STAGES.includes(v) || v === best);
+}
+
+/**
+ * When a new stage of the home arrives, which stage was standing there before?
+ * Returns null if `stage` is not a home stage or there was no home yet.
+ */
+export function previousHomeStage(farm, rewards, stage) {
+  const index = HOME_STAGES.indexOf(stage);
+  if (index <= 0) return null;
+  const owned = rewards.filter((r) => r.type === 'upgrade' && farm.rewards.includes(r.id)).map((r) => r.value);
+  return HOME_STAGES.slice(0, index).filter((s) => owned.includes(s)).at(-1) ?? null;
 }

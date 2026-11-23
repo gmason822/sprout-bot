@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { createInput, ACTIONS } from '../systems/input.js';
 import { endDay } from '../systems/day.js';
-import { NEW_THING, ALL_DONE, SLEEPY } from '../systems/phrases.js';
+import { NEW_THING, BIG_SURPRISE, ALL_DONE, SLEEPY } from '../systems/phrases.js';
 import { drawFarmBackdrop } from './farmBackdrop.js';
 import { TRUCK_Y } from './layout.js';
 import { tween, wait, makeTruck, makeConfetti, drawDayRow, rewardPicture, emoji, makeSunButton } from './ui.js';
@@ -58,19 +58,26 @@ export class Sunset extends Phaser.Scene {
     }
     await wait(this, 300);
 
-    if (reward || gift) {
-      // A big reward gets the big entrance; a small thing is the same moment, smaller.
-      const picture = reward
-        ? rewardPicture(this, 640, 340, reward, 230)
-        : rewardPicture(this, 640, 340, { type: 'decoration', ...gift }, 150);
-      picture.setDepth(10).setScale(0);
+    if (reward) {
+      // A big reward is a building, and it is not handed over here. He gets a big
+      // present and is told to go and see: it is built in front of him on the farm.
+      this.registry.set('justBuilt', reward.value ?? null);
+      const present = emoji(this, 640, 330, '🎁', 240).setDepth(10).setScale(0);
       this.sfx.cheer();
-      for (const x of reward ? [340, 640, 940] : [640]) this.confetti.explode(reward ? 45 : 30, x, 420);
+      for (const x of [240, 440, 640, 840, 1040]) this.confetti.explode(45, x, 420);
+      await tween(this, { targets: present, scale: 1, duration: 500, ease: 'Back.out' });
+      this.tweens.add({ targets: present, angle: { from: -7, to: 7 }, duration: 260, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+      this.tweens.add({ targets: present, scale: 1.1, duration: 520, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+      await this.audio.say(BIG_SURPRISE.say, BIG_SURPRISE.tts);
+      await wait(this, 400);
+    } else if (gift) {
+      // A small reward is shown as itself, then goes off to wait on the shelf.
+      const picture = rewardPicture(this, 640, 340, { type: 'decoration', ...gift }, 150).setDepth(10).setScale(0);
+      this.sfx.chime();
+      this.confetti.explode(30, 640, 420);
       tween(this, { targets: picture, scale: 1, duration: 420, ease: 'Back.out' });
       await this.audio.say(NEW_THING.say, NEW_THING.tts);
       await wait(this, 500);
-      // It goes off to live on the farm. Whatever the timing of the voice line, the
-      // entrance is over by now, so make sure nothing is still growing it.
       this.tweens.killTweensOf(picture);
       picture.setScale(1);
       await tween(this, { targets: picture, scale: 0.4, y: 240, duration: 350, ease: 'Quad.in' });

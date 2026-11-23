@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   earnSmall, smallOnOffer, reconcileFarm, placeFromBox, moveThing, putAway, freeSpot, wearOptions, setWear, ownedUpgrades,
+  previousHomeStage,
   clampToField, isPlaceable, MAX_THINGS, FIELD,
 } from './home.js';
 
@@ -82,7 +83,12 @@ describe('reconcileFarm', () => {
     const f = farm({ rewards: ['friend-duck', 'deco-balloon'], box: ['deco-balloon'], placed: [{ item: 'friend-duck', x: 300, y: 400 }] });
     reconcileFarm(f, REWARDS, SMALL);
     expect(f.box).toEqual(['deco-balloon']);
-    expect(f.placed).toHaveLength(1);
+    expect(f.placed).toEqual([{ item: 'friend-duck', x: 300, y: 400 }]);
+  });
+  it('nudges things back inside the field', () => {
+    const f = farm({ rewards: ['friend-duck'], placed: [{ item: 'friend-duck', x: 300, y: 320 }, { item: 'small-rock', x: 5, y: 900 }] });
+    reconcileFarm(f, REWARDS, SMALL);
+    expect(f.placed).toEqual([{ item: 'friend-duck', x: 300, y: FIELD.top }, { item: 'small-rock', x: FIELD.left, y: FIELD.bottom }]);
   });
   it('drops things that no longer exist', () => {
     const f = farm({ rewards: ['deco-windmill'], box: ['small-gone', 'small-rock'], placed: [{ item: 'gone', x: 1, y: 1 }], paint: 'paint-old', hat: 'hat-straw' });
@@ -105,7 +111,7 @@ describe('placing', () => {
   });
   it('moves and puts away', () => {
     const f = farm({ box: ['small-rock'] });
-    const thing = placeFromBox(f, 0, 400, 400);
+    const thing = placeFromBox(f, 0, 400, 450);
     moveThing(thing, 612.4, 455.6);
     expect(f.placed[0]).toEqual({ item: 'small-rock', x: 612, y: 456 });
     expect(putAway(f, thing)).toBe(true);
@@ -178,6 +184,13 @@ describe('ownedUpgrades and isPlaceable', () => {
     expect(ownedUpgrades(owning('tent', 'cabin', 'barn', 'farmhouse', 'bighouse'), BUILDINGS)).toEqual(['barn', 'bighouse']);
     // A later stage without the earlier ones still shows.
     expect(ownedUpgrades(owning('farmhouse'), BUILDINGS)).toEqual(['farmhouse']);
+  });
+  it('knows which home was standing before a new stage', () => {
+    expect(previousHomeStage(owning('tent', 'cabin'), BUILDINGS, 'cabin')).toBe('tent');
+    expect(previousHomeStage(owning('tent', 'cabin', 'farmhouse'), BUILDINGS, 'farmhouse')).toBe('cabin');
+    expect(previousHomeStage(owning('tent'), BUILDINGS, 'tent')).toBeNull();
+    expect(previousHomeStage(owning('farmhouse'), BUILDINGS, 'farmhouse')).toBeNull();
+    expect(previousHomeStage(owning('tent', 'barn'), BUILDINGS, 'barn')).toBeNull();
   });
   it('knows what can stand on the farm', () => {
     expect(REWARDS.filter(isPlaceable).map((r) => r.id)).toEqual(['friend-duck', 'deco-balloon']);

@@ -66,7 +66,8 @@ export function validateContent(raw, generatorIds) {
     if (!REWARD_TYPES.includes(r.type)) return bad(`rewards.json: reward "${r.id}" has unknown type "${r.type}"`);
     if (r.type === 'paint' && !r.value) return bad(`rewards.json: paint "${r.id}" has no value`);
     if (r.type === 'upgrade' && !r.value) return bad(`rewards.json: upgrade "${r.id}" does not say which upgrade it is`);
-    if (r.type !== 'paint' && !r.emoji) return bad(`rewards.json: reward "${r.id}" has no emoji to draw it with`);
+    // A building is drawn by code; anything else needs an emoji, apart from paint.
+    if (r.type !== 'paint' && r.type !== 'upgrade' && !r.emoji) return bad(`rewards.json: reward "${r.id}" has no emoji to draw it with`);
     if (!Number.isInteger(r.day) || r.day < 1) return bad(`rewards.json: reward "${r.id}" needs a "day" (1 or more) to arrive on`);
     seenRewards.add(r.id);
     return true;

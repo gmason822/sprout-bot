@@ -5,7 +5,8 @@ Every line the game says is a pre-made audio file, generated ahead of time with 
 ## The generated voice
 - **Engine:** [Kokoro](https://huggingface.co/hexgrad/Kokoro-82M) (open weights, Apache 2.0), run on the PC. Nothing is sent to a cloud service.
 - **Settings:** `content/voice.json` holds the voice (`af_heart`), the speed (0.8 of normal, for a 4-year-old), the pause between sentences and the MP3 quality.
-- **Files:** one MP3 per line in `public/assets/audio/voice/lines/`, about 280 lines and 3.6 MB in total. Each is named after its words plus a short code, for example `i-need-three-apples-4fd0bbc0.mp3`.
+- **How the slow pace is made:** the engine speaks at its normal pace and the recording is then slowed to 80% without changing its pitch. Asking the engine itself to speak slowly makes it add a stray "uh" before short lines ("a five"): measured on "Six.", 40 ms of it at normal pace and 130 ms at 0.8. Keep `engineSpeed` at 1.0.
+- **Files:** one MP3 per line in `public/assets/audio/voice/lines/`, about 280 lines and 3.6 MB in total. Each is named after its words plus a short code, for example `i-need-three-apples-4fd0bbc0.mp3`. About 285 lines.
 - **Which lines:** every skill lists everything it can say (`src/skills/`), and the fixed phrases are in `src/systems/phrases.js`. A test checks that nothing the game can say is missing from the list.
 
 ### Making the voice again

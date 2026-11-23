@@ -12,7 +12,7 @@ Why this loop: he has to **understand the request** to succeed, the learning is 
    - Right: the truck delivers, the animal cheers, and what he delivered stays on the farm for the day.
    - Wrong: the animal says what that was and what it wants ("That's D. I want /b/!"), the thing goes back, and he tries again. After 2 misses the right answer glows.
 4. **Back to the animals** with three waiting again, until the day's deliveries are done.
-5. **Sunset.** The sky turns orange, today's deliveries are counted back one by one, the day's one reward arrives (see Rewards), and the robot goes to sleep. A big sun button then takes him to the home farm, where today's rewards are waiting; nothing pushes him to start another day.
+5. **Sunset.** The sky turns orange, today's deliveries are counted back one by one, the day's one reward arrives (a small thing is shown; a big one is a wrapped present to go and see), and the robot goes to sleep. A big sun button then takes him to the home farm, where today's rewards are waiting; nothing pushes him to start another day.
 
 A farm day is `deliveriesPerDay` deliveries, set by the parent (default 5, range 3–10).
 
@@ -123,6 +123,14 @@ The home farm starts as an empty field with the truck parked on it. Everything e
 
 **Big rewards build the farm.** On set days (1, 3 and 5, then every third day) the reward is a building or feature that becomes a permanent part of the farm and changes how it looks. Each one is also a toy: tapping it makes something happen.
 
+A big reward must feel different from a small one, and it must be obvious that the farm has changed:
+1. **At sunset** he is not shown the building. A big wrapped present bounces on screen and the voice says there is a big surprise for the farm.
+2. **On the farm** he first sees it exactly as he left it. Then, at the building's spot, there is hammering and dust, and the building grows out of the ground with confetti and sparkles. If it replaces an older home, that one comes down first.
+3. **It shows what it does,** once, by itself (the barn's cow comes out, the tree drops its apples).
+4. **A finger points at it** until he taps it himself.
+
+So that the buildings are not mistaken for scenery, they are drawn large and stand in front of the fence, and every few seconds one of them gives a little hop.
+
 | Day | Big reward | When tapped |
 |---|---|---|
 | 1 | Tent (the first home) | The flap lifts and a lantern glows inside |
@@ -157,7 +165,7 @@ The home farm starts as an empty field with the truck parked on it. Everything e
 - Tapping one makes it hop onto the farm at a free spot. He can then drag it anywhere. Dragging it back down onto the shelf puts it away.
 - Tapping a placed thing or the truck makes it wiggle.
 - Tapping the garage opens every paint and hat he owns, in two rows, with "none" first in each and the current one ringed. Tapping anywhere else closes it.
-- Things lower on the screen are drawn in front, so the farm has depth. Buildings stand along the back; the pond, garden, well, beehive and scarecrow are out in the field.
+- Things lower on the screen are drawn in front, so the farm has depth. The fence runs along the back. In front of it stand the buildings, in two loose rows: the home, barn, garage and hen house at the front, the tree, silo and windmill a little behind and between them. The pond, garden, well, beehive and scarecrow are out in the field, and the rain cloud is in the sky.
 - Every day ends at home: after sunset the sun button always leads to the home farm. A house button on the animals screen leads there at any other time, with a bouncing gift on it while something is waiting.
 - The farm holds up to 120 placed and waiting things. Past that, the oldest plain decoration makes room; one-offs are never dropped.
 - No stars, no counters, no shop.
@@ -202,12 +210,12 @@ There is no learning on the home farm on purpose. It is where the rewards for le
 
 ### `content/rewards.json`
 ```json
-"rewards": [{ "day": 8, "id": "upgrade-barn", "type": "upgrade", "name": "Barn", "emoji": "🐄", "value": "barn" }],
+"rewards": [{ "day": 8, "id": "upgrade-barn", "type": "upgrade", "name": "Barn", "value": "barn" }],
 "small":   [{ "id": "small-tulip", "name": "Tulip", "emoji": "🌷" },
             { "id": "friend-duck", "type": "friend", "name": "Duck", "emoji": "🦆", "once": true },
             { "id": "paint-blue", "type": "paint", "name": "Blue paint", "value": "#3b82f6", "once": true, "needs": "garage" }]
 ```
-- `rewards` are the big rewards: farm buildings. `day` is the farm day each arrives on (1 is his first finished day); edit these to change how often big rewards come. `value` names a builder in `src/scenes/homeUpgrades.js`. `emoji` is only what the sunset shows.
+- `rewards` are the big rewards: farm buildings. `day` is the farm day each arrives on (1 is his first finished day); edit these to change how often big rewards come. `value` names a builder in `src/scenes/homeUpgrades.js`. A building has no emoji: it is never shown as a picture, only built on the farm.
 - `small` is the pool for ordinary days.
   - A plain entry (an id and an emoji) is a decoration that can repeat. Give repeatable ones an id starting with `small-`: only those are ever recycled when the farm is full.
   - `once: true` means it is given only one time.

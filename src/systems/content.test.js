@@ -64,7 +64,7 @@ describe('validateContent', () => {
 
   it('checks small things and upgrades', () => {
     const raw = good();
-    raw.rewards.rewards.push({ id: 'u1', type: 'upgrade', emoji: '🏠', value: 'barn', day: 5 }, { id: 'u2', type: 'upgrade', emoji: '🏠', day: 6 });
+    raw.rewards.rewards.push({ id: 'u1', type: 'upgrade', value: 'barn', day: 5 }, { id: 'u2', type: 'upgrade', day: 6 });
     raw.rewards.small = [
       { id: 'small-rock', emoji: '🪨' },
       { id: 'friend-dog', type: 'friend', emoji: '🐶', once: true },
