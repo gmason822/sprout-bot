@@ -190,8 +190,9 @@ export class Farm extends Phaser.Scene {
     this.tweens.add({ targets: picked.sprite, scale: picked.sprite.scale * 1.12, duration: 160, yoyo: true });
     this.sfx.engine(0.5);
     await tween(this, { targets: this.truck, x: Phaser.Math.Linear(640, picked.x, 0.6), duration: 500, ease: 'Sine.inOut' });
-    // Let the noise finish, so the request is not spoken over it.
-    if (spoke) await wait(this, 450);
+    // Let the noise finish, so the request is not spoken over it. (The truck's drive
+    // and the pause before a request already cover the first part of it.)
+    if (spoke) await wait(this, Math.max(0, spoke - 700));
     this.scene.start('Request', { animal: picked.animal });
   }
 }

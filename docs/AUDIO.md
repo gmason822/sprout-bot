@@ -35,6 +35,17 @@ curl -L -o model/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/rel
 ```
 That is about 340 MB. It is only needed to make the voice, not to build or play the game.
 
+## Animal noises
+Tapping an animal plays a real recording of it. The clips are in `public/assets/audio/animals/`, one per noise name (`moo.mp3`, `oink.mp3`...), and `src/systems/animalClips.js` lists them with their lengths.
+
+To add or change one:
+1. Find a recording with a licence that allows reuse (public domain, CC0, CC BY or CC BY-SA). Wikimedia Commons is the source used so far. Download it into a folder outside the repository.
+2. Run `python tools/sounds/make.py <that folder> . --look` (with the voice tool's Python) to see a picture of its loudness over time and choose the seconds to keep.
+3. Add a line to `tools/sounds/recipes.json`, run `make.py` again without `--look`, and name the noise with `"sound"` in `content/animals.json` or `content/rewards.json`.
+4. Credit the recording in `CREDITS.md`.
+
+Still without a recording, and so quiet: owl, sheep, duck, goat, rooster, turkey, llama and chick. Wikimedia limits how fast files can be fetched by a script, which is why the first batch stopped at six. The rabbit's hop and the mouse's squeak are synthesized.
+
 ## How a line is chosen at play time
 1. Hand-recorded clips for that line, if every one of them exists (see below).
 2. Otherwise the generated file for the whole line.

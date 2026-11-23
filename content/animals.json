@@ -5,7 +5,7 @@
     { "id": "hen",    "name": "Hen",    "skill": "count",      "emoji": "🐔", "icon": "apple", "sound": "cluck" },
     { "id": "cow",    "name": "Cow",    "skill": "letters",    "emoji": "🐮", "icon": "crate", "sound": "moo" },
     { "id": "pig",    "name": "Pig",    "skill": "leftright",  "emoji": "🐷", "icon": "barrel", "sound": "oink" },
-    { "id": "owl",    "name": "Owl",    "skill": "numbers",    "emoji": "🦉", "icon": "🔢", "sound": "hoot" },
+    { "id": "owl",    "name": "Owl",    "skill": "numbers",    "emoji": "🦉", "icon": "🔢" },
     { "id": "rabbit", "name": "Rabbit", "skill": "firstsound", "emoji": "🐰", "icon": "👂", "sound": "boing" },
     { "id": "mouse",  "name": "Mouse",  "skill": "shapes",     "emoji": "🐭", "icon": "shape-star", "sound": "squeak" }
   ]

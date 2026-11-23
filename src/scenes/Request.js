@@ -134,10 +134,11 @@ export class Request extends Phaser.Scene {
   async repeatRequest(fromTimer = false, tapped = false) {
     if (this.in.locked) return;
     this.in.lock();
-    if (tapped && this.sfx.animal(this.animal.sound)) {
+    const noise = tapped ? this.sfx.animal(this.animal.sound) : 0;
+    if (noise) {
       this.audio.stop();
       bounce(this, this.animalSprite, -34);
-      await wait(this, 950);
+      await wait(this, noise + 100);
     }
     await this.sayRequest();
     this.in.unlock();

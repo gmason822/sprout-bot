@@ -54,6 +54,7 @@ src/
 content/               JSON data (animals, skills, letters, words, rewards) — edit these, not code, to add content
 public/assets/         Art (Kenney CC0, OpenMoji) and audio
 tools/voice/           Generates the voice files (`npm run voice`)
+tools/sounds/          Cuts the animal noises out of their source recordings
 hardware/              Button box firmware (CircuitPython for Raspberry Pi Pico)
 docs/                  Design, roadmap, audio recording list
 ```
@@ -94,7 +95,7 @@ Scenes listen for **actions**, never raw keys or pointers. The one exception is 
 - At play time `audio.js` uses, in order: hand-recorded clips for the line if all exist, the generated line, then speechSynthesis (slow rate, about 0.85).
 - The game learns which clips exist at build time: `vite.config.js` lists the folder as the module `virtual:voice-clips`. Never probe the server for clips at runtime.
 - **Letter sounds cannot be generated or spoken by TTS.** They must be recorded before the letter-sound requests ship.
-- Sound effects are synthesized in `src/systems/sfx.js`, including each animal's noise. Content names a noise with `"sound"`; the names it may use are `SOUND_NAMES` in that file.
+- Sound effects are synthesized in `src/systems/sfx.js`. Animal noises are the exception: they are real recordings in `public/assets/audio/animals/`, cut from free-licence sources by `tools/sounds/make.py` (recipes in `tools/sounds/recipes.json`) and credited one by one in `CREDITS.md`. Content names a noise with `"sound"`; the names it may use are `SOUND_NAMES` in `sfx.js`.
 
 ## Hosting
 - The game is public at https://gmason822.github.io/sprout-bot/ (GitHub Pages). Every push to `main` tests, builds and publishes it.

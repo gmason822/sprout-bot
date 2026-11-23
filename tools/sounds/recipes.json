@@ -1,0 +1,8 @@
+{
+  "moo": [["cow.ogg", ["span", 0.62, 2.19]]],
+  "oink": [["pig1.ogg", ["span", 0.06, 0.36]], ["pig2.ogg", ["span", 0.0, 0.33]]],
+  "cluck": [["hen.ogg", ["span", 3.78, 5.45]]],
+  "woof": [["dog.ogg", ["span", 0.12, 0.5]], ["dog.ogg", ["span", 1.11, 1.5]]],
+  "meow": [["cat.wav", ["span", 0.25, 1.15]]],
+  "neigh": [["horse.ogg", ["span", 0.04, 1.85]]]
+}
