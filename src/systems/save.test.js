@@ -26,7 +26,7 @@ describe('migrate', () => {
       ...defaultSave(),
       settings: { childName: 'Sam', deliveriesPerDay: 7, volume: 0.5, ttsOnly: true },
       mastery: { 'count:3': { box: 4, seen: 6, correct: 5, lastSeen: 123 } },
-      farm: { rewards: ['friend-duck', 'paint-blue'], paint: 'paint-blue', hat: null, box: ['small-tulip', 'small-tulip'], placed: [{ item: 'friend-duck', x: 400, y: 450 }] },
+      farm: { rewards: ['friend-duck', 'paint-blue'], paint: 'paint-blue', hat: null, box: ['small-tulip', 'small-tulip'], placed: [{ item: 'friend-duck', x: 400, y: 450 }], log: [{ day: 1, id: 'friend-duck' }, { day: 2, id: 'small-tulip' }] },
       days: 3,
       today: [{ art: 'apple', numeral: 3 }, { art: 'crate', label: 'B' }, { art: 'shape-star', tint: 0xef4444 }],
       skillLog: ['count', 'letters'],
@@ -39,15 +39,17 @@ describe('migrate', () => {
     const save = migrate({
       settings: { childName: 42, deliveriesPerDay: 99, volume: 'loud', ttsOnly: 'yes' },
       mastery: { ok: { box: 9, seen: 2, correct: 5 }, junk: 'no', alsoJunk: { box: 'x' } },
-      farm: { rewards: ['a', 'a', 3], paint: 'not-owned', hat: 'a', box: ['x', 7], placed: [{ item: 'x', x: 10.6, y: 20 }, { item: 'y' }, 'junk'] },
+      farm: { rewards: ['a', 'a', 3], paint: 'not-owned', hat: 'a', box: ['x', 7], placed: [{ item: 'x', x: 10.6, y: 20 }, { item: 'y' }, 'junk'], log: [{ day: 2.2, id: 'x' }, { day: 'soon', id: 'y' }, 'junk'] },
       days: -4,
+      bookmark: 'yesterday',
       today: [{ art: 'apple' }, { nope: 1 }, 'x'],
       skillLog: ['count', 5],
       lastItem: { count: 'count:2', bad: 9 },
     });
     expect(save.settings).toEqual({ childName: '', deliveriesPerDay: 10, volume: 0.8, ttsOnly: false });
     expect(save.mastery).toEqual({ ok: { box: 5, seen: 2, correct: 2, lastSeen: 0 } });
-    expect(save.farm).toEqual({ rewards: ['a'], paint: null, hat: 'a', box: ['x'], placed: [{ item: 'x', x: 11, y: 20 }] });
+    expect(save.farm).toEqual({ rewards: ['a'], paint: null, hat: 'a', box: ['x'], placed: [{ item: 'x', x: 11, y: 20 }], log: [{ day: 2, id: 'x' }] });
+    expect(save.bookmark).toBeNull();
     expect(save.days).toBe(0);
     expect(save.today).toEqual([{ art: 'apple' }]);
     expect(save.skillLog).toEqual(['count']);

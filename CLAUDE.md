@@ -44,6 +44,7 @@ src/
     mastery.js         Leitner-box tracking per content item
     day.js             Farm-day rules: which animals wait, when the day ends, rewards
     home.js            Home-farm rules: earning, the gift box, placing, wearing
+    dayTravel.js       The parent's day control: jump to any day, and put his real farm back
     paint.js           Recolours the truck SVG for paint rewards
     save.js            Versioned localStorage save, wrapped in try/catch
   skills/              One pure generator per request type, plus index.js (registry)

@@ -12,7 +12,7 @@ Why this loop: he has to **understand the request** to succeed, the learning is 
    - Right: the truck delivers, the animal cheers, and what he delivered stays on the farm for the day.
    - Wrong: the animal says what that was and what it wants ("That's D. I want /b/!"), the thing goes back, and he tries again. After 2 misses the right answer glows.
 4. **Back to the animals** with three waiting again, until the day's deliveries are done.
-5. **Sunset.** The sky turns orange, today's deliveries are counted back one by one, the day's one reward arrives (a small thing is shown; a big one is a wrapped present to go and see), and the robot goes to sleep. A big sun button then takes him to the home farm, where today's rewards are waiting; nothing pushes him to start another day.
+5. **Sunset.** The sky turns orange, today's deliveries are counted back one by one, the robot goes to sleep, and then the day's one reward arrives. A small thing is shown for a moment and he is taken straight to the home farm, where it is waiting on the shelf. A big one is a wrapped present that waits: tapping it takes him to the farm to watch the building go up.
 
 A farm day is `deliveriesPerDay` deliveries, set by the parent (default 5, range 3–10).
 
@@ -27,6 +27,7 @@ Hidden **Parent Gate**: hold the sun in the top-right for 3 seconds, or tap it f
 The **parent area** is plain HTML over the paused game, because a parent needs to read and type:
 - **Settings:** child name, deliveries per day (3 to 10), volume, computer-voice-only mode.
 - **Progress:** every item of every skill as a dot coloured by its box, hollow if he has not met it yet, with how often it was asked and how often he was right first time.
+- **Farm day:** a number to set how many farm days are finished, for testing what arrives when. Going forward gives every skipped day its reward, exactly as playing would; going back takes away what was earned after that day. The first change keeps a copy of his real farm (the `bookmark` in the save), and "Return to his real farm" puts it back exactly, placed things and all. The rules are in `src/systems/dayTravel.js`.
 - **Reset everything**, behind a second confirmation.
 
 Changing a setting saves it and restarts the game at the play button, so nothing on screen is left out of step with the new values. Closing without changes resumes exactly where he was.
@@ -166,7 +167,7 @@ So that the buildings are not mistaken for scenery, they are drawn large and sta
 - Tapping a placed thing or the truck makes it wiggle.
 - Tapping the garage opens every paint and hat he owns, in two rows, with "none" first in each and the current one ringed. Tapping anywhere else closes it.
 - Things lower on the screen are drawn in front, so the farm has depth. The fence runs along the back. In front of it stand the buildings, in two loose rows: the home, barn, garage and hen house at the front, the tree, silo and windmill a little behind and between them. The pond, garden, well, beehive and scarecrow are out in the field, and the rain cloud is in the sky.
-- Every day ends at home: after sunset the sun button always leads to the home farm. A house button on the animals screen leads there at any other time, with a bouncing gift on it while something is waiting.
+- Every day ends at home: the sunset always leads to the home farm. A house button on the animals screen leads there at any other time, with a bouncing gift on it while something is waiting.
 - The farm holds up to 120 placed and waiting things. Past that, the oldest plain decoration makes room; one-offs are never dropped.
 - No stars, no counters, no shop.
 
@@ -246,12 +247,14 @@ Picture words for the first-sounds game, which uses each word's first letter. `f
     rewards: ["upgrade-tent", "friend-duck"],      // buildings and one-off cosmetics he owns
     paint: null, hat: null,                        // what the truck and robot wear
     box: ["small-tulip", "small-tulip"],           // waiting on the shelf, oldest first
-    placed: [{ item: "friend-duck", x: 470, y: 500 }]   // standing on the home farm
+    placed: [{ item: "friend-duck", x: 470, y: 500 }],  // standing on the home farm
+    log: [{ day: 1, id: "upgrade-tent" }]          // which day gave which reward, so a day can be taken back
   },
   days: 0,
   today: [{ art: "apple", numeral: 3 }, { art: "crate", label: "B" }],   // today's deliveries so far
   skillLog: [],         // recent deliveries per skill, for choosing which animals to offer
-  lastItem: {}          // last item asked per skill, so it is not asked twice running
+  lastItem: {},         // last item asked per skill, so it is not asked twice running
+  bookmark: null        // { days, today, farm }: his real farm, kept while a parent tests other days
 }
 ```
 

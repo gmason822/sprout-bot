@@ -5,6 +5,8 @@ import { isPlaceable, earnSmall, ownedUpgrades } from './home.js';
 import { shuffle } from './mastery.js';
 
 const RECENT = 20;
+// One entry per finished day. Years of play still fit, and the save stays small.
+export const LOG_MAX = 1500;
 
 export const ANIMALS_OFFERED = 3;
 
@@ -54,21 +56,34 @@ export function bigRewardFor(rewards, owned, dayNumber) {
 export function endDay(state, rewards, small = [], rng = Math.random) {
   const delivered = state.today;
   const dayNumber = state.days + 1;
-  let reward = null;
-  let gift = null;
-  if (delivered.length > 0) {
-    reward = bigRewardFor(rewards, state.farm.rewards, dayNumber);
-    if (reward) {
-      state.farm.rewards.push(reward.id);
-      if (reward.type === 'paint') state.farm.paint = reward.id;
-      if (reward.type === 'hat') state.farm.hat = reward.id;
-      // A friend or decoration waits on the shelf for him to place at home.
-      if (isPlaceable(reward)) state.farm.box.push(reward.id);
-    } else {
-      gift = earnSmall(state.farm, small, rng, ownedUpgrades(state.farm, rewards));
-    }
-  }
+  const { reward, gift } = delivered.length > 0
+    ? giveDayReward(state.farm, dayNumber, rewards, small, rng)
+    : { reward: null, gift: null };
   state.days = dayNumber;
   state.today = [];
   return { reward, gift, delivered };
+}
+
+/**
+ * Give farm day `dayNumber` its one reward, and note in the farm's log which day it
+ * came on, so the parent's day control can take it back again.
+ * Returns { reward, gift }: a big one or a small one, never both.
+ */
+export function giveDayReward(farm, dayNumber, rewards, small = [], rng = Math.random) {
+  const reward = bigRewardFor(rewards, farm.rewards, dayNumber);
+  let gift = null;
+  if (reward) {
+    farm.rewards.push(reward.id);
+    if (reward.type === 'paint') farm.paint = reward.id;
+    if (reward.type === 'hat') farm.hat = reward.id;
+    // A friend or decoration waits on the shelf for him to place at home.
+    if (isPlaceable(reward)) farm.box.push(reward.id);
+  } else {
+    gift = earnSmall(farm, small, rng, ownedUpgrades(farm, rewards));
+  }
+  const given = reward ?? gift;
+  if (given) {
+    farm.log = [...(farm.log ?? []), { day: dayNumber, id: given.id }].slice(-LOG_MAX);
+  }
+  return { reward, gift };
 }

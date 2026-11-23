@@ -9,17 +9,24 @@ export const DELIVERIES_MIN = 3;
 export const DELIVERIES_MAX = 10;
 const SKILL_LOG_MAX = 100;
 const THINGS_MAX = 400;
+const LOG_MAX = 1500;
+export const DAYS_MAX = 9999;
+
+// `log` is which day gave which reward: [{ day, id }], oldest first.
+const defaultFarm = () => ({ rewards: [], paint: null, hat: null, box: [], placed: [], log: [] });
 
 export function defaultSave() {
   return {
     version: SAVE_VERSION,
     settings: { childName: '', deliveriesPerDay: 5, volume: 0.8, ttsOnly: false },
     mastery: {},
-    farm: { rewards: [], paint: null, hat: null, box: [], placed: [] },
+    farm: defaultFarm(),
     days: 0,
     today: [],      // what he has delivered so far today, for the row on the farm
     skillLog: [],   // recent deliveries per skill, for choosing which animals to offer
     lastItem: {},   // last item asked per skill, so it is not asked twice running
+    // His real farm, kept safe while a parent tries out other days: { days, today, farm }.
+    bookmark: null,
   };
 }
 
@@ -58,37 +65,16 @@ export function migrate(raw) {
     }
   }
 
-  if (isObject(raw.farm)) {
-    const owned = Array.isArray(raw.farm.rewards) ? raw.farm.rewards.filter((id) => typeof id === 'string') : [];
-    save.farm.rewards = [...new Set(owned)];
-    // Only something he owns can be worn.
-    for (const slot of ['paint', 'hat']) {
-      if (save.farm.rewards.includes(raw.farm[slot])) save.farm[slot] = raw.farm[slot];
-    }
-    // The home farm: things waiting in the gift box, and things he has placed.
-    if (Array.isArray(raw.farm.box)) {
-      save.farm.box = raw.farm.box.filter((id) => typeof id === 'string').slice(0, THINGS_MAX);
-    }
-    if (Array.isArray(raw.farm.placed)) {
-      save.farm.placed = raw.farm.placed
-        .filter((p) => isObject(p) && typeof p.item === 'string' && Number.isFinite(p.x) && Number.isFinite(p.y))
-        .slice(0, THINGS_MAX)
-        .map((p) => ({ item: p.item, x: Math.round(p.x), y: Math.round(p.y) }));
-    }
-  }
+  save.farm = migrateFarm(raw.farm);
+  save.days = int(raw.days, 0, DAYS_MAX, 0);
+  save.today = migrateToday(raw.today);
 
-  save.days = int(raw.days, 0, 1e9, 0);
-
-  if (Array.isArray(raw.today)) {
-    save.today = raw.today
-      .filter((d) => isObject(d) && typeof d.art === 'string')
-      .slice(0, DELIVERIES_MAX)
-      .map((d) => ({
-        art: d.art,
-        ...(typeof d.label === 'string' ? { label: d.label } : {}),
-        ...(Number.isFinite(d.numeral) ? { numeral: d.numeral } : {}),
-        ...(Number.isFinite(d.tint) ? { tint: d.tint } : {}),
-      }));
+  if (isObject(raw.bookmark) && isObject(raw.bookmark.farm)) {
+    save.bookmark = {
+      days: int(raw.bookmark.days, 0, DAYS_MAX, 0),
+      today: migrateToday(raw.bookmark.today),
+      farm: migrateFarm(raw.bookmark.farm),
+    };
   }
 
   if (Array.isArray(raw.skillLog)) {
@@ -102,6 +88,47 @@ export function migrate(raw) {
   }
 
   return save;
+}
+
+function migrateFarm(raw) {
+  const farm = defaultFarm();
+  if (!isObject(raw)) return farm;
+  const owned = Array.isArray(raw.rewards) ? raw.rewards.filter((id) => typeof id === 'string') : [];
+  farm.rewards = [...new Set(owned)];
+  // Only something he owns can be worn.
+  for (const slot of ['paint', 'hat']) {
+    if (farm.rewards.includes(raw[slot])) farm[slot] = raw[slot];
+  }
+  // The home farm: things waiting in the gift box, and things he has placed.
+  if (Array.isArray(raw.box)) {
+    farm.box = raw.box.filter((id) => typeof id === 'string').slice(0, THINGS_MAX);
+  }
+  if (Array.isArray(raw.placed)) {
+    farm.placed = raw.placed
+      .filter((p) => isObject(p) && typeof p.item === 'string' && Number.isFinite(p.x) && Number.isFinite(p.y))
+      .slice(0, THINGS_MAX)
+      .map((p) => ({ item: p.item, x: Math.round(p.x), y: Math.round(p.y) }));
+  }
+  if (Array.isArray(raw.log)) {
+    farm.log = raw.log
+      .filter((e) => isObject(e) && typeof e.id === 'string' && Number.isFinite(e.day))
+      .slice(-LOG_MAX)
+      .map((e) => ({ day: int(e.day, 0, DAYS_MAX, 0), id: e.id }));
+  }
+  return farm;
+}
+
+function migrateToday(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((d) => isObject(d) && typeof d.art === 'string')
+    .slice(0, DELIVERIES_MAX)
+    .map((d) => ({
+      art: d.art,
+      ...(typeof d.label === 'string' ? { label: d.label } : {}),
+      ...(Number.isFinite(d.numeral) ? { numeral: d.numeral } : {}),
+      ...(Number.isFinite(d.tint) ? { tint: d.tint } : {}),
+    }));
 }
 
 /**

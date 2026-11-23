@@ -76,6 +76,10 @@
 .parent-step { width: 46px; height: 46px; padding: 0; font-size: 24px; }
 .parent-count { min-width: 28px; text-align: center; font-size: 20px; font-weight: 700; }
 
+.parent-number { flex: 0 0 84px; width: 84px; text-align: center; font-size: 20px; font-weight: 700; }
+.parent-testing { padding: 12px 14px; border-radius: 10px; background: #33465a; }
+.parent-testing .parent-button { margin-top: 6px; }
+
 .parent-confirm { margin-top: 10px; }
 .parent-confirm .parent-button { margin-right: 10px; }
 

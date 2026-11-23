@@ -11,6 +11,7 @@ import { setInputSuspended } from './systems/input.js';
 import { allLines, lineClipId } from './systems/lines.js';
 import { installParentGate } from './parent/gate.js';
 import { openParentPanel } from './parent/panel.js';
+import { travelToDay, keepBookmark, restoreBookmark } from './systems/dayTravel.js';
 import './parent/parent.css';
 import voiceClips from 'virtual:voice-clips';
 
@@ -91,12 +92,25 @@ installParentGate({
         sfx.setVolume(volume * 0.6);
         sfx.pop(3);
       },
-      onClose: ({ settings, reset }) => {
-        if (reset) store.reset();
-        else if (settings) store.save({ ...state, settings });
-        // A changed name or day length affects what is already on screen, so start
-        // cleanly from the saved state rather than patching a running scene.
-        if (reset || settings) return window.location.reload();
+      onClose: ({ settings, reset, days, restore, keep }) => {
+        const moved = !restore && !keep && days !== null && days !== state.days;
+        if (reset) {
+          store.reset();
+        } else {
+          if (restore) restoreBookmark(state);
+          if (keep) state.bookmark = null;
+          if (moved) {
+            // His real farm is copied once, before the first change, so testing can
+            // never lose it.
+            keepBookmark(state);
+            travelToDay(state, days, content.rewards, content.small);
+          }
+          if (settings) state.settings = settings;
+          if (settings || restore || keep || moved) store.save(state);
+        }
+        // A changed name, day length or farm affects what is already on screen, so
+        // start cleanly from the saved state rather than patching a running scene.
+        if (reset || settings || restore || keep || moved) return window.location.reload();
         const sfx = game.registry.get('sfx');
         sfx.setVolume(state.settings.volume * 0.6);
         resumeGame();

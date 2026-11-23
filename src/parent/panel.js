@@ -1,7 +1,8 @@
 // The parent area: settings and the progress view. Plain HTML over the game,
 // because a parent needs to read and type, which the child's screens never ask for.
 
-import { DELIVERIES_MIN, DELIVERIES_MAX } from '../systems/save.js';
+import { DELIVERIES_MIN, DELIVERIES_MAX, DAYS_MAX } from '../systems/save.js';
+import { buildingsAt } from '../systems/dayTravel.js';
 import { progressGroups, progressSummary } from './progress.js';
 import { overlayRoot } from './gate.js';
 
@@ -18,8 +19,10 @@ function el(tag, className, text) {
  * Open the panel. `onPreview({ volume })` lets a setting be heard before saving.
  * `voiceCheck` is { lines, has(text), speak(text) }: every line the game can say, whether
  * it has a generated clip, and a way to hear it.
- * `onClose({ settings, reset })` gets the new settings (or null if unchanged),
- * and `reset: true` if the parent chose to wipe everything.
+ * `onClose({ settings, reset, days, restore, keep })` gets the new settings (or null if
+ * unchanged), `reset: true` if the parent chose to wipe everything, `days` if the farm
+ * should move to that many finished days (else null), `restore: true` to put his real
+ * farm back, and `keep: true` to make the farm being tested the real one.
  */
 export function openParentPanel({ state, content, voiceCheck, onPreview, onClose }) {
   const draft = { ...state.settings };
@@ -30,6 +33,12 @@ export function openParentPanel({ state, content, voiceCheck, onPreview, onClose
   const finish = (result) => {
     overlay.remove();
     onClose(result);
+  };
+  // What every way of closing reports, other than wiping everything.
+  const closing = () => {
+    draft.childName = draft.childName.trim();
+    const changed = Object.keys(draft).some((key) => draft[key] !== state.settings[key]);
+    return { settings: changed ? draft : null, reset: false, days: null, restore: false, keep: false };
   };
 
   card.appendChild(el('h1', '', 'Parent area'));
@@ -92,6 +101,59 @@ export function openParentPanel({ state, content, voiceCheck, onPreview, onClose
   settings.appendChild(voiceRow);
   settings.appendChild(el('p', 'parent-hint', 'Off: recorded clips are used wherever they exist. Letter sounds always use recordings.'));
   card.appendChild(settings);
+
+  // ----- farm day -----
+  let days = state.days;
+  const travel = el('section', 'parent-section');
+  travel.appendChild(el('h2', '', 'Farm day'));
+  const travelRow = el('div', 'parent-row');
+  travelRow.appendChild(el('span', 'parent-label', 'Farm days finished'));
+  const dayStepper = el('div', 'parent-stepper');
+  const earlier = el('button', 'parent-button parent-step', '−');
+  const dayInput = el('input', 'parent-input parent-number');
+  const later = el('button', 'parent-button parent-step', '+');
+  earlier.type = later.type = 'button';
+  dayInput.type = 'number';
+  dayInput.min = '0';
+  dayInput.max = String(DAYS_MAX);
+  dayInput.inputMode = 'numeric';
+  const forecast = el('p', 'parent-hint');
+  const setDays = (value, typed = false) => {
+    days = Number.isFinite(value) ? Math.max(0, Math.min(DAYS_MAX, Math.round(value))) : state.days;
+    // Leave the box alone while it is being typed in, or the cursor jumps.
+    if (!typed) dayInput.value = String(days);
+    const { have, next, total } = buildingsAt(content.rewards, days);
+    forecast.textContent =
+      (days === state.days ? 'Now: ' : `At ${days}: `) +
+      (have.length === 0 ? 'an empty field' : `${have.length} of ${total} buildings (${have.map((r) => r.name).join(', ')})`) + '. ' +
+      (next
+        ? `Next is the ${next.name}, built at the end of day ${next.day}: set this to ${next.day - 1} and play one day to watch it go up.`
+        : 'Every building is built.');
+  };
+  earlier.addEventListener('click', () => setDays(days - 1));
+  later.addEventListener('click', () => setDays(days + 1));
+  dayInput.addEventListener('input', () => setDays(dayInput.valueAsNumber, true));
+  dayInput.addEventListener('blur', () => setDays(days));
+  setDays(days);
+  dayStepper.append(earlier, dayInput, later);
+  travelRow.appendChild(dayStepper);
+  travel.append(travelRow, forecast);
+  travel.appendChild(el('p', 'parent-hint',
+    'For testing. Going forward gives every skipped day its reward; going back takes away what was earned after that day. ' +
+    'The first change keeps a copy of his real farm, so you can always return to it. It takes effect when you press Done.'));
+  if (state.bookmark) {
+    const testing = el('div', 'parent-confirm parent-testing');
+    testing.appendChild(el('p', '',
+      `You are testing. His real farm (${state.bookmark.days} ${state.bookmark.days === 1 ? 'day' : 'days'} finished) is kept safe.`));
+    const back = el('button', 'parent-button', 'Return to his real farm');
+    const keep = el('button', 'parent-button parent-quiet', 'Keep this farm instead');
+    back.type = keep.type = 'button';
+    back.addEventListener('click', () => finish({ ...closing(), restore: true }));
+    keep.addEventListener('click', () => finish({ ...closing(), keep: true }));
+    testing.append(back, keep);
+    travel.appendChild(testing);
+  }
+  card.appendChild(travel);
 
   // ----- progress -----
   const progress = el('section', 'parent-section');
@@ -173,18 +235,14 @@ export function openParentPanel({ state, content, voiceCheck, onPreview, onClose
   confirm.append(yes, no);
   reset.addEventListener('click', () => { confirm.hidden = false; reset.hidden = true; });
   no.addEventListener('click', () => { confirm.hidden = true; reset.hidden = false; });
-  yes.addEventListener('click', () => finish({ settings: null, reset: true }));
+  yes.addEventListener('click', () => finish({ settings: null, reset: true, days: null, restore: false, keep: false }));
   danger.append(reset, confirm);
   card.appendChild(danger);
 
   // ----- done -----
   const done = el('button', 'parent-button parent-done', 'Done');
   done.type = 'button';
-  done.addEventListener('click', () => {
-    draft.childName = draft.childName.trim();
-    const changed = Object.keys(draft).some((key) => draft[key] !== state.settings[key]);
-    finish({ settings: changed ? draft : null, reset: false });
-  });
+  done.addEventListener('click', () => finish({ ...closing(), days: days === state.days ? null : days }));
   card.appendChild(done);
 
   overlayRoot().appendChild(overlay);

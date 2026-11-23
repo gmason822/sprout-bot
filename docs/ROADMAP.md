@@ -36,7 +36,7 @@ Still to do:
 Built, waiting for its playtest:
 - `day.js`: deliveries per day, which animals are offered, sunset, wearing paint and hats (pure, tested).
 - A row at the top of the farm shows today's deliveries, with empty rings for the ones still to come.
-- Sunset scene: the day is counted back, the next reward from `content/rewards.json` arrives, the robot sleeps, and a sun button starts a new day.
+- Sunset scene: the day is counted back, the next reward from `content/rewards.json` arrives, the robot sleeps, and the day ends at the home farm (a small reward goes there by itself; a big one is a present to tap).
 - Rewards live on the farm: friends and decorations stand around and wiggle when tapped; tapping a hat or paint pot puts it on or takes it off.
 - `save.js` with tests; the farm, rewards, mastery and the day so far survive a restart.
 
