@@ -8,6 +8,7 @@ import { generateNumbers, numberLines } from './numbers.js';
 import { generateFirstSound, firstSoundLines } from './firstsound.js';
 import { generateShapes, shapeLines } from './shapes.js';
 import { generateColours, colourLines } from './colours.js';
+import { generateSame, sameLines } from './same.js';
 
 const GENERATORS = {
   count: generateCount,
@@ -17,6 +18,7 @@ const GENERATORS = {
   firstsound: generateFirstSound,
   shapes: generateShapes,
   colours: generateColours,
+  same: generateSame,
 };
 
 export const GENERATOR_IDS = Object.keys(GENERATORS);
@@ -30,6 +32,7 @@ const LINES = {
   firstsound: firstSoundLines,
   shapes: shapeLines,
   colours: colourLines,
+  same: sameLines,
 };
 
 /** Every line the skills in this content can say. */

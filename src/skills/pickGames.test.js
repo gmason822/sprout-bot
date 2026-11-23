@@ -6,6 +6,7 @@ import { loadContent } from '../systems/content.js';
 import { GENERATOR_IDS, makeRequest } from './index.js';
 import { EVERYTHING_SOLID } from '../systems/tryGame.js';
 import { generateColours, colourLines } from './colours.js';
+import { generateSame, sameLines } from './same.js';
 
 const content = loadContent(GENERATOR_IDS);
 const skillOf = (id) => content.skills.find((s) => s.id === id);
@@ -85,5 +86,50 @@ describe('colours', () => {
   it('has nothing to ask without colours or shapes', () => {
     expect(generateColours({ skill, content: { ...content, colours: [] } })).toBeNull();
     expect(generateColours({ skill: { ...skill, shapes: [] }, content })).toBeNull();
+  });
+});
+
+describe('find the same one', () => {
+  const skill = skillOf('same');
+  const look = ({ id, wrong, ...picture }) => JSON.stringify(picture);
+
+  it('shows the picture to find, and exactly one thing on the table looks like it', () => {
+    ask('same', EVERYTHING_SOLID, (request) => {
+      const matching = request.answer.choices.filter((c) => look(c) === JSON.stringify(request.bubble));
+      expect(matching, request.itemId).toHaveLength(1);
+      expect(matching[0].id).toBe(request.answer.correct);
+      // No two things on the table look alike.
+      expect(new Set(request.answer.choices.map(look)).size).toBe(request.answer.choices.length);
+    });
+  });
+
+  it('starts with different things of one kind, then colours, then turned pictures', () => {
+    const first = new Set();
+    ask('same', {}, (r) => {
+      first.add(r.itemId.split(':')[0]);
+      // Near misses: everything on the table is the same kind of thing.
+      const kind = content.groups.find((g) => g.id === r.itemId.split(':')[1]);
+      for (const choice of r.answer.choices) expect(kind.emoji).toContain(choice.emoji);
+    });
+    expect([...first]).toEqual(['same']);
+
+    const kinds = skill.tiers[0].items.map((k) => `same:${k}`);
+    const second = new Set();
+    ask('same', solid(kinds), (r) => second.add(r.itemId.split(':')[0]));
+    expect(second.has('same-colour')).toBe(true);
+    expect(second.has('same-turned')).toBe(false);
+  });
+
+  it('turns a picture four different ways', () => {
+    const turned = { ...skill, tiers: [{ ...skill.tiers[2], unlockAfter: undefined }] };
+    for (let i = 0; i < 50; i++) {
+      const request = generateSame({ skill: turned, content });
+      expect(request.answer.choices.map((c) => c.angle ?? 0).sort((a, b) => a - b)).toEqual([0, 90, 180, 270]);
+      expect(new Set(request.answer.choices.map((c) => c.emoji)).size).toBe(1);
+    }
+  });
+
+  it('says only two things', () => {
+    expect(sameLines()).toEqual(['Find the same one!', 'That one is different.']);
   });
 });
