@@ -44,6 +44,7 @@ src/
     content.js         Loads and validates content/*.json
     mastery.js         Leitner-box tracking per content item
     day.js             Farm-day rules: which animals wait, when the day ends, rewards
+    sky.js             The time of day: where the sun is and what colour the world is
     home.js            Home-farm rules: earning, the gift box, placing, wearing
     dayTravel.js       The parent's day control: jump to any day, and put his real farm back
     paint.js           Recolours the truck SVG for paint rewards

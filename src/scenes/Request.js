@@ -6,6 +6,7 @@ import { recordAnswer } from '../systems/mastery.js';
 import { isDayDone } from '../systems/day.js';
 import { PRAISE, THANK_YOU } from '../systems/phrases.js';
 import { drawFarmBackdrop } from './farmBackdrop.js';
+import { dayTime } from '../systems/sky.js';
 import { CountBoard } from './boards/CountBoard.js';
 import { PickBoard } from './boards/PickBoard.js';
 import { ANIMAL, TRUCK_Y } from './layout.js';
@@ -53,7 +54,7 @@ export class Request extends Phaser.Scene {
     this.judged = false;
     this.focus = -1;
 
-    drawFarmBackdrop(this);
+    drawFarmBackdrop(this, dayTime(this.state.today.length, this.state.settings.deliveriesPerDay));
     this.buildAnimal();
     this.truckHomeX = Board.TRUCK_HOME_X;
     this.truck = makeTruck(this, this.truckHomeX, TRUCK_Y);
@@ -196,6 +197,8 @@ export class Request extends Phaser.Scene {
     // What he delivered stays on the farm for the rest of the day.
     this.state.today.push(this.board.delivered());
     this.registry.get('store').save(this.state);
+    // The animals screen moves the sun on when he gets back to it.
+    this.registry.set('justDelivered', true);
     const done = isDayDone(this.state.today, this.state.settings.deliveriesPerDay);
     this.scene.start(done ? 'Sunset' : 'Farm');
   }

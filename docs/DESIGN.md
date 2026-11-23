@@ -12,7 +12,7 @@ Why this loop: he has to **understand the request** to succeed, the learning is 
    - Right: the truck delivers, the animal cheers, and what he delivered stays on the farm for the day.
    - Wrong: the animal says what that was and what it wants ("That's D. I want /b/!"), the thing goes back, and he tries again. After 2 misses the right answer glows.
 4. **Back to the animals** with three waiting again, until the day's deliveries are done.
-5. **Sunset.** The sky turns orange, today's deliveries are counted back one by one, the robot goes to sleep, and then the day's one reward arrives. A small thing is shown for a moment and he is taken straight to the home farm, where it is waiting on the shelf. A big one is a wrapped present that waits: tapping it takes him to the farm to watch the building go up.
+5. **Sunset.** The sky is already orange from the last request. Today's deliveries are counted back one by one, night falls, the robot goes to sleep, and then the day's one reward arrives. A small thing is shown for a moment and he is taken straight to the home farm, where it is waiting on the shelf. A big one is a wrapped present that waits: tapping it takes him to the farm to watch the building go up.
 
 A farm day is `deliveriesPerDay` deliveries, set by the parent (default 5, range 3–10).
 
@@ -23,7 +23,7 @@ A farm day is `deliveriesPerDay` deliveries, set by the parent (default 5, range
 - **Sunset**: end-of-day celebration and reward.
 - **Home farm**: free play. Everything he has earned ends up here, and the logo button leads back to the animals.
 
-Hidden **Parent Gate**: hold the sun in the top-right for 3 seconds, or tap it five times quickly, then tap three numbers that are written out as words ("seven, two, five") on a keypad. A white ring closes in around the finger from the second second of a hold, so a parent can see it counting. The hold zone is measured from the game picture rather than the screen, because a wide phone shows the picture with bars at the sides. The numbers change every time. One wrong tap, or 20 seconds of nothing, closes it and the game carries on.
+Hidden **Parent Gate**: hold the top-right corner of the picture for 3 seconds, or tap it five times quickly (the sun used to sit there; it now moves through the day), then tap three numbers that are written out as words ("seven, two, five") on a keypad. A white ring closes in around the finger from the second second of a hold, so a parent can see it counting. The hold zone is measured from the game picture rather than the screen, because a wide phone shows the picture with bars at the sides. The numbers change every time. One wrong tap, or 20 seconds of nothing, closes it and the game carries on.
 
 The **parent area** is plain HTML over the paused game, because a parent needs to read and type:
 - **Settings:** child name, deliveries per day (3 to 10), volume, computer-voice-only mode.
@@ -34,6 +34,8 @@ The **parent area** is plain HTML over the paused game, because a parent needs t
 Changing a setting saves it and restarts the game at the play button, so nothing on screen is left out of step with the new values. Closing without changes resumes exactly where he was.
 
 **The logo is the one "go" button.** The robot with a sprout, on a yellow disc (`public/assets/art/logo.svg`), starts the game on the title screen and leads from the home farm back to the animals. It is also the app icon. Its yellow is kept well away from the orange that always means RIGHT.
+
+**The sky is the clock.** The sun crosses the sky as deliveries are made, and he watches it move on each time he comes back to the animals. The last request of the day is always asked at sunset, however long the parent has made the day, and the end of the day is night, with stars and a moon. The home farm is always in daylight: every visit there is a fresh morning. The rules are in `src/systems/sky.js` and the drawing in `src/scenes/farmBackdrop.js`.
 
 ## Requests
 

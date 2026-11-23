@@ -4,6 +4,7 @@ import { makeRequest } from '../skills/index.js';
 import { chooseAnimals, isDayDone } from '../systems/day.js';
 import { GOOD_MORNING, WHO_HELPS } from '../systems/phrases.js';
 import { drawFarmBackdrop } from './farmBackdrop.js';
+import { dayTime } from '../systems/sky.js';
 import { TRUCK_Y } from './layout.js';
 import { tween, makeTruck, drawFocusRing, drawDayRow, emoji } from './ui.js';
 
@@ -43,7 +44,14 @@ export class Farm extends Phaser.Scene {
       return this.scene.start('Sunset');
     }
 
-    drawFarmBackdrop(this);
+    // The sun moves on with every delivery, and he sees it go when he comes back.
+    const { today, settings } = this.state;
+    const now = dayTime(today.length, settings.deliveriesPerDay);
+    const backdrop = drawFarmBackdrop(this, now);
+    if (this.registry.get('justDelivered')) {
+      this.registry.set('justDelivered', false);
+      backdrop.moveTo(dayTime(today.length - 1, settings.deliveriesPerDay), now);
+    }
     drawDayRow(this, this.state.today, this.state.settings.deliveriesPerDay);
     this.buildHouseButton();
     this.truck = makeTruck(this, 640, TRUCK_Y);

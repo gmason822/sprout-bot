@@ -14,7 +14,7 @@ On an Android phone or tablet, open that address in Chrome, then use the menu â†
 Milestones 1 to 4 are built, plus a second batch of games: six animals ask for counting, letters, left/right, numbers, first sounds and shapes; every finished farm day earns one reward for his home farm, which grows from an empty field into a full farm of buildings he can play with; progress is saved on the device; and a hidden parent area holds the settings and a progress view. See `docs/ROADMAP.md`.
 
 ## Parent area
-Hold a finger on the sun in the top-right for three seconds (a white ring closes in around your finger while it counts), or tap the sun five times quickly. Then tap the three numbers shown as words. From there you can set his name, the length of a farm day and the volume, see what he has and hasn't mastered, move the farm to any day to test what arrives when (his real farm is kept safe and can be put back), or reset everything.
+Hold a finger on the top-right corner of the picture for three seconds (a white ring closes in around your finger while it counts), or tap that corner five times quickly. Then tap the three numbers shown as words. From there you can set his name, the length of a farm day and the volume, see what he has and hasn't mastered, move the farm to any day to test what arrives when (his real farm is kept safe and can be put back), or reset everything.
 
 ## Voice
 The game's voice is generated ahead of time with the open Kokoro text-to-speech model and shipped as audio files. `npm run voice` remakes it after content changes; see `docs/AUDIO.md`.

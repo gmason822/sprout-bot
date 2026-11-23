@@ -9,6 +9,7 @@ import { UPGRADE_IDS } from './homeUpgrades.js';
 import { drawFarmBackdrop } from './farmBackdrop.js';
 import { makeGoButton, numberStyle } from './ui.js';
 import { VERSION } from '../systems/version.js';
+import { dayTime } from '../systems/sky.js';
 
 // Art is loaded at twice the drawn size so it stays sharp when the canvas is scaled up.
 const ART = {
@@ -40,7 +41,6 @@ export class Boot extends Phaser.Scene {
 
   create() {
     const { width } = this.scale;
-    drawFarmBackdrop(this);
 
     // Nothing has started yet, so if a newer version arrives while the play button
     // is showing, switch to it straight away.
@@ -58,6 +58,8 @@ export class Boot extends Phaser.Scene {
     reconcileFarm(state.farm, content.rewards, content.small);
     this.registry.set('store', store);
     this.registry.set('state', state);
+    // The title screen shows the time of day he left off at.
+    drawFarmBackdrop(this, dayTime(state.today.length, state.settings.deliveriesPerDay));
 
     const audio = this.registry.get('audio');
     audio.setVolume(state.settings.volume);

@@ -3,12 +3,14 @@ import { createInput, ACTIONS } from '../systems/input.js';
 import { endDay } from '../systems/day.js';
 import { NEW_THING, BIG_SURPRISE, ALL_DONE, SLEEPY } from '../systems/phrases.js';
 import { drawFarmBackdrop } from './farmBackdrop.js';
+import { SUNSET, NIGHT } from '../systems/sky.js';
 import { TRUCK_Y } from './layout.js';
 import { tween, wait, makeTruck, makeConfetti, drawDayRow, rewardPicture, emoji } from './ui.js';
 
 /**
  * The end of a farm day, and the only time a reward is given: everything he
- * delivered is counted back, the robot goes to sleep, and one new thing arrives. A
+ * delivered is counted back, night falls and the robot goes to sleep, and one new
+ * thing arrives. A
  * small reward is shown briefly and he goes straight to the home farm. A big one is
  * a present that waits to be tapped.
  */
@@ -31,10 +33,10 @@ export class Sunset extends Phaser.Scene {
     const { reward, gift, delivered } = endDay(state, content.rewards, content.small);
     this.registry.get('store').save(state);
 
-    drawFarmBackdrop(this);
-    // The sky warms up as the day ends.
-    this.dusk = this.add.rectangle(640, 360, 1280, 720, 0xff7043, 0).setDepth(0.5);
-    this.night = this.add.rectangle(640, 360, 1280, 720, 0x1a237e, 0).setDepth(18);
+    // The last request was asked at sunset, so that is where this screen starts.
+    this.backdrop = drawFarmBackdrop(this, SUNSET);
+    // At night the truck and the day's row dim a little too, not only the sky.
+    this.night = this.add.rectangle(640, 360, 1280, 720, 0x0b1445, 0).setDepth(18);
 
     this.row = drawDayRow(this, delivered, perDay, { y: 110, size: 86, depth: 4 });
     this.row.icons.forEach((icon) => icon.setScale(0));
@@ -50,8 +52,6 @@ export class Sunset extends Phaser.Scene {
 
   /** `reward` is a big reward, `gift` a small one. A day gives one or the other. */
   async play(reward, gift) {
-    this.tweens.add({ targets: this.dusk, fillAlpha: 0.42, duration: 2500 });
-
     // Count the day back to him, one delivery at a time.
     for (const [i, icon] of this.row.icons.entries()) {
       this.sfx.pop(i + 1);
@@ -60,7 +60,8 @@ export class Sunset extends Phaser.Scene {
     await wait(this, 300);
 
     // Night falls and the robot sleeps.
-    this.tweens.add({ targets: this.night, fillAlpha: 0.45, duration: 1800 });
+    this.backdrop.moveTo(SUNSET, NIGHT, 2400);
+    this.tweens.add({ targets: this.night, fillAlpha: 0.3, duration: 2400 });
     // To the left of the robot, clear of the reward that comes up in the middle.
     const zzz = emoji(this, 455, 410, '💤', 70).setDepth(19);
     this.tweens.add({ targets: zzz, y: 380, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
