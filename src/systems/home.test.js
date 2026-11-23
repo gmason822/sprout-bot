@@ -1,23 +1,24 @@
 import { describe, it, expect } from 'vitest';
 import {
-  earnSmall, reconcileFarm, placeFromBox, moveThing, putAway, freeSpot, wearOptions, setWear, ownedUpgrades,
+  earnSmall, smallOnOffer, reconcileFarm, placeFromBox, moveThing, putAway, freeSpot, wearOptions, setWear, ownedUpgrades,
   clampToField, isPlaceable, MAX_THINGS, FIELD,
 } from './home.js';
 
 const SMALL = [{ id: 'small-tulip', emoji: '🌷' }, { id: 'small-rock', emoji: '🪨' }];
+// Everything that can be owned, the way the game passes it around: big and small together.
 const REWARDS = [
-  { id: 'friend-duck', type: 'friend', emoji: '🦆' },
+  { id: 'friend-duck', type: 'friend', emoji: '🦆', once: true },
   { id: 'upgrade-fence', type: 'upgrade', value: 'fence', emoji: '🪵' },
-  { id: 'paint-blue', type: 'paint', value: '#00f' },
-  { id: 'paint-red', type: 'paint', value: '#f00' },
-  { id: 'hat-straw', type: 'hat', emoji: '👒' },
-  { id: 'deco-balloon', type: 'decoration', emoji: '🎈' },
+  { id: 'paint-blue', type: 'paint', value: '#00f', once: true, needs: 'garage' },
+  { id: 'paint-red', type: 'paint', value: '#f00', once: true, needs: 'garage' },
+  { id: 'hat-straw', type: 'hat', emoji: '👒', once: true, needs: 'garage' },
+  { id: 'deco-balloon', type: 'decoration', emoji: '🎈', once: true },
   { id: 'upgrade-barn', type: 'upgrade', value: 'barn', emoji: '🏠' },
 ];
 const farm = (extra = {}) => ({ rewards: [], paint: null, hat: null, box: [], placed: [], ...extra });
 
 describe('earnSmall', () => {
-  it('puts one small thing in the gift box', () => {
+  it('puts one small thing on the shelf', () => {
     const f = farm();
     const item = earnSmall(f, SMALL, () => 0);
     expect(item.id).toBe('small-tulip');
@@ -25,18 +26,41 @@ describe('earnSmall', () => {
     earnSmall(f, SMALL, () => 0.99);
     expect(f.box).toEqual(['small-tulip', 'small-rock']);
   });
-  it('allows repeats', () => {
+  it('allows plain things to repeat', () => {
     const f = farm();
     earnSmall(f, SMALL, () => 0);
     earnSmall(f, SMALL, () => 0);
     expect(f.box).toEqual(['small-tulip', 'small-tulip']);
+    expect(f.rewards).toEqual([]);
+  });
+  it('gives a one-off only once', () => {
+    const pool = [{ id: 'friend-duck', type: 'friend', emoji: '🦆', once: true }];
+    const f = farm();
+    expect(earnSmall(f, pool).id).toBe('friend-duck');
+    expect(f.rewards).toEqual(['friend-duck']);
+    expect(f.box).toEqual(['friend-duck']);
+    expect(earnSmall(f, pool)).toBeNull();
+    expect(f.box).toEqual(['friend-duck']);
+  });
+  it('holds paints and hats back until he has the garage, then puts them straight on', () => {
+    const pool = [{ id: 'paint-blue', type: 'paint', value: '#00f', once: true, needs: 'garage' }];
+    const f = farm();
+    expect(earnSmall(f, pool, Math.random, [])).toBeNull();
+    expect(earnSmall(f, pool, Math.random, ['garage']).id).toBe('paint-blue');
+    expect(f).toMatchObject({ paint: 'paint-blue', rewards: ['paint-blue'], box: [] });
+  });
+  it('only ever offers what can be given', () => {
+    const pool = [...SMALL, ...REWARDS.filter((r) => r.type !== 'upgrade')];
+    const f = farm({ rewards: ['friend-duck'] });
+    expect(smallOnOffer(f, pool, []).map((s) => s.id)).toEqual(['small-tulip', 'small-rock', 'deco-balloon']);
+    expect(smallOnOffer(f, pool, ['garage'])).toHaveLength(6);
   });
   it('gives nothing when there is nothing to give', () => {
     const f = farm();
     expect(earnSmall(f, [])).toBeNull();
     expect(f.box).toEqual([]);
   });
-  it('lets the oldest small thing go when the farm is full, never a friend', () => {
+  it('lets the oldest plain thing go when the farm is full, never a friend', () => {
     const f = farm({
       box: ['friend-duck'],
       placed: Array.from({ length: MAX_THINGS - 1 }, (_, i) => ({ item: i === 0 ? 'deco-balloon' : 'small-rock', x: i, y: 400 })),
@@ -141,11 +165,24 @@ describe('choosing what to wear', () => {
 });
 
 describe('ownedUpgrades and isPlaceable', () => {
-  it('lists upgrades in the order of the reward list', () => {
-    expect(ownedUpgrades(farm({ rewards: ['upgrade-barn', 'friend-duck', 'upgrade-fence'] }), REWARDS)).toEqual(['fence', 'barn']);
+  const BUILDINGS = ['tent', 'fence', 'cabin', 'barn', 'farmhouse', 'bighouse'].map((v) => ({ id: `upgrade-${v}`, type: 'upgrade', value: v }));
+  const owning = (...values) => farm({ rewards: values.map((v) => `upgrade-${v}`) });
+
+  it('lists what he owns in the order of the reward list', () => {
+    expect(ownedUpgrades(owning('barn', 'fence'), BUILDINGS)).toEqual(['fence', 'barn']);
+    expect(ownedUpgrades(farm(), BUILDINGS)).toEqual([]);
   });
-  it('knows what can be placed', () => {
+  it('draws only the best stage of the home', () => {
+    expect(ownedUpgrades(owning('tent'), BUILDINGS)).toEqual(['tent']);
+    expect(ownedUpgrades(owning('tent', 'fence', 'cabin'), BUILDINGS)).toEqual(['fence', 'cabin']);
+    expect(ownedUpgrades(owning('tent', 'cabin', 'barn', 'farmhouse', 'bighouse'), BUILDINGS)).toEqual(['barn', 'bighouse']);
+    // A later stage without the earlier ones still shows.
+    expect(ownedUpgrades(owning('farmhouse'), BUILDINGS)).toEqual(['farmhouse']);
+  });
+  it('knows what can stand on the farm', () => {
     expect(REWARDS.filter(isPlaceable).map((r) => r.id)).toEqual(['friend-duck', 'deco-balloon']);
+    // A plain small thing has no type and is a decoration.
+    expect(isPlaceable({ id: 'small-tulip', emoji: '🌷' })).toBe(true);
     expect(isPlaceable(undefined)).toBe(false);
   });
 });

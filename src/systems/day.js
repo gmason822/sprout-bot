@@ -1,7 +1,7 @@
 // The farm day: which animals wait, how far through the day he is, and what
 // arrives at sunset. Pure functions over the saved state.
 
-import { isPlaceable, earnSmall } from './home.js';
+import { isPlaceable, earnSmall, ownedUpgrades } from './home.js';
 import { shuffle } from './mastery.js';
 
 const RECENT = 20;
@@ -46,8 +46,8 @@ export function bigRewardFor(rewards, owned, dayNumber) {
 
 /**
  * Sunset is the only time anything is given out, and it is always exactly one thing:
- * the big reward if today is one of its set days, otherwise one small thing.
- * A new paint or hat goes straight on. A day with no deliveries gives nothing.
+ * the big reward (a farm building) if today is one of its set days, otherwise one
+ * small thing (a cosmetic). A day with no deliveries gives nothing.
  * Changes `state` in place and returns { reward, gift, delivered }: `reward` is a big
  * one, `gift` a small one, and at most one of them is set.
  */
@@ -65,7 +65,7 @@ export function endDay(state, rewards, small = [], rng = Math.random) {
       // A friend or decoration waits on the shelf for him to place at home.
       if (isPlaceable(reward)) state.farm.box.push(reward.id);
     } else {
-      gift = earnSmall(state.farm, small, rng);
+      gift = earnSmall(state.farm, small, rng, ownedUpgrades(state.farm, rewards));
     }
   }
   state.days = dayNumber;

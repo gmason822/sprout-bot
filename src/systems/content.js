@@ -78,11 +78,19 @@ export function validateContent(raw, generatorIds) {
     return true;
   });
 
-  // Small things: one of these on any day with no big reward. Optional.
+  // Small things: the reward on any day with no big one. Optional.
+  const buildings = new Set(rewards.filter((r) => r.type === 'upgrade').map((r) => r.value));
   const small = (Array.isArray(raw.rewards?.small) ? raw.rewards.small : []).filter((r) => {
-    if (typeof r?.id !== 'string' || !r.id.startsWith('small-')) return bad(`rewards.json: small thing "${r?.id}" must have an id starting with "small-"`);
+    const where = `rewards.json: small thing "${r?.id}"`;
+    if (typeof r?.id !== 'string' || !r.id) return bad('rewards.json: a small thing has no id');
     if (seenRewards.has(r.id)) return bad(`rewards.json: "${r.id}" appears twice`);
-    if (!r.emoji) return bad(`rewards.json: small thing "${r.id}" has no emoji to draw it with`);
+    const type = r.type ?? 'decoration';
+    if (!['friend', 'decoration', 'paint', 'hat'].includes(type)) return bad(`${where} has unknown type "${r.type}"`);
+    if (type === 'paint' && !r.value) return bad(`${where} is a paint with no value`);
+    if (type !== 'paint' && !r.emoji) return bad(`${where} has no emoji to draw it with`);
+    // A paint or hat given twice would be a wasted day, so those must be one-offs.
+    if ((type === 'paint' || type === 'hat') && r.once !== true) return bad(`${where} must be marked "once": true`);
+    if (r.needs !== undefined && !buildings.has(r.needs)) return bad(`${where} needs "${r.needs}", which is not a building in "rewards"`);
     seenRewards.add(r.id);
     return true;
   });

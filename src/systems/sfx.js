@@ -71,6 +71,39 @@ export function createSfx() {
     left() { tone({ freq: 233, to: 196, dur: 0.22, type: 'square', gain: 0.14 }); },
     /** ...and RIGHT always like this high beep. */
     right() { tone({ freq: 784, to: 880, dur: 0.16, type: 'square', gain: 0.12 }); },
+    // ----- the home farm's toys -----
+    moo() {
+      tone({ freq: 150, to: 118, dur: 0.55, type: 'sawtooth', gain: 0.2 });
+      tone({ freq: 118, to: 140, dur: 0.35, type: 'sawtooth', gain: 0.16, delay: 0.5 });
+    },
+    cluck() {
+      [0, 0.11, 0.22, 0.4].forEach((d, i) => tone({ freq: i === 3 ? 700 : 520, to: i === 3 ? 900 : 430, dur: 0.07, type: 'square', gain: 0.1, delay: d }));
+    },
+    splash() {
+      [900, 700, 1100, 600, 800].forEach((f, i) => tone({ freq: f, to: f * 0.5, dur: 0.09, type: 'sine', gain: 0.14, delay: i * 0.04 }));
+    },
+    creak() { tone({ freq: 210, to: 330, dur: 0.4, type: 'sawtooth', gain: 0.1 }); },
+    whoosh() {
+      tone({ freq: 260, to: 900, dur: 0.45, type: 'sine', gain: 0.12 });
+      tone({ freq: 900, to: 300, dur: 0.6, type: 'sine', gain: 0.12, delay: 0.45 });
+    },
+    buzz() {
+      for (let i = 0; i < 7; i++) tone({ freq: 190 + (i % 2) * 22, to: 205, dur: 0.11, type: 'sawtooth', gain: 0.08, delay: i * 0.1 });
+    },
+    caw() {
+      tone({ freq: 620, to: 430, dur: 0.16, type: 'square', gain: 0.1 });
+      tone({ freq: 600, to: 400, dur: 0.2, type: 'square', gain: 0.1, delay: 0.22 });
+    },
+    rain() {
+      for (let i = 0; i < 26; i++) tone({ freq: 1400 + (i * 137) % 900, to: 900, dur: 0.04, type: 'sine', gain: 0.05, delay: i * 0.07 });
+    },
+    rustle() {
+      for (let i = 0; i < 6; i++) tone({ freq: 1100 + (i % 3) * 300, to: 500, dur: 0.05, type: 'triangle', gain: 0.07, delay: i * 0.05 });
+    },
+    thud() { tone({ freq: 140, to: 70, dur: 0.12, type: 'sine', gain: 0.25 }); },
+    chime() {
+      [784, 988, 1175].forEach((f, i) => tone({ freq: f, dur: 0.3, type: 'triangle', gain: 0.14, delay: i * 0.09 }));
+    },
     cheer() {
       [523, 659, 784, 1047].forEach((f, i) => {
         tone({ freq: f, dur: 0.22, type: 'triangle', gain: 0.3, delay: i * 0.11 });

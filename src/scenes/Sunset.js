@@ -65,7 +65,7 @@ export class Sunset extends Phaser.Scene {
       // A big reward gets the big entrance; a small thing is the same moment, smaller.
       const picture = reward
         ? rewardPicture(this, 640, 340, reward, 230)
-        : emoji(this, 640, 340, gift.emoji, 150);
+        : rewardPicture(this, 640, 340, { type: 'decoration', ...gift }, 150);
       picture.setDepth(10).setScale(0);
       this.sfx.cheer();
       for (const x of reward ? [340, 640, 940] : [640]) this.confetti.explode(reward ? 45 : 30, x, 420);

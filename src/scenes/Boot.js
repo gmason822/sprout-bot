@@ -78,7 +78,7 @@ export class Boot extends Phaser.Scene {
   paintTrucks(content) {
     const svg = this.cache.text.get('truck-svg');
     const [width, height] = ART.truck;
-    for (const reward of content.rewards) {
+    for (const reward of [...content.rewards, ...content.small]) {
       if (reward.type !== 'paint' || !svg) continue;
       const painted = paintTruckSvg(svg, reward.value, width, height);
       this.textures.addBase64(`truck-${reward.id}`, `data:image/svg+xml;charset=utf-8,${encodeURIComponent(painted)}`);

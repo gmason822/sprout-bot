@@ -57,11 +57,12 @@ Built, waiting for its playtest. Replay value was thin with three games, so ther
 
 ## Home farm (free play)
 Built, waiting for its playtest:
-- A home farm on its own screen, reached by the house button on the animals screen. It starts as bare grass.
-- One reward per finished day, given at sunset: a big reward on its set day (days 1, 3, 5, then every third day), otherwise one small thing (a flower, a vegetable, a bug). The day then ends at home.
-- Things wait on a shelf. He taps one to put it on the farm and drags it wherever he likes; dragging it back onto the shelf puts it away.
-- Farm upgrades are among the big rewards and become part of the farm itself: fence, barn, pond, apple tree, path, windmill, silo, rainbow.
-- The palette and hat buttons on the shelf open every colour or hat he owns to choose from.
+- A home farm on its own screen, reached by the house button on the animals screen. It starts as an empty field.
+- One reward per finished day, given at sunset, and the day then ends at home.
+- **Big rewards build the farm:** 17 buildings and features on set days (1, 3, 5, then every third day), from a tent to a big farmhouse. The home itself grows through four stages.
+- **Every building is a toy:** tapping it does something (the barn's cow comes out, the tree drops apples, the garden grows a crop, the cloud rains a rainbow).
+- **Small rewards are cosmetics:** repeatable flowers, vegetables and bugs, plus one-off animal friends, truck paints and robot hats. Paints and hats arrive only after the garage and are chosen there.
+- Small things wait on a shelf. He taps one to put it on the farm and drags it wherever he likes; dragging it back onto the shelf puts it away.
 - Three animals are offered at a time, and the counting game no longer shows a running total on the truck.
 
 ## Long-term

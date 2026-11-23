@@ -54,9 +54,9 @@ describe('chooseAnimals', () => {
 });
 
 const REWARDS = [
-  { id: 'friend-duck', type: 'friend', day: 1 },
-  { id: 'paint-blue', type: 'paint', value: '#00f', day: 3 },
-  { id: 'hat-straw', type: 'hat', day: 4 },
+  { id: 'upgrade-tent', type: 'upgrade', value: 'tent', day: 1 },
+  { id: 'upgrade-garage', type: 'upgrade', value: 'garage', day: 3 },
+  { id: 'upgrade-barn', type: 'upgrade', value: 'barn', day: 4 },
 ];
 const SMALL = [{ id: 'small-tulip', emoji: '🌷' }, { id: 'small-rock', emoji: '🪨' }];
 const fresh = (days = 0) => ({
@@ -76,41 +76,41 @@ describe('isDayDone', () => {
 
 describe('bigRewardFor', () => {
   it('gives each big reward on its set day', () => {
-    expect(bigRewardFor(REWARDS, [], 1).id).toBe('friend-duck');
-    expect(bigRewardFor(REWARDS, ['friend-duck'], 2)).toBeNull();
-    expect(bigRewardFor(REWARDS, ['friend-duck'], 3).id).toBe('paint-blue');
-    expect(bigRewardFor(REWARDS, ['friend-duck', 'paint-blue'], 4).id).toBe('hat-straw');
+    expect(bigRewardFor(REWARDS, [], 1).id).toBe('upgrade-tent');
+    expect(bigRewardFor(REWARDS, ['upgrade-tent'], 2)).toBeNull();
+    expect(bigRewardFor(REWARDS, ['upgrade-tent'], 3).id).toBe('upgrade-garage');
+    expect(bigRewardFor(REWARDS, ['upgrade-tent', 'upgrade-garage'], 4).id).toBe('upgrade-barn');
   });
   it('gives nothing big once he has them all', () => {
     expect(bigRewardFor(REWARDS, REWARDS.map((r) => r.id), 99)).toBeNull();
   });
   it('catches up one at a time if some were missed', () => {
-    // An older save on day 10 that only has the duck: the earliest one owed comes first.
-    expect(bigRewardFor(REWARDS, ['friend-duck'], 10).id).toBe('paint-blue');
-    expect(bigRewardFor(REWARDS, ['friend-duck', 'paint-blue'], 11).id).toBe('hat-straw');
+    // An older save on day 10 that only has the tent: the earliest one owed comes first.
+    expect(bigRewardFor(REWARDS, ['upgrade-tent'], 10).id).toBe('upgrade-garage');
+    expect(bigRewardFor(REWARDS, ['upgrade-tent', 'upgrade-garage'], 11).id).toBe('upgrade-barn');
   });
   it('does not depend on the order of the file', () => {
-    expect(bigRewardFor([...REWARDS].reverse(), [], 5).id).toBe('friend-duck');
+    expect(bigRewardFor([...REWARDS].reverse(), [], 5).id).toBe('upgrade-tent');
   });
 });
 
 describe('endDay', () => {
-  it('gives the big reward on its day, and nothing else', () => {
+  it('gives the farm building on its day, and nothing else', () => {
     const state = fresh();
     const { reward, gift, delivered } = endDay(state, REWARDS, SMALL);
-    expect(reward.id).toBe('friend-duck');
+    expect(reward.id).toBe('upgrade-tent');
     expect(gift).toBeNull();
     expect(delivered).toHaveLength(2);
-    expect(state.farm.rewards).toEqual(['friend-duck']);
-    // A friend waits on the shelf for him to place at home.
-    expect(state.farm.box).toEqual(['friend-duck']);
+    expect(state.farm.rewards).toEqual(['upgrade-tent']);
+    // A building is part of the farm, not something to place.
+    expect(state.farm.box).toEqual([]);
     expect(state.days).toBe(1);
     expect(state.today).toEqual([]);
   });
 
   it('gives exactly one small thing on an in-between day', () => {
     const state = fresh(1);
-    state.farm.rewards = ['friend-duck'];
+    state.farm.rewards = ['upgrade-tent'];
     const { reward, gift } = endDay(state, REWARDS, SMALL, () => 0);
     expect(reward).toBeNull();
     expect(gift.id).toBe('small-tulip');
@@ -126,25 +126,26 @@ describe('endDay', () => {
       const before = state.farm.box.length + state.farm.rewards.length;
       const { reward, gift } = endDay(state, REWARDS, SMALL);
       given.push(reward ? 'big' : gift ? 'small' : 'none');
-      // Never both, and never more than one new thing.
       expect(Boolean(reward) && Boolean(gift)).toBe(false);
-      expect(state.farm.box.length + state.farm.rewards.length - before).toBeLessThanOrEqual(2);
+      expect(state.farm.box.length + state.farm.rewards.length - before).toBe(1);
     }
     expect(given).toEqual(['big', 'small', 'big', 'big', 'small', 'small', 'small']);
   });
 
-  it('puts a new paint or hat straight on, and not on the shelf', () => {
-    const state = fresh(2);
-    state.farm.rewards = ['friend-duck'];
-    endDay(state, REWARDS, SMALL);
-    expect(state.farm.paint).toBe('paint-blue');
-    state.today = [{ art: 'apple' }];
-    endDay(state, REWARDS, SMALL);
-    expect(state.farm.hat).toBe('hat-straw');
-    expect(state.farm.box).toEqual([]);
+  it('only gives paint once he has the garage', () => {
+    const paint = [{ id: 'paint-blue', type: 'paint', value: '#00f', once: true, needs: 'garage' }];
+    const before = fresh(1);
+    before.farm.rewards = ['upgrade-tent'];
+    expect(endDay(before, REWARDS, paint)).toMatchObject({ reward: null, gift: null });
+
+    const after = fresh(4);
+    after.farm.rewards = REWARDS.map((r) => r.id);
+    expect(endDay(after, REWARDS, paint).gift.id).toBe('paint-blue');
+    expect(after.farm.paint).toBe('paint-blue');
+    expect(after.farm.box).toEqual([]);
   });
 
-  it('gives a small thing when the big rewards have run out', () => {
+  it('gives a small thing when the buildings have run out', () => {
     const state = fresh(50);
     state.farm.rewards = REWARDS.map((r) => r.id);
     const { reward, gift } = endDay(state, REWARDS, SMALL);
@@ -156,12 +157,12 @@ describe('endDay', () => {
   it('gives nothing for a day with no deliveries', () => {
     const state = { ...fresh(), today: [] };
     expect(endDay(state, REWARDS, SMALL)).toMatchObject({ reward: null, gift: null });
-    expect(state.farm.box).toEqual([]);
+    expect(state.farm.rewards).toEqual([]);
   });
 
   it('still ends the day with no small things in the content', () => {
     const state = fresh(1);
-    state.farm.rewards = ['friend-duck'];
+    state.farm.rewards = ['upgrade-tent'];
     expect(endDay(state, REWARDS)).toMatchObject({ reward: null, gift: null });
     expect(state.days).toBe(2);
   });

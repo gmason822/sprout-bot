@@ -33,7 +33,7 @@ src/
   main.js              Phaser game config, scene registration
   scenes/              Boot, Farm (the animals screen), Request, Sunset, Home (the home farm)
     boards/            CountBoard and PickBoard: the two ways of answering a request
-    homeUpgrades.js    The home farm's backdrop and each earnable upgrade (barn, pond...)
+    homeUpgrades.js    The home farm's backdrop and each earnable building, with its tap toy
     layout.js, ui.js   Shared positions, colours and small drawing helpers
   systems/
     input.js           Maps touch + keyboard → game actions (see below)
@@ -65,7 +65,7 @@ Scenes listen for **actions**, never raw keys or pointers. The one exception is 
 
 ## Content and data
 - All learnable content lives in `content/*.json`. The formats are documented in `docs/DESIGN.md`. Adding a letter, an item, an animal or a reward must never need a code change.
-- Adding a farm **upgrade** is one drawing function in `src/scenes/homeUpgrades.js` and one `upgrade` entry in `content/rewards.json`. Any other reward is JSON only.
+- Adding a farm **building** (a big reward) is one builder in `src/scenes/homeUpgrades.js`, which draws it and returns what happens when it is tapped, plus one entry in `content/rewards.json`. Every building must do something when tapped. A small reward is JSON only.
 - Adding a new **skill** is one generator module in `src/skills/`, one entry in `content/skills.json`, and an animal that owns it. It must not change the scenes.
 - Validate content at boot. Log clear errors to the console, and skip bad items rather than crashing.
 

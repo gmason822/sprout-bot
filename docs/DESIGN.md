@@ -117,27 +117,50 @@ Their left-to-right order is random too.
 - Left/right has only two answers, so half of all guesses are right. Read its dots as a trend, not a score.
 
 ## Rewards and the home farm
-The home farm starts as bare grass with the truck parked on it. Everything else is earned by helping the animals, so the farm grows as he plays.
+The home farm starts as an empty field with the truck parked on it. Everything else is earned by helping the animals.
 
-**Earning**
+**One reward per finished farm day, given at sunset.** Nothing is handed out after a single delivery, so finishing the day is what counts.
 
-He earns exactly one reward for each finished farm day, given at sunset. Nothing is handed out after a single delivery, so finishing the day is what counts.
-- **On most days it is one small thing,** picked at random from a pool (flowers, vegetables, bugs, small trees). Repeats are fine.
-- **On set days it is a big reward instead.** Each big reward names the farm day it arrives on: days 1, 3 and 5, then every third day. If one was missed (the schedule was edited, or an older save is further on), the earliest one still owed is given, one per day. A big reward is one of:
-  - a **friend** or **decoration**, which he places on the farm;
-  - an **upgrade**, which becomes part of the farm itself (fence, barn, pond, apple tree, path, windmill, silo, rainbow);
-  - a **hat** or a **paint**, which goes straight on the robot or truck.
-- During the day, each delivery also fills the next ring in the row at the top of the animals screen, so he can see how much of the day is left.
-- No stars, no counters, no shop.
+**Big rewards build the farm.** On set days (1, 3 and 5, then every third day) the reward is a building or feature that becomes a permanent part of the farm and changes how it looks. Each one is also a toy: tapping it makes something happen.
+
+| Day | Big reward | When tapped |
+|---|---|---|
+| 1 | Tent (the first home) | The flap lifts and a lantern glows inside |
+| 3 | Fence and gate | The gate swings open or shut |
+| 5 | Garage | The door rolls up and his paints and hats come out to choose from |
+| 8 | Barn | The doors open and a cow comes out and moos |
+| 11 | Cabin (replaces the tent) | Lights go on or off, the door opens, the chimney smokes |
+| 14 | Pond | A fish jumps and splashes |
+| 17 | Apple tree | It shakes and apples drop and bounce |
+| 20 | Hen house | A hen pops out and lays an egg, which hatches |
+| 23 | Vegetable garden | Tap to plant, tap to ripen, tap to pick |
+| 26 | Well | The bucket goes down, splashes and comes up |
+| 29 | Windmill | The sails spin fast, then settle |
+| 32 | Farmhouse (replaces the cabin, adds a path) | Lights, door and chimney |
+| 35 | Silo | Grain pours out and two birds fly down for it |
+| 38 | Beehive | Bees fly out, loop around and come home |
+| 41 | Scarecrow | It wobbles and the crow flaps off, then sneaks back |
+| 44 | Rain cloud | It rains, then a rainbow comes out for a while |
+| 47 | Big farmhouse (replaces the farmhouse) | Lights window by window, door, chimney, a flag |
+
+- The tent, cabin, farmhouse and big farmhouse are four stages of one home. Only the best one he owns is drawn.
+- If a building's day has passed and he does not have it (the schedule was edited, or an older save is further on), the earliest one still owed is given, one per day.
+- A toy ignores taps while it is still doing its thing, so mashing cannot tangle it.
+
+**Small rewards are cosmetics.** On every other day the reward is one small thing, picked at random:
+- **Plain decorations** (flowers, vegetables, bugs, small trees), which can repeat.
+- **One-offs**, each given only once: animal friends, a few bigger decorations, truck paints and robot hats.
+- Paints and hats are only given once he has the garage, and go straight on.
 
 **On the home farm**
-- Things he has earned but not placed wait on a shelf along the bottom, six at a time, oldest first.
+- Small things he has not placed wait on a shelf along the bottom, eight at a time, oldest first.
 - Tapping one makes it hop onto the farm at a free spot. He can then drag it anywhere. Dragging it back down onto the shelf puts it away.
 - Tapping a placed thing or the truck makes it wiggle.
-- The palette and hat buttons each open a row of everything he owns of that kind, with "none" first and the current one ringed. He taps the one he wants. Tapping anywhere else closes the row.
-- Things lower on the screen are drawn in front, so the farm has depth.
+- Tapping the garage opens every paint and hat he owns, in two rows, with "none" first in each and the current one ringed. Tapping anywhere else closes it.
+- Things lower on the screen are drawn in front, so the farm has depth. Buildings stand along the back; the pond, garden, well, beehive and scarecrow are out in the field.
 - Every day ends at home: after sunset the sun button always leads to the home farm. A house button on the animals screen leads there at any other time, with a bouncing gift on it while something is waiting.
-- The farm holds up to 120 placed and waiting things. Past that, the oldest small thing makes room; friends and decorations are never dropped.
+- The farm holds up to 120 placed and waiting things. Past that, the oldest plain decoration makes room; one-offs are never dropped.
+- No stars, no counters, no shop.
 
 There is no learning on the home farm on purpose. It is where the rewards for learning are enjoyed, and the only way to get more is to go back to the animals.
 
@@ -179,15 +202,18 @@ There is no learning on the home farm on purpose. It is where the rewards for le
 
 ### `content/rewards.json`
 ```json
-"small":   [{ "id": "small-tulip", "name": "Tulip", "emoji": "🌷" }],
-"rewards": [{ "day": 1, "id": "friend-duck", "type": "friend", "name": "Duck", "emoji": "🦆" },
-            { "day": 11, "id": "upgrade-barn", "type": "upgrade", "name": "Barn", "emoji": "🏠", "value": "barn" }]
+"rewards": [{ "day": 8, "id": "upgrade-barn", "type": "upgrade", "name": "Barn", "emoji": "🐄", "value": "barn" }],
+"small":   [{ "id": "small-tulip", "name": "Tulip", "emoji": "🌷" },
+            { "id": "friend-duck", "type": "friend", "name": "Duck", "emoji": "🦆", "once": true },
+            { "id": "paint-blue", "type": "paint", "name": "Blue paint", "value": "#3b82f6", "once": true, "needs": "garage" }]
 ```
-- `small` is the pool for ordinary days. Ids must start with `small-`.
-- `rewards` are the big rewards. `day` is the farm day each one arrives on (1 is his first finished day). To change how often big rewards come, edit the `day` numbers. Types: `friend`, `decoration`, `hat`, `paint`, `upgrade`.
-- Everything except paint is drawn from its `emoji`, using the device's own emoji font, so a new reward needs no art.
-- `paint` needs a `value`: a `#rrggbb` color or `rainbow`. The truck's SVG is recoloured with it.
-- `upgrade` needs a `value` naming a drawing in `src/scenes/homeUpgrades.js`. Its `emoji` is only what the sunset shows; on the farm it is drawn properly.
+- `rewards` are the big rewards: farm buildings. `day` is the farm day each arrives on (1 is his first finished day); edit these to change how often big rewards come. `value` names a builder in `src/scenes/homeUpgrades.js`. `emoji` is only what the sunset shows.
+- `small` is the pool for ordinary days.
+  - A plain entry (an id and an emoji) is a decoration that can repeat. Give repeatable ones an id starting with `small-`: only those are ever recycled when the farm is full.
+  - `once: true` means it is given only one time.
+  - `type` is `friend` or `decoration` (placed on the farm; the default), `paint` (`value` is a `#rrggbb` color or `rainbow`) or `hat`. Paints and hats must be `once`.
+  - `needs` names a building he must own before this can be given.
+- Everything except paint is drawn from its `emoji`, using the device's own emoji font, so a new small reward needs no art.
 
 ### `content/words.json`
 ```json
@@ -209,7 +235,7 @@ Picture words for the first-sounds game, which uses each word's first letter. `f
   settings: { childName: "", deliveriesPerDay: 5, volume: 0.8, ttsOnly: false },
   mastery: { "count:3": { box: 2, seen: 4, correct: 3, lastSeen: 0 } },
   farm: {
-    rewards: ["friend-duck"],                      // big rewards he owns
+    rewards: ["upgrade-tent", "friend-duck"],      // buildings and one-off cosmetics he owns
     paint: null, hat: null,                        // what the truck and robot wear
     box: ["small-tulip", "small-tulip"],           // waiting on the shelf, oldest first
     placed: [{ item: "friend-duck", x: 470, y: 500 }]   // standing on the home farm

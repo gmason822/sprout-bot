@@ -15,10 +15,12 @@ export const FIELD = { left: 50, right: 1230, top: 315, bottom: 590 };
 
 const PLACEABLE = ['friend', 'decoration'];
 
-export function isPlaceable(reward) {
-  return PLACEABLE.includes(reward?.type);
+/** Can this thing stand on the farm? A small thing with no type is a plain decoration. */
+export function isPlaceable(item) {
+  return Boolean(item) && PLACEABLE.includes(item.type ?? 'decoration');
 }
 
+// Only plain, repeatable things are ever recycled when the farm is full.
 const isSmall = (id) => id.startsWith('small-');
 
 /** Make room if the farm is full, by letting the oldest small thing go. */
@@ -30,12 +32,31 @@ function makeRoom(farm) {
   if (standing >= 0) farm.placed.splice(standing, 1);
 }
 
-/** After a delivery: one small thing, picked at random, goes into the gift box. */
-export function earnSmall(farm, small, rng = Math.random) {
-  if (!small?.length) return null;
-  const item = small[Math.min(small.length - 1, Math.floor(rng() * small.length))];
-  makeRoom(farm);
-  farm.box.push(item.id);
+/** Which small things could be given today. `upgrades` are the buildings he owns. */
+export function smallOnOffer(farm, small, upgrades = []) {
+  return small.filter((s) => {
+    if (s.once && farm.rewards.includes(s.id)) return false;   // he already has it
+    if (s.needs && !upgrades.includes(s.needs)) return false;  // e.g. paint before the garage
+    return true;
+  });
+}
+
+/**
+ * An ordinary day's reward: one small thing, picked at random. A friend or decoration
+ * goes on the shelf for him to place; a paint or hat goes straight on. Something
+ * marked `once` is remembered so it is never given twice.
+ */
+export function earnSmall(farm, small, rng = Math.random, upgrades = []) {
+  const offer = smallOnOffer(farm, small ?? [], upgrades);
+  if (offer.length === 0) return null;
+  const item = offer[Math.min(offer.length - 1, Math.floor(rng() * offer.length))];
+  if (item.once) farm.rewards.push(item.id);
+  if (item.type === 'paint' || item.type === 'hat') {
+    farm[item.type] = item.id;
+  } else {
+    makeRoom(farm);
+    farm.box.push(item.id);
+  }
   return item;
 }
 
@@ -110,22 +131,30 @@ export function freeSpot(farm, rng = Math.random) {
 
 /**
  * Everything of one kind he can choose between: "none" first (the plain green truck,
- * or a bare head), then each one he owns in the order he earned it.
- * `type` is 'paint' or 'hat'. Returns [null, reward, reward...].
+ * or a bare head), then each one he owns. `items` is every reward, big and small;
+ * `type` is 'paint' or 'hat'. Returns [null, item, item...].
  */
-export function wearOptions(farm, rewards, type) {
-  return [null, ...rewards.filter((r) => r.type === type && farm.rewards.includes(r.id))];
+export function wearOptions(farm, items, type) {
+  return [null, ...items.filter((r) => r.type === type && farm.rewards.includes(r.id))];
 }
 
 /** Put on the paint or hat with this id, or take it off with null. Only what he owns. */
-export function setWear(farm, rewards, type, id) {
+export function setWear(farm, items, type, id) {
   if (type !== 'paint' && type !== 'hat') return false;
-  if (id !== null && !wearOptions(farm, rewards, type).some((r) => r?.id === id)) return false;
+  if (id !== null && !wearOptions(farm, items, type).some((r) => r?.id === id)) return false;
   farm[type] = id;
   return true;
 }
 
-/** The names of the upgrades he owns, in the order he earned them. */
+// The home is one building that grows. Only the best stage he owns is drawn.
+export const HOME_STAGES = ['tent', 'cabin', 'farmhouse', 'bighouse'];
+
+/**
+ * The buildings and features to draw on his farm, in the order of the reward list.
+ * Of the home's stages, only the highest one he owns is kept.
+ */
 export function ownedUpgrades(farm, rewards) {
-  return rewards.filter((r) => r.type === 'upgrade' && farm.rewards.includes(r.id)).map((r) => r.value);
+  const owned = rewards.filter((r) => r.type === 'upgrade' && farm.rewards.includes(r.id)).map((r) => r.value);
+  const best = HOME_STAGES.filter((s) => owned.includes(s)).at(-1);
+  return owned.filter((v) => !HOME_STAGES.includes(v) || v === best);
 }

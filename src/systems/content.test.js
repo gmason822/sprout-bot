@@ -65,11 +65,20 @@ describe('validateContent', () => {
   it('checks small things and upgrades', () => {
     const raw = good();
     raw.rewards.rewards.push({ id: 'u1', type: 'upgrade', emoji: '🏠', value: 'barn', day: 5 }, { id: 'u2', type: 'upgrade', emoji: '🏠', day: 6 });
-    raw.rewards.small = [{ id: 'small-rock', emoji: '🪨' }, { id: 'rock', emoji: '🪨' }, { id: 'small-x' }, { id: 'small-rock', emoji: '🪨' }];
+    raw.rewards.small = [
+      { id: 'small-rock', emoji: '🪨' },
+      { id: 'friend-dog', type: 'friend', emoji: '🐶', once: true },
+      { id: 'paint-red', type: 'paint', value: '#f00', once: true, needs: 'barn' },
+      { id: 'small-x' },                                             // nothing to draw
+      { id: 'small-rock', emoji: '🪨' },                              // twice
+      { id: 'thing', type: 'car', emoji: '🚗' },                      // unknown type
+      { id: 'paint-loose', type: 'paint', value: '#0f0' },           // a paint that could repeat
+      { id: 'hat-early', type: 'hat', emoji: '🎩', once: true, needs: 'castle' },  // needs a building that is not there
+    ];
     const { content, errors } = validateContent(raw, GEN);
     expect(content.rewards.map((r) => r.id)).toEqual(['r1', 'p1', 'u1']);
-    expect(content.small.map((r) => r.id)).toEqual(['small-rock']);
-    expect(errors).toHaveLength(4);
+    expect(content.small.map((r) => r.id)).toEqual(['small-rock', 'friend-dog', 'paint-red']);
+    expect(errors).toHaveLength(6);
   });
 
   it('skips bad words', () => {
@@ -95,7 +104,10 @@ describe('the real content files', () => {
     expect(content.animals.length).toBeGreaterThanOrEqual(6);
     expect(content.words.length).toBeGreaterThan(20);
     expect(content.small.length).toBeGreaterThan(10);
-    expect(content.rewards.filter((r) => r.type === 'upgrade').length).toBeGreaterThan(5);
+    // Every big reward is a farm building, and every paint and hat is a one-off small thing.
+    expect(content.rewards.length).toBeGreaterThan(10);
+    expect(content.rewards.every((r) => r.type === 'upgrade')).toBe(true);
+    expect(content.small.filter((r) => r.type === 'paint' || r.type === 'hat').every((r) => r.once)).toBe(true);
     expect(content.letters).toHaveLength(26);
     spy.mockRestore();
   });

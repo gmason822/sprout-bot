@@ -86,7 +86,8 @@ export function emoji(scene, x, y, char, px) {
  */
 export function makeTruck(scene, x, y) {
   const farm = scene.registry.get('state')?.farm ?? {};
-  const rewards = scene.registry.get('content')?.rewards ?? [];
+  const content = scene.registry.get('content');
+  const rewards = [...(content?.rewards ?? []), ...(content?.small ?? [])];
   const painted = `truck-${farm.paint}`;
   const truck = scene.add.container(x, y).setDepth(5);
   truck.add(scene.add.image(0, 0, farm.paint && scene.textures.exists(painted) ? painted : 'truck').setDisplaySize(440, 240));
