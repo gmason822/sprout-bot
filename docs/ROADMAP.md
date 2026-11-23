@@ -74,6 +74,7 @@ Built, waiting for a listen on the phone:
 - The parent area has a voice check that plays any line.
 - The engine speaks at normal pace and the audio is then slowed, because asking it to speak slowly added a stray "uh" before numbers.
 - Still open: lines that sound unnatural need to be found by ear and fixed one by one, and letter sounds still need hand recordings.
+- Tried and rejected (November 2026): generating the letter sounds with the same engine, as bare sounds and as hisses cut from real words, for "Bear. b, b, bear." in the first-sounds game. They sounded bad. Sounding-out is on hold until there is a better way to make the sounds.
 
 ## Long-term
 - **Button box.** Not needed while he plays by touch. The firmware is in `hardware/`, and the game already answers to its keys (arrows move a highlight, Space picks, 1 to 4 pick directly), so building the box later needs no game changes beyond testing.

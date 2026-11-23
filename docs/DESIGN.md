@@ -43,7 +43,7 @@ Changing a setting saves it and restarts the game at the play button, so nothing
 Every skill produces a request that uses one of two answer kinds. The Request scene only knows these two, which is what keeps new skills from touching the loop.
 
 - **`pick`**: 2–4 things on screen, one is right. One tap answers.
-- **`count`**: a pile of identical things. Each tap loads one into the truck while the voice counts it ("one… two… three"). Tapping the truck sends it; there is no separate button, and nothing can be taken out again. If something is loaded and he waits, the truck gives a little hop.
+- **`count`**: a pile of identical things. Each tap loads one into the truck while the voice counts it ("one… two… three"). Tapping the truck sends it; there is no send button. Things cannot be taken out one at a time, but while anything is loaded a round-arrow "start again" button stands at the right: it empties the truck back onto the pile and is never counted as a mistake. If something is loaded and he waits, the truck gives a little hop.
   - Too few: the animal counts what arrived, then "Not enough! I need three. Count again!"
   - Too many: "Too many! I need three. Count again!"
   - Either way the truck comes back, everything returns to the pile, and he counts again from one.

@@ -4,12 +4,16 @@ import { BASKET, TRUCK_AT_ANIMAL_X, ANIMAL, HINT_COLOR } from '../layout.js';
 import { tween, wait, bounce, popNumber } from '../ui.js';
 
 // The "count" answer: a pile of identical things. Each tap loads one into the truck
-// while the voice counts it, and tapping the truck sends it. Nothing can be taken
-// out again: a wrong count comes back, is tipped out, and he counts again from one.
+// while the voice counts it, and tapping the truck sends it. Things cannot be taken
+// out one at a time: the "start again" button empties the truck, and a wrong count
+// comes back and is tipped out, so either way he counts again from one.
 
 const PILE_MAX = 12;
 // The whole truck is the target, cab and bed.
 const TRUCK_HIT = { x: -220, y: -135, width: 440, height: 255 };
+// "Start again": only there while something is loaded, and well away from the truck
+// so it is not tapped by a finger aiming to send.
+const RESET = { x: 1175, y: 560, radius: 62 };
 // With something loaded and nothing happening, the truck hops: "I am ready to go".
 const NUDGE_MS = 3200;
 
@@ -66,6 +70,7 @@ export class CountBoard {
     this.drawSource();
     this.buildThings();
     this.buildTruckParts();
+    this.buildResetButton();
     this.basket = scene.add.image(BASKET.x, BASKET.y, 'basket').setDisplaySize(160, 110).setDepth(4);
     this.refresh();
   }
@@ -131,6 +136,34 @@ export class CountBoard {
     });
   }
 
+  /** A round arrow: everything in the truck goes back, and it is not a mistake. */
+  buildResetButton() {
+    const { s } = this;
+    const { radius } = RESET;
+    const g = s.add.graphics();
+    g.fillStyle(0x5b4636, 0.35).fillCircle(0, 6, radius);
+    g.fillStyle(0xffffff, 1).fillCircle(0, 0, radius);
+    g.lineStyle(6, 0x5b4636, 1).strokeCircle(0, 0, radius);
+    // The arrow: most of a circle, with a head where it ends.
+    const r = radius * 0.5;
+    const end = -0.5;
+    // Brown, not blue: blue always means LEFT.
+    g.lineStyle(radius * 0.2, 0x5b4636, 1);
+    g.beginPath();
+    g.arc(0, 0, r, end + 0.9, end + Math.PI * 2 - 0.25, false);
+    g.strokePath();
+    const tipX = Math.cos(end) * r;
+    const tipY = Math.sin(end) * r;
+    const head = radius * 0.3;
+    g.fillStyle(0x5b4636, 1).fillTriangle(
+      tipX - head, tipY - head * 0.2,
+      tipX + head * 0.9, tipY - head * 0.5,
+      tipX + head * 0.2, tipY + head * 1.05,
+    );
+    this.resetButton = s.add.container(RESET.x, RESET.y, [g]).setDepth(8);
+    s.in.tappable(this.resetButton, 'reset', new Phaser.Geom.Circle(0, 0, radius + 18), Phaser.Geom.Circle.Contains);
+  }
+
   // ---------- what the scene asks of a board ----------
 
   /** Things the highlight can land on, left to right, with the truck last. */
@@ -138,7 +171,9 @@ export class CountBoard {
     const things = this.things
       .map((t, i) => ({ id: `thing:${i}`, x: t.x, y: t.y, r: this.layout.hit, visible: t.visible }))
       .filter((t) => t.visible);
-    return [...things, { id: 'truck', x: this.s.truck.x, y: this.s.truck.y - 10, r: 150 }];
+    const truck = { id: 'truck', x: this.s.truck.x, y: this.s.truck.y - 10, r: 150 };
+    const reset = { id: 'reset', x: RESET.x, y: RESET.y, r: RESET.radius + 8 };
+    return this.loaded.length > 0 ? [...things, truck, reset] : [...things, truck];
   }
 
   /** What this delivery leaves in the day's row on the farm. */
@@ -148,6 +183,7 @@ export class CountBoard {
 
   onTap(id) {
     if (id === 'truck') return this.send();
+    if (id === 'reset') return this.startAgain();
     if (id.startsWith('thing:')) return this.load(Number(id.slice(6)));
   }
 
@@ -195,6 +231,17 @@ export class CountBoard {
     s.refreshFocus();
   }
 
+  /** He loaded too many, or just wants another go: empty the truck. Never a miss. */
+  async startAgain() {
+    const { s } = this;
+    if (this.loaded.length === 0) return;
+    s.in.lock();
+    s.audio.stop();
+    await this.tipOut();
+    s.in.unlock();
+    s.resetIdle();
+  }
+
   /** Everything in the truck goes back where it came from, so he can count again. */
   async tipOut() {
     const { s } = this;
@@ -227,6 +274,9 @@ export class CountBoard {
   }
 
   refresh() {
+    const loaded = this.loaded.length > 0;
+    this.resetButton.setVisible(loaded);
+    this.resetButton.input.enabled = loaded;
     this.glow.setVisible(sendGlows(this.s.misses, this.loaded.length, this.answer.target));
   }
 
@@ -244,6 +294,7 @@ export class CountBoard {
     s.in.lock();
     s.hideFocus();
     this.glow.setVisible(false);
+    this.resetButton.setVisible(false);
     const { target } = this.answer;
     const verdict = judgeCount(target, loaded);
     s.judge(verdict === 'right');
