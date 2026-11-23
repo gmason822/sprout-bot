@@ -5,5 +5,6 @@
   "woof": [["dog.ogg", ["span", 0.12, 0.5]], ["dog.ogg", ["span", 1.11, 1.5]]],
   "meow": [["cat.wav", ["span", 0.25, 1.15]]],
   "neigh": [["horse.ogg", ["span", 0.04, 1.85]]],
-  "baa": [["sheep.ogg", ["span", 0.0, 1.1]]]
+  "baa": [["sheep.ogg", ["span", 0.0, 1.1]]],
+  "quack": [["duck2.ogg", ["span", 1.12, 2.62]]]
 }

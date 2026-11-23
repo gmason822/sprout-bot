@@ -107,7 +107,7 @@ Each fits the existing loop (an animal asks, he taps one thing, the truck delive
 
 Also still open:
 - **Animals now own families of games** (see "Which animals are offered" in `docs/DESIGN.md`), so each idea above joins an existing animal's family rather than needing a new animal.
-- **More animal recordings:** owl, duck, goat, rooster, turkey, llama and chick are still quiet.
+- **More animal recordings:** owl, goat, rooster, turkey, llama and chick are still quiet.
 
 ## Ideas for later
 - More animals and places (orchard, pond, pumpkin patch).

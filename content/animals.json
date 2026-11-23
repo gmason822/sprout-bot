@@ -10,7 +10,7 @@
     { "id": "mouse",  "name": "Mouse",  "skills": ["shapes"],     "emoji": "🐭", "sound": "squeak" },
     { "id": "sheep",  "name": "Sheep",  "skills": ["colours"],    "emoji": "🐑", "sound": "baa" },
     { "id": "cat",    "name": "Cat",    "skills": ["same"],       "emoji": "🐱", "sound": "meow" },
-    { "id": "duck",   "name": "Duck",   "skills": ["whosays"],    "emoji": "🦆" },
+    { "id": "duck",   "name": "Duck",   "skills": ["whosays"],    "emoji": "🦆", "sound": "quack" },
     { "id": "horse",  "name": "Horse",  "skills": ["oddone"],     "emoji": "🐴", "sound": "neigh" },
     { "id": "dog",    "name": "Dog",    "skills": ["pattern"],    "emoji": "🐶", "sound": "woof" }
   ]

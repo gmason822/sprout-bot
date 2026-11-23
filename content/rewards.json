@@ -21,7 +21,7 @@
     { "id": "small-snail", "name": "Snail", "emoji": "🐌" },
     { "id": "small-chick", "name": "Chick", "emoji": "🐥" },
 
-    { "id": "friend-duck", "type": "friend", "name": "Duck", "emoji": "🦆", "once": true },
+    { "id": "friend-duck", "type": "friend", "name": "Duck", "emoji": "🦆", "once": true, "sound": "quack" },
     { "id": "friend-sheep", "type": "friend", "name": "Sheep", "emoji": "🐑", "once": true, "sound": "baa" },
     { "id": "friend-dog", "type": "friend", "name": "Dog", "emoji": "🐕", "once": true, "sound": "woof" },
     { "id": "friend-horse", "type": "friend", "name": "Horse", "emoji": "🐎", "once": true, "sound": "neigh" },
