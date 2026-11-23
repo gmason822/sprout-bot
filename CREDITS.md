@@ -13,6 +13,7 @@
 |------|------------------|--------|---------|
 | `moo.mp3` | [Mudchute cow 1.ogg](https://commons.wikimedia.org/wiki/File:Mudchute_cow_1.ogg) | Secretlondon | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
 | `oink.mp3` | [Mudchute pig 1.ogg](https://commons.wikimedia.org/wiki/File:Mudchute_pig_1.ogg) and [Mudchute pig 2.ogg](https://commons.wikimedia.org/wiki/File:Mudchute_pig_2.ogg), joined | Secretlondon | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| `baa.mp3` | [Mudchute sheep 1.ogg](https://commons.wikimedia.org/wiki/File:Mudchute_sheep_1.ogg) | Secretlondon | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
 | `woof.mp3` | [Barking of a dog.ogg](https://commons.wikimedia.org/wiki/File:Barking_of_a_dog.ogg), two barks joined | Amada44 | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
 | `cluck.mp3` | [Hen announcing shes lain an egg.ogg](https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg) | alys | Public domain |
 | `neigh.mp3` | [Wiehern.ogg](https://commons.wikimedia.org/wiki/File:Wiehern.ogg) | Hü. | Public domain |

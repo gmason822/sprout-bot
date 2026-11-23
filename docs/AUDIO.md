@@ -44,7 +44,7 @@ To add or change one:
 3. Add a line to `tools/sounds/recipes.json`, run `make.py` again without `--look`, and name the noise with `"sound"` in `content/animals.json` or `content/rewards.json`.
 4. Credit the recording in `CREDITS.md`.
 
-Still without a recording, and so quiet: owl, sheep, duck, goat, rooster, turkey, llama and chick. Wikimedia limits how fast files can be fetched by a script, which is why the first batch stopped at six. The rabbit's hop and the mouse's squeak are synthesized.
+Still without a recording, and so quiet: owl, duck, goat, rooster, turkey, llama and chick. Wikimedia limits how fast files can be fetched by a script, which is why the first batch stopped at six. The rabbit's hop and the mouse's squeak are synthesized.
 
 ## How a line is chosen at play time
 1. Hand-recorded clips for that line, if every one of them exists (see below).

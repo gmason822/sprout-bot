@@ -8,7 +8,7 @@
     { "id": "owl",    "name": "Owl",    "skill": "numbers",    "emoji": "🦉", "icon": "🔢" },
     { "id": "rabbit", "name": "Rabbit", "skill": "firstsound", "emoji": "🐰", "icon": "👂", "sound": "boing" },
     { "id": "mouse",  "name": "Mouse",  "skill": "shapes",     "emoji": "🐭", "icon": "shape-star", "sound": "squeak" },
-    { "id": "sheep",  "name": "Sheep",  "skill": "colours",    "emoji": "🐑", "icon": "🎨" },
+    { "id": "sheep",  "name": "Sheep",  "skill": "colours",    "emoji": "🐑", "icon": "🎨", "sound": "baa" },
     { "id": "cat",    "name": "Cat",    "skill": "same",       "emoji": "🐱", "icon": "🧩", "sound": "meow" },
     { "id": "duck",   "name": "Duck",   "skill": "whosays",    "emoji": "🦆", "icon": "🔊" },
     { "id": "horse",  "name": "Horse",  "skill": "oddone",     "emoji": "🐴", "icon": "🤔", "sound": "neigh" },

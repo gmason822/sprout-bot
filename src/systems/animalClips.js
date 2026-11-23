@@ -8,4 +8,5 @@ export const ANIMAL_CLIPS = {
   woof: 0.9,
   meow: 0.9,
   neigh: 1.81,
+  baa: 1.1,
 };

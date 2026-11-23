@@ -84,7 +84,7 @@
       "title": "Who says that?",
       "answer": "pick",
       "tiers": [
-        { "id": "says", "title": "Who says that?", "items": ["moo", "oink", "cluck", "woof", "meow", "neigh"], "start": 4, "choices": 3 }
+        { "id": "says", "title": "Who says that?", "items": ["moo", "oink", "cluck", "woof", "meow", "neigh", "baa"], "start": 4, "choices": 3 }
       ]
     },
     {
