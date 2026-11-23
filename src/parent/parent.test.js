@@ -43,6 +43,13 @@ describe('progressGroups', () => {
 
   const group = (groups, title) => groups.find((g) => g.title === title);
 
+  it('shows a game whose tiers list their own items', () => {
+    const made = { skills: [{ id: 'colours', answer: 'pick', tiers: [{ id: 'colour', title: 'Colours', items: ['red', 'blue'] }] }], letters: [] };
+    const [only] = progressGroups(made, { 'colour:red': rec(3) });
+    expect(only.title).toBe('Colours');
+    expect(only.items.map((i) => [i.id, i.label, i.box])).toEqual([['colour:red', 'Red', 3], ['colour:blue', 'Blue', null]]);
+  });
+
   it('lists every item of every game, met or not', () => {
     const groups = progressGroups(content, {});
     expect(groups.map((g) => g.title)).toEqual([

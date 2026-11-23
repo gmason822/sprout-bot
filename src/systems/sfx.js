@@ -170,6 +170,8 @@ export function createSfx(context = null) {
       this[name]();
       return SYNTHESIZED_MS[name];
     },
+    /** Is `name` one of the noises, recorded or synthesized? */
+    isNoise(name) { return Boolean(ANIMAL_CLIPS[name] || SYNTHESIZED_MS[name]); },
     /** The barn's cow and the hen house use the same recordings as the animals. */
     moo() { this.animal('moo'); },
     cluck() { this.animal('cluck'); },

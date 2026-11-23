@@ -81,6 +81,24 @@ export function emoji(scene, x, y, char, px) {
 }
 
 /**
+ * One picture from a spec: `art` (a drawing) or `emoji`, with an optional `tint`,
+ * `angle` in degrees and `flipX`. `size` is how many pixels across it is drawn.
+ * Requests, choices and the day's row all describe pictures this way.
+ */
+export function drawPicture(scene, x, y, spec, size) {
+  let picture;
+  if (spec.emoji) {
+    picture = emoji(scene, x, y, spec.emoji, Math.round(size * 0.82));
+  } else {
+    picture = scene.add.image(x, y, spec.art).setDisplaySize(size, size);
+    if (spec.tint !== undefined) picture.setTint(spec.tint);
+  }
+  if (spec.angle) picture.setAngle(spec.angle);
+  if (spec.flipX) picture.setFlipX(true);
+  return picture;
+}
+
+/**
  * The robot's truck: a container, so things loaded into it ride along.
  * It wears whatever paint and hat he has chosen on the farm.
  */
@@ -117,11 +135,7 @@ export function rewardPicture(scene, x, y, reward, size) {
 /** One delivery as a small picture: the thing, plus its letter or how many. */
 export function deliveryIcon(scene, x, y, delivery, size) {
   const icon = scene.add.container(x, y);
-  if (scene.textures.exists(delivery.art)) {
-    const image = scene.add.image(0, 0, delivery.art).setDisplaySize(size, size);
-    if (delivery.tint !== undefined) image.setTint(delivery.tint);
-    icon.add(image);
-  }
+  if (delivery.emoji || scene.textures.exists(delivery.art)) icon.add(drawPicture(scene, 0, 0, delivery, size));
   if (delivery.label) icon.add(scene.add.text(0, 0, delivery.label, numberStyle(size * 0.5)).setOrigin(0.5));
   if (delivery.numeral !== undefined) {
     icon.add(scene.add.text(size * 0.36, size * 0.3, String(delivery.numeral), numberStyle(size * 0.5)).setOrigin(0.5));

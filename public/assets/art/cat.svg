@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <!-- curled tail -->
+  <path d="M46 150 C12 150 8 104 30 92 C46 84 56 100 44 110" fill="none" stroke="#7a4a1e" stroke-width="18" stroke-linecap="round"/>
+  <path d="M46 150 C12 150 8 104 30 92 C46 84 56 100 44 110" fill="none" stroke="#f2a03d" stroke-width="9" stroke-linecap="round"/>
+  <!-- legs -->
+  <g fill="#f2a03d" stroke="#7a4a1e" stroke-width="5" stroke-linejoin="round">
+    <rect x="66" y="176" width="24" height="46" rx="8"/>
+    <rect x="128" y="176" width="24" height="46" rx="8"/>
+  </g>
+  <rect x="66" y="210" width="24" height="12" rx="5" fill="#fff4e0" stroke="#7a4a1e" stroke-width="4"/>
+  <rect x="128" y="210" width="24" height="12" rx="5" fill="#fff4e0" stroke="#7a4a1e" stroke-width="4"/>
+  <!-- body -->
+  <ellipse cx="108" cy="150" rx="70" ry="50" fill="#f2a03d" stroke="#7a4a1e" stroke-width="5"/>
+  <path d="M70 112 Q76 128 70 144 M92 104 Q98 122 92 140 M114 104 Q120 120 114 136" fill="none" stroke="#c9741a" stroke-width="7" stroke-linecap="round"/>
+  <!-- ears -->
+  <path d="M128 66 L124 18 L164 44 Z" fill="#f2a03d" stroke="#7a4a1e" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M212 66 L216 18 L176 44 Z" fill="#f2a03d" stroke="#7a4a1e" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M134 54 L133 32 L150 44 Z" fill="#f9b8c0"/>
+  <path d="M206 54 L207 32 L190 44 Z" fill="#f9b8c0"/>
+  <!-- head -->
+  <ellipse cx="170" cy="96" rx="54" ry="48" fill="#f2a03d" stroke="#7a4a1e" stroke-width="5"/>
+  <path d="M158 52 V66 M170 50 V68 M182 52 V66" stroke="#c9741a" stroke-width="6" stroke-linecap="round"/>
+  <!-- cheeks, nose, mouth -->
+  <ellipse cx="170" cy="116" rx="26" ry="18" fill="#fff4e0"/>
+  <path d="M163 104 H177 L170 113 Z" fill="#f47c8c" stroke="#7a4a1e" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M170 113 V119 M158 122 Q164 128 170 120 Q176 128 182 122" fill="none" stroke="#7a4a1e" stroke-width="4" stroke-linecap="round"/>
+  <!-- whiskers -->
+  <path d="M146 112 H118 M146 120 L120 128 M194 112 H222 M194 120 L220 128" stroke="#7a4a1e" stroke-width="3" stroke-linecap="round"/>
+  <!-- eyes -->
+  <ellipse cx="150" cy="86" rx="7" ry="9" fill="#2b2118"/><circle cx="152" cy="83" r="2.4" fill="#fff"/>
+  <ellipse cx="190" cy="86" rx="7" ry="9" fill="#2b2118"/><circle cx="192" cy="83" r="2.4" fill="#fff"/>
+</svg>

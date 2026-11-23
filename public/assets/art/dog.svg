@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <!-- legs -->
+  <g fill="#d9a066" stroke="#6b4423" stroke-width="5" stroke-linejoin="round">
+    <rect x="62" y="172" width="26" height="50" rx="8"/>
+    <rect x="128" y="172" width="26" height="50" rx="8"/>
+  </g>
+  <rect x="62" y="210" width="26" height="12" rx="5" fill="#fff4e0" stroke="#6b4423" stroke-width="4"/>
+  <rect x="128" y="210" width="26" height="12" rx="5" fill="#fff4e0" stroke="#6b4423" stroke-width="4"/>
+  <!-- wagging tail -->
+  <path d="M44 128 C24 116 20 92 30 76" fill="none" stroke="#6b4423" stroke-width="16" stroke-linecap="round"/>
+  <path d="M44 128 C24 116 20 92 30 76" fill="none" stroke="#d9a066" stroke-width="8" stroke-linecap="round"/>
+  <!-- body -->
+  <rect x="36" y="100" width="140" height="92" rx="44" fill="#d9a066" stroke="#6b4423" stroke-width="5"/>
+  <ellipse cx="84" cy="128" rx="26" ry="20" fill="#b9793f"/>
+  <!-- head -->
+  <circle cx="172" cy="92" r="52" fill="#d9a066" stroke="#6b4423" stroke-width="5"/>
+  <!-- floppy ears -->
+  <path d="M128 60 C108 62 102 98 112 122 C126 126 138 104 138 76 Z" fill="#8d5a2b" stroke="#6b4423" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M216 60 C236 62 242 98 232 122 C218 126 206 104 206 76 Z" fill="#8d5a2b" stroke="#6b4423" stroke-width="5" stroke-linejoin="round"/>
+  <!-- muzzle -->
+  <ellipse cx="174" cy="112" rx="30" ry="24" fill="#fff4e0" stroke="#6b4423" stroke-width="5"/>
+  <ellipse cx="174" cy="100" rx="11" ry="8" fill="#2b2118"/>
+  <path d="M174 108 V118 M160 120 Q174 132 188 120" fill="none" stroke="#6b4423" stroke-width="4" stroke-linecap="round"/>
+  <path d="M166 124 Q174 146 184 124 Z" fill="#f47c8c" stroke="#6b4423" stroke-width="3" stroke-linejoin="round"/>
+  <!-- eyes -->
+  <circle cx="152" cy="76" r="7" fill="#2b2118"/><circle cx="154" cy="74" r="2.4" fill="#fff"/>
+  <circle cx="196" cy="76" r="7" fill="#2b2118"/><circle cx="198" cy="74" r="2.4" fill="#fff"/>
+</svg>

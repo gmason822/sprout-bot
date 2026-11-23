@@ -1,9 +1,14 @@
 import Phaser from 'phaser';
 import { ANIMAL, TRUCK_AT_ANIMAL_X, SIDE_COLOR, HINT_COLOR } from '../layout.js';
-import { numberStyle, tween, bounce } from '../ui.js';
+import { numberStyle, tween, wait, bounce, drawPicture } from '../ui.js';
 
 // The "pick" answer: 2 to 4 things on a table, one is right. One tap answers:
 // the truck fetches that thing and takes it to the animal.
+//
+// A choice is { id, wrong: { say, tts } } plus its picture (`art` or `emoji`, with
+// optional `tint`, `angle`, `flipX`, and a `label` written over it). It may also
+// have a `side` (left or right, for that game's colours and sounds) and a `cue`:
+// a noise it makes when it is picked wrongly, before the animal says what it was.
 
 const POSITIONS = {
   2: [540, 980],
@@ -35,8 +40,7 @@ export class PickBoard {
       glow.fillStyle(color, 0.9).fillCircle(x, y, size / 2 + 34);
       scene.tweens.add({ targets: glow, alpha: 0.3, duration: 450, yoyo: true, repeat: -1 });
 
-      const image = scene.add.image(0, 0, choice.art).setDisplaySize(size, size);
-      if (choice.tint !== undefined) image.setTint(choice.tint);
+      const image = drawPicture(scene, 0, 0, choice, size);
       const obj = scene.add.container(x, y, [image]).setDepth(6);
       if (choice.label) {
         obj.add(scene.add.text(0, 0, choice.label, numberStyle(size * 0.55)).setOrigin(0.5));
@@ -68,7 +72,8 @@ export class PickBoard {
   /** What this delivery leaves in the day's row on the farm. */
   delivered() {
     const right = this.choices.find((c) => c.id === this.answer.correct);
-    return { art: right.art, ...(right.label ? { label: right.label } : {}), ...(right.tint !== undefined ? { tint: right.tint } : {}) };
+    const keep = (key) => (right[key] !== undefined ? { [key]: right[key] } : {});
+    return { ...keep('art'), ...keep('emoji'), ...keep('label'), ...keep('tint'), ...keep('angle'), ...keep('flipX') };
   }
 
   onTap(id) {
@@ -109,6 +114,12 @@ export class PickBoard {
     if (choice.side) {
       choice.image.setTint(choice.color);
       s.sfx[choice.side]?.();
+    }
+    if (choice.cue) {
+      // It answers for itself first ("oink"), then the animal says what it was.
+      bounce(s, choice.obj, -18);
+      const noise = s.sfx.animal(choice.cue);
+      if (noise) await wait(s, noise + 100);
     }
     bounce(s, s.animalSprite);
     await s.audio.say(choice.wrong.say, choice.wrong.tts);

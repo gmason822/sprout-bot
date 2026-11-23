@@ -17,6 +17,8 @@ function tierItems(skill, tier, content) {
     for (let n = tier.min; n <= tier.max; n++) out.push([`${prefix}:${n}`, String(n)]);
     return out;
   }
+  // The general way for a game to say what a tier asks about.
+  if (tier.items) return tier.items.map((item) => [`${tier.id}:${item}`, capital(item)]);
   if (tier.sides) return tier.sides.map((s) => [`${tier.id}:${s}`, capital(s)]);
   if (tier.shapes) return tier.shapes.map((s) => [`${tier.id}:${s}`, capital(s)]);
   if (skill.source === 'letters.json') {

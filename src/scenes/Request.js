@@ -10,11 +10,14 @@ import { dayTime } from '../systems/sky.js';
 import { CountBoard } from './boards/CountBoard.js';
 import { PickBoard } from './boards/PickBoard.js';
 import { ANIMAL, TRUCK_Y } from './layout.js';
-import { numberStyle, tween, wait, bounce, makeConfetti, makeTruck, drawFocusRing, emoji } from './ui.js';
+import { numberStyle, tween, wait, bounce, makeConfetti, makeTruck, drawFocusRing, drawPicture } from './ui.js';
 
 // The scene knows only these two ways of answering. A new skill reuses one of them,
 // which is why adding a skill never touches this file.
 const BOARDS = { count: CountBoard, pick: PickBoard };
+
+// A bubble holding a row of pictures stretches across the top of the screen.
+const ROW_BUBBLE = { width: 1145 };
 
 const IDLE_MS = 8000;
 const IDLE_REPEATS_MAX = 3;
@@ -82,16 +85,22 @@ export class Request extends Phaser.Scene {
       Phaser.Geom.Circle.Contains);
 
     // The bubble shows what the request is about: the kind of thing wanted (with its
-    // numeral for a counting request), a picture of a word, or a pile to count.
-    // It never shows the answer itself: a letter, a side or a numeral to be found.
-    const { art, numeral, count, emoji: picture } = this.request.bubble;
+    // numeral for a counting request), a picture of a word, a pile to count, or a
+    // row of pictures with a gap. It never shows the answer itself: a letter, a
+    // side or a numeral to be found. (The matching game is the one exception: there
+    // the picture to match is the whole point.)
+    const { art, numeral, count, row } = this.request.bubble;
+    this.rowItems = [];
+    const width = row ? ROW_BUBBLE.width : 280;
     const bubble = this.add.graphics().setDepth(3);
-    bubble.fillStyle(0xffffff, 1).fillRoundedRect(105, 40, 280, 170, 40);
+    bubble.fillStyle(0xffffff, 1).fillRoundedRect(105, 40, width, 170, 40);
     bubble.fillTriangle(250, 205, 300, 205, 290, 250);
-    bubble.lineStyle(5, 0x5b4636, 1).strokeRoundedRect(105, 40, 280, 170, 40);
+    bubble.lineStyle(5, 0x5b4636, 1).strokeRoundedRect(105, 40, width, 170, 40);
     const hasNumeral = numeral !== undefined;
     this.bubbleNumber = this.add.text(180, 125, '', numberStyle(130)).setOrigin(0.5).setDepth(3);
-    if (count !== undefined) {
+    if (row) {
+      this.buildRow(row);
+    } else if (count !== undefined) {
       // A pile to count: rows of five, like fingers on a hand.
       const size = 46;
       const rows = Math.ceil(count / 5);
@@ -101,11 +110,38 @@ export class Request extends Phaser.Scene {
         const y = 125 + (Math.floor(i / 5) - (rows - 1) / 2) * (size + 12);
         this.add.image(x, y, art).setDisplaySize(size, size).setDepth(3);
       }
-    } else if (picture) {
-      emoji(this, 245, 125, picture, 104).setDepth(3);
     } else {
-      this.add.image(hasNumeral ? 305 : 245, 125, art).setDisplaySize(118, 118).setDepth(3);
+      const spec = this.request.bubble;
+      drawPicture(this, hasNumeral ? 305 : 245, 125, spec, spec.emoji ? 126 : 118).setDepth(3);
     }
+  }
+
+  /** A row of pictures across a wide bubble. A `null` in the row is the gap to fill. */
+  buildRow(row) {
+    const slot = Math.min(150, (ROW_BUBBLE.width - 60) / row.length);
+    const size = Math.min(118, slot - 16);
+    const x0 = 105 + ROW_BUBBLE.width / 2 - ((row.length - 1) * slot) / 2;
+    row.forEach((spec, i) => {
+      const x = x0 + i * slot;
+      if (spec) {
+        this.rowItems.push({ obj: drawPicture(this, x, 125, spec, size).setDepth(3), note: spec.note ?? 1 });
+        return;
+      }
+      const gap = this.add.graphics().setDepth(3);
+      gap.fillStyle(0xfff3c4, 1).fillRoundedRect(x - size / 2, 125 - size / 2, size, size, 18);
+      gap.lineStyle(5, 0x5b4636, 0.7).strokeRoundedRect(x - size / 2, 125 - size / 2, size, size, 18);
+      this.add.text(x, 125, '?', numberStyle(size * 0.6)).setOrigin(0.5).setDepth(3);
+    });
+  }
+
+  /** The row is "read" from left to right: each picture hops with its own note. */
+  async chantRow() {
+    for (const item of this.rowItems) {
+      this.sfx.pop(item.note * 2);
+      bounce(this, item.obj, -16, 90);
+      await wait(this, 230);
+    }
+    await wait(this, 120);
   }
 
   // ---------- the request ----------
@@ -126,7 +162,15 @@ export class Request extends Phaser.Scene {
       this.bubbleNumber.setText(String(numeral));
       this.tweens.add({ targets: this.bubbleNumber, scale: { from: 0.3, to: 1 }, duration: 260, ease: 'Back.out' });
     }
-    if (this.request.cue) this.sfx[this.request.cue]?.();
+    if (this.rowItems.length > 0) await this.chantRow();
+    const { cue } = this.request;
+    if (cue) {
+      // A noise that is the question itself ("who says that?") is heard out first.
+      // Any other cue, like the left and right beeps, plays along with the words.
+      const noise = this.sfx.isNoise(cue) ? this.sfx.animal(cue) : 0;
+      if (noise) await wait(this, noise + 150);
+      else this.sfx[cue]?.();
+    }
     await this.audio.say(this.request.say, this.request.tts);
   }
 
@@ -134,7 +178,8 @@ export class Request extends Phaser.Scene {
   async repeatRequest(fromTimer = false, tapped = false) {
     if (this.in.locked) return;
     this.in.lock();
-    const noise = tapped ? this.sfx.animal(this.animal.sound) : 0;
+    // If the request's own cue is a noise, the animal's would only muddle it.
+    const noise = tapped && !this.sfx.isNoise(this.request.cue) ? this.sfx.animal(this.animal.sound) : 0;
     if (noise) {
       this.audio.stop();
       bounce(this, this.animalSprite, -34);

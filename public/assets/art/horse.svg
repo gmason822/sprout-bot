@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+  <!-- tail -->
+  <path d="M40 116 C14 124 10 170 22 198 C34 190 38 160 50 140 Z" fill="#4a2f1b" stroke="#3a2414" stroke-width="5" stroke-linejoin="round"/>
+  <!-- legs -->
+  <g fill="#b5713a" stroke="#5b3a1e" stroke-width="5" stroke-linejoin="round">
+    <rect x="58" y="158" width="24" height="66" rx="8"/>
+    <rect x="124" y="158" width="24" height="66" rx="8"/>
+  </g>
+  <rect x="58" y="210" width="24" height="14" rx="5" fill="#3a2414"/>
+  <rect x="124" y="210" width="24" height="14" rx="5" fill="#3a2414"/>
+  <!-- body -->
+  <rect x="36" y="96" width="136" height="82" rx="40" fill="#b5713a" stroke="#5b3a1e" stroke-width="5"/>
+  <!-- neck -->
+  <path d="M128 110 L150 44 H196 L176 150 Z" fill="#b5713a" stroke="#5b3a1e" stroke-width="5" stroke-linejoin="round"/>
+  <!-- mane -->
+  <path d="M150 30 C124 44 116 84 124 116 C136 108 142 80 152 58 Z" fill="#4a2f1b" stroke="#3a2414" stroke-width="5" stroke-linejoin="round"/>
+  <!-- ears -->
+  <path d="M158 34 L156 8 L176 26 Z" fill="#b5713a" stroke="#5b3a1e" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M200 34 L204 8 L184 26 Z" fill="#b5713a" stroke="#5b3a1e" stroke-width="5" stroke-linejoin="round"/>
+  <!-- head -->
+  <rect x="146" y="26" width="68" height="104" rx="30" fill="#b5713a" stroke="#5b3a1e" stroke-width="5"/>
+  <path d="M170 28 C166 44 170 60 180 70 C190 60 194 44 190 28 Z" fill="#fff4e0"/>
+  <path d="M164 26 C160 40 164 50 172 56 C174 44 172 34 176 26 Z" fill="#4a2f1b"/>
+  <!-- muzzle -->
+  <ellipse cx="180" cy="112" rx="38" ry="26" fill="#e6c29a" stroke="#5b3a1e" stroke-width="5"/>
+  <ellipse cx="166" cy="108" rx="5" ry="7" fill="#5b3a1e"/>
+  <ellipse cx="194" cy="108" rx="5" ry="7" fill="#5b3a1e"/>
+  <path d="M164 124 Q180 134 196 124" fill="none" stroke="#5b3a1e" stroke-width="4" stroke-linecap="round"/>
+  <!-- eyes -->
+  <circle cx="160" cy="70" r="7" fill="#2b2118"/><circle cx="162" cy="68" r="2.4" fill="#fff"/>
+  <circle cx="200" cy="70" r="7" fill="#2b2118"/><circle cx="202" cy="68" r="2.4" fill="#fff"/>
+</svg>

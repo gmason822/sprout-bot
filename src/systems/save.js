@@ -121,13 +121,16 @@ function migrateFarm(raw) {
 function migrateToday(raw) {
   if (!Array.isArray(raw)) return [];
   return raw
-    .filter((d) => isObject(d) && typeof d.art === 'string')
+    .filter((d) => isObject(d) && (typeof d.art === 'string' || typeof d.emoji === 'string'))
     .slice(0, DELIVERIES_MAX)
     .map((d) => ({
-      art: d.art,
+      // A delivery is a drawing or an emoji.
+      ...(typeof d.art === 'string' ? { art: d.art } : { emoji: d.emoji.slice(0, 16) }),
       ...(typeof d.label === 'string' ? { label: d.label } : {}),
       ...(Number.isFinite(d.numeral) ? { numeral: d.numeral } : {}),
       ...(Number.isFinite(d.tint) ? { tint: d.tint } : {}),
+      ...(Number.isFinite(d.angle) ? { angle: d.angle } : {}),
+      ...(d.flipX === true ? { flipX: true } : {}),
     }));
 }
 

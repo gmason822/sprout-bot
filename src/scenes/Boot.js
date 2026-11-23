@@ -15,6 +15,7 @@ import { dayTime } from '../systems/sky.js';
 const ART = {
   truck: [880, 480], basket: [320, 220], logo: [680, 680],
   hen: [520, 520], cow: [520, 520], pig: [520, 520], owl: [520, 520], rabbit: [520, 520], mouse: [520, 520],
+  dog: [520, 520], cat: [520, 520], horse: [520, 520], sheep: [520, 520], duck: [520, 520],
   apple: [300, 300], carrot: [300, 300], egg: [300, 300], pumpkin: [300, 300], strawberry: [300, 300], tomato: [300, 300],
   crate: [420, 420], barrel: [420, 420], haybale: [420, 420], flowerpot: [420, 420],
   'shape-circle': [420, 420], 'shape-square': [420, 420], 'shape-triangle': [420, 420], 'shape-star': [420, 420],
