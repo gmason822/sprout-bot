@@ -7,11 +7,12 @@ import { paintTruckSvg } from '../systems/paint.js';
 import { reconcileFarm } from '../systems/home.js';
 import { UPGRADE_IDS } from './homeUpgrades.js';
 import { drawFarmBackdrop } from './farmBackdrop.js';
-import { makePlayButton } from './ui.js';
+import { makeGoButton, numberStyle } from './ui.js';
+import { VERSION } from '../systems/version.js';
 
 // Art is loaded at twice the drawn size so it stays sharp when the canvas is scaled up.
 const ART = {
-  truck: [880, 480], basket: [320, 220],
+  truck: [880, 480], basket: [320, 220], logo: [680, 680],
   hen: [520, 520], cow: [520, 520], pig: [520, 520], owl: [520, 520], rabbit: [520, 520], mouse: [520, 520],
   apple: [300, 300], carrot: [300, 300], egg: [300, 300], pumpkin: [300, 300], strawberry: [300, 300], tomato: [300, 300],
   crate: [420, 420], barrel: [420, 420], haybale: [420, 420], flowerpot: [420, 420],
@@ -19,7 +20,11 @@ const ART = {
   'shape-heart': [420, 420], 'shape-rectangle': [420, 420], 'shape-oval': [420, 420], 'shape-diamond': [420, 420],
 };
 
-/** Loads art and content, then shows one big play button. The first tap is what unlocks sound. */
+/**
+ * Loads art and content, then shows the title screen: the name, the logo as one big
+ * start button, and the version. The game waits here, and that first tap is also
+ * what unlocks sound.
+ */
 export class Boot extends Phaser.Scene {
   constructor() {
     super('Boot');
@@ -61,14 +66,25 @@ export class Boot extends Phaser.Scene {
     audio.preload();
     this.paintTrucks(content);
 
-    const truck = this.add.image(width / 2, 560, 'truck').setDisplaySize(440, 240);
-    this.tweens.add({ targets: truck, y: 556, duration: 140, yoyo: true, repeat: -1 });
+    // The name is for grown-ups; he only needs the big button.
+    this.add.text(width / 2, 86, 'Sprout Bot', { ...numberStyle(112), color: '#2e7d32' }).setOrigin(0.5).setDepth(3);
 
-    const button = makePlayButton(this, width / 2, 260, 130);
-    this.tweens.add({ targets: button, scale: 1.08, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+    const truck = this.add.image(width / 2, 596, 'truck').setDisplaySize(360, 196);
+    this.tweens.add({ targets: truck, y: 592, duration: 140, yoyo: true, repeat: -1 });
+
+    const button = makeGoButton(this, width / 2, 316, 142).setDepth(4);
+    this.tweens.add({ targets: button, scale: 1.07, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+
+    // Small and out of the way: so a parent can tell when an update has arrived.
+    this.add.text(width - 18, 710, VERSION, {
+      fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+      fontSize: '22px',
+      color: '#5b4636',
+      resolution: 2,
+    }).setOrigin(1, 1).setAlpha(0.8).setDepth(3);
 
     const input = createInput(this);
-    input.tappable(button, 'play', new Phaser.Geom.Circle(0, 0, 150), Phaser.Geom.Circle.Contains);
+    input.tappable(button, 'play', new Phaser.Geom.Circle(0, 0, 170), Phaser.Geom.Circle.Contains);
     const start = () => this.start(input);
     input.on(ACTIONS.TAP, start);
     input.on(ACTIONS.GO, start);

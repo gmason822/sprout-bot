@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- The Sprout Bot logo. It is also the game's one "go" button, so it is drawn as
+       a round button with a darker rim underneath. -->
+  <circle cx="256" cy="270" r="238" fill="#b98f00"/>
+  <circle cx="256" cy="252" r="238" fill="#ffd21f"/>
+  <circle cx="256" cy="244" r="208" fill="#ffe566"/>
+  <!-- The robot from the truck, with a sprout growing where its antenna would be. -->
+  <g transform="translate(256 296) scale(0.8) translate(-256 -264)">
+    <path d="M256 160 V74" stroke="#2e7d32" stroke-width="16" stroke-linecap="round" fill="none"/>
+    <path d="M256 108 C222 110 180 86 170 46 C212 34 254 64 256 108 Z" fill="#7ed957" stroke="#2e7d32" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M256 88 C292 90 338 64 350 22 C306 10 258 42 256 88 Z" fill="#5cc93f" stroke="#2e7d32" stroke-width="10" stroke-linejoin="round"/>
+    <rect x="104" y="232" width="30" height="64" rx="12" fill="#90a4ae" stroke="#5f6b7a" stroke-width="10"/>
+    <rect x="378" y="232" width="30" height="64" rx="12" fill="#90a4ae" stroke="#5f6b7a" stroke-width="10"/>
+    <rect x="128" y="156" width="256" height="216" rx="52" fill="#dfe6ea" stroke="#5f6b7a" stroke-width="14"/>
+    <circle cx="204" cy="244" r="32" fill="#00bcd4"/>
+    <circle cx="308" cy="244" r="32" fill="#00bcd4"/>
+    <circle cx="194" cy="234" r="11" fill="#ffffff"/>
+    <circle cx="298" cy="234" r="11" fill="#ffffff"/>
+    <path d="M200 306 Q256 348 312 306" fill="none" stroke="#5f6b7a" stroke-width="16" stroke-linecap="round"/>
+  </g>
+</svg>

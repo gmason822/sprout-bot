@@ -4,7 +4,7 @@ import {
   placeFromBox, moveThing, putAway, freeSpot, wearOptions, setWear, ownedUpgrades, previousHomeStage, FIELD,
 } from '../systems/home.js';
 import { drawHomeBackdrop, buildUpgrade, upgradeSpot, depthAt } from './homeUpgrades.js';
-import { makeTruck, makePlayButton, makeConfetti, emoji, tween, wait } from './ui.js';
+import { makeTruck, makeGoButton, makeConfetti, emoji, tween, wait } from './ui.js';
 
 // The shelf along the bottom: things waiting to be placed, then the way back.
 const SHELF = { y: 668, top: 618 };
@@ -200,7 +200,7 @@ export class Home extends Phaser.Scene {
     g.fillStyle(0xc98f4a, 1).fillRoundedRect(34, SHELF.top + 10, 1020, 64, 16);
 
     // The way back to the animals.
-    const go = makePlayButton(this, GO_BUTTON.x, GO_BUTTON.y, 42).setDepth(600);
+    const go = makeGoButton(this, GO_BUTTON.x, GO_BUTTON.y, 44).setDepth(600);
     this.in.tappable(go, 'go', new Phaser.Geom.Circle(0, 0, 62), Phaser.Geom.Circle.Contains);
     this.tweens.add({ targets: go, scale: 1.07, duration: 800, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
   }

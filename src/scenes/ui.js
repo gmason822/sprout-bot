@@ -14,18 +14,18 @@ export function numberStyle(px) {
   };
 }
 
-/** The green ▶ used for "play" and for "send the truck". */
-export function makePlayButton(scene, x, y, radius) {
-  const c = scene.add.container(x, y);
-  const g = scene.add.graphics();
-  g.fillStyle(0x1b5e20, 1).fillCircle(0, 8, radius);
-  g.fillStyle(0x43a047, 1).fillCircle(0, 0, radius);
-  g.fillStyle(0x66bb6a, 1).fillCircle(0, -radius * 0.08, radius * 0.86);
-  g.fillStyle(0xffffff, 1);
-  const r = radius * 0.5;
-  g.fillTriangle(-r * 0.7, -r, -r * 0.7, r, r, 0);
-  c.add(g);
-  return c;
+// The logo's disc inside its 512-pixel drawing: where its middle is, and how wide.
+const LOGO = { size: 512, discX: 256, discY: 258, discRadius: 238 };
+
+/**
+ * The one "go" button: the Sprout Bot logo. It starts the game and leads back to the
+ * animals. `radius` is the radius of the yellow disc.
+ */
+export function makeGoButton(scene, x, y, radius) {
+  const k = radius / LOGO.discRadius;
+  const image = scene.add.image((LOGO.size / 2 - LOGO.discX) * k, (LOGO.size / 2 - LOGO.discY) * k, 'logo')
+    .setDisplaySize(LOGO.size * k, LOGO.size * k);
+  return scene.add.container(x, y, [image]);
 }
 
 export function tween(scene, config) {
@@ -146,28 +146,6 @@ export function drawDayRow(scene, today, deliveriesPerDay, { y = 52, size = 58, 
     if (today[i]) icons.push(deliveryIcon(scene, x, y, today[i], size).setDepth(depth));
   }
   return { rings, icons };
-}
-
-/** A big sun: the "start a new day" button. */
-export function makeSunButton(scene, x, y, radius) {
-  const g = scene.add.graphics();
-  g.fillStyle(0xffb300, 1);
-  for (let i = 0; i < 12; i++) {
-    const a = (i / 12) * Math.PI * 2;
-    g.fillTriangle(
-      Math.cos(a - 0.14) * radius, Math.sin(a - 0.14) * radius,
-      Math.cos(a + 0.14) * radius, Math.sin(a + 0.14) * radius,
-      Math.cos(a) * radius * 1.38, Math.sin(a) * radius * 1.38,
-    );
-  }
-  g.fillStyle(0xf59e0b, 1).fillCircle(0, 4, radius);
-  g.fillStyle(0xffd94a, 1).fillCircle(0, 0, radius * 0.94);
-  g.fillStyle(0x5b4636, 1).fillCircle(-radius * 0.32, -radius * 0.15, radius * 0.09).fillCircle(radius * 0.32, -radius * 0.15, radius * 0.09);
-  g.lineStyle(radius * 0.09, 0x5b4636, 1);
-  g.beginPath();
-  g.arc(0, radius * 0.08, radius * 0.42, 0.25, Math.PI - 0.25, false);
-  g.strokePath();
-  return scene.add.container(x, y, [g]);
 }
 
 /** A yellow ring for the keyboard / button-box highlight. */

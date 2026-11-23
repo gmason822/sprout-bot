@@ -5,6 +5,7 @@ import { DELIVERIES_MIN, DELIVERIES_MAX, DAYS_MAX } from '../systems/save.js';
 import { buildingsAt } from '../systems/dayTravel.js';
 import { progressGroups, progressSummary } from './progress.js';
 import { overlayRoot } from './gate.js';
+import { VERSION } from '../systems/version.js';
 
 const BOX_NOTE = ['', 'new or struggling', 'getting there', 'solid', 'strong', 'mastered'];
 
@@ -42,6 +43,7 @@ export function openParentPanel({ state, content, voiceCheck, onPreview, onClose
   };
 
   card.appendChild(el('h1', '', 'Parent area'));
+  card.appendChild(el('p', 'parent-hint', `Sprout Bot ${VERSION}`));
 
   // ----- settings -----
   const settings = el('section', 'parent-section');

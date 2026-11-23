@@ -15,7 +15,7 @@ Read `docs/DESIGN.md` for the full game design and `docs/ROADMAP.md` for the bui
 2. **Never show the answer in a form he can match by shape.** The number an animal asks for is shown as a numeral as well as spoken, and a numeral pops up whenever something is counted aloud, because a numeral still has to be counted out. There is deliberately no running total on the truck: he could match it to the asked-for numeral and never count. A requested letter or side is spoken only, because showing it would turn the task into shape matching.
 3. **Nothing to lose.** No game over, no lives, no timers. A wrong pick gets a gentle spoken correction and another try, and the right answer glows after 2 misses.
 4. **Huge tap targets.** At least 120 px on a tablet, with lots of space between them. They may scale down on the phone, but never below about 72 px.
-5. **No menus he can get lost in.** The child UI is the animals screen, a request, the end of the day, and the home farm. Each has at most one picture button leading elsewhere. Settings live behind a hidden parent gate.
+5. **No menus he can get lost in.** The child UI is the title screen, the animals screen, a request, the end of the day, and the home farm. Each has at most one picture button leading elsewhere. Settings live behind a hidden parent gate.
 6. **Nothing is gated.** Every subject has its own difficulty. Struggling with one never blocks another.
 7. **One loop for everything.** New learning is a new kind of request, never a new screen or mode.
 8. **Celebrate a lot.** Every delivery gets a cheer and a happy robot. Every farm day ends on a high.
@@ -31,13 +31,14 @@ Read `docs/DESIGN.md` for the full game design and `docs/ROADMAP.md` for the bui
 ```
 src/
   main.js              Phaser game config, scene registration
-  scenes/              Boot, Farm (the animals screen), Request, Sunset, Home (the home farm)
+  scenes/              Boot (loading, then the title screen), Farm (the animals screen), Request, Sunset, Home (the home farm)
     boards/            CountBoard and PickBoard: the two ways of answering a request
     homeUpgrades.js    The home farm's backdrop and each earnable building, with its tap toy
     layout.js, ui.js   Shared positions, colours and small drawing helpers
   systems/
     input.js           Maps touch + keyboard → game actions (see below)
     audio.js           Plays the generated voice; falls back to speechSynthesis
+    version.js         The build's version label (commit count and date, filled in by vite.config.js)
     lines.js           Every line the game can say, and the file name for each
     phrases.js         The fixed phrases (praise, greetings, sunset)
     content.js         Loads and validates content/*.json
@@ -62,7 +63,7 @@ docs/                  Design, roadmap, audio recording list
 | TAP      | Tap a thing on screen     | —                     |
 | LEFT     | —                         | `ArrowLeft` (moves the highlight left)  |
 | RIGHT    | —                         | `ArrowRight` (moves the highlight right) |
-| GO       | Big green ▶ send button   | `Space` or `Enter` (taps the highlighted thing) |
+| GO       | The logo button; the truck in a counting request | `Space` or `Enter` (taps the highlighted thing) |
 | PICK_1–4 | —                         | `1` `2` `3` `4` (taps that choice directly) |
 
 Scenes listen for **actions**, never raw keys or pointers. The one exception is the parent gate (`src/parent/gate.js`), which reads raw pointer events because it is not part of the child's game. While the parent area is open, `setInputSuspended(true)` silences every action. Input is **locked while the truck is moving or a voice line that must be heard is playing**, so mashing does nothing. Do not use a fixed time debounce.
@@ -82,6 +83,7 @@ Scenes listen for **actions**, never raw keys or pointers. The one exception is 
 - Prefer **Kenney.nl** packs (CC0) for the world, robot, truck, UI and sound effects.
 - Use **OpenMoji** for item and word pictures (CC BY-SA 4.0, so it needs a credit, listed in `CREDITS.md`).
 - Every third-party asset gets a line in `CREDITS.md`.
+- The logo (`public/assets/art/logo.svg`) is the game's one "go" button and the source of the app icon (`public/icon.svg`, `icon-192.png`, `icon-512.png`). There is no green play button any more.
 - The current art (`public/assets/art/*.svg`) was drawn for this project and the sound effects are synthesized in `src/systems/sfx.js`. Swap in Kenney packs when wanted. Never block a milestone on art.
 
 ## Audio

@@ -17,10 +17,11 @@ Why this loop: he has to **understand the request** to succeed, the learning is 
 A farm day is `deliveriesPerDay` deliveries, set by the parent (default 5, range 3–10).
 
 ## Screens (child-facing)
+- **Title**: the name, the logo as one big start button, and a small version label for parents. The game waits here until the logo is tapped.
 - **Animals**: three animals waiting, the row of today's deliveries, and a house button to the home farm.
 - **Request**: animal on one side, the things to pick in the middle, the truck at the bottom.
 - **Sunset**: end-of-day celebration and reward.
-- **Home farm**: free play. Everything he has earned ends up here, and a green button leads back to the animals.
+- **Home farm**: free play. Everything he has earned ends up here, and the logo button leads back to the animals.
 
 Hidden **Parent Gate**: hold the sun in the top-right for 3 seconds, or tap it five times quickly, then tap three numbers that are written out as words ("seven, two, five") on a keypad. A white ring closes in around the finger from the second second of a hold, so a parent can see it counting. The hold zone is measured from the game picture rather than the screen, because a wide phone shows the picture with bars at the sides. The numbers change every time. One wrong tap, or 20 seconds of nothing, closes it and the game carries on.
 
@@ -32,16 +33,19 @@ The **parent area** is plain HTML over the paused game, because a parent needs t
 
 Changing a setting saves it and restarts the game at the play button, so nothing on screen is left out of step with the new values. Closing without changes resumes exactly where he was.
 
+**The logo is the one "go" button.** The robot with a sprout, on a yellow disc (`public/assets/art/logo.svg`), starts the game on the title screen and leads from the home farm back to the animals. It is also the app icon. Its yellow is kept well away from the orange that always means RIGHT.
+
 ## Requests
 
 ### Two ways to answer
 Every skill produces a request that uses one of two answer kinds. The Request scene only knows these two, which is what keeps new skills from touching the loop.
 
 - **`pick`**: 2–4 things on screen, one is right. One tap answers.
-- **`count`**: a pile of identical things. Each tap loads one into the truck while the voice counts it ("one… two… three"). Tapping one in the truck puts it back. The green ▶ button sends the truck.
-  - Too few: the animal counts what arrived, "One, two. I need three. One more!", and he keeps loading.
-  - Too many: "Too many! Take one out."
-  - After 2 misses the send button glows exactly when the truck holds the right number.
+- **`count`**: a pile of identical things. Each tap loads one into the truck while the voice counts it ("one… two… three"). Tapping the truck sends it; there is no separate button, and nothing can be taken out again. If something is loaded and he waits, the truck gives a little hop.
+  - Too few: the animal counts what arrived, then "Not enough! I need three. Count again!"
+  - Too many: "Too many! I need three. Count again!"
+  - Either way the truck comes back, everything returns to the pile, and he counts again from one.
+  - After 2 misses the truck glows exactly when it holds the right number.
   - **Numerals are shown with the spoken number**: the asked-for number in the animal's speech bubble, and a numeral that pops up each time the animal counts one aloud. There is no running total on the truck, because he could match it to the bubble's numeral without counting. Each thing he loads is still counted aloud.
 
 What is shown versus only spoken: a numeral is shown, because he still has to count it out. A requested letter or side is spoken only, because showing it would let him match shapes without listening.

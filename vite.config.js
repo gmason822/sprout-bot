@@ -1,3 +1,4 @@
+import { execSync } from 'node:child_process';
 import { existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
@@ -42,7 +43,22 @@ function voiceClips() {
   };
 }
 
+/**
+ * What the title screen shows so a parent can tell builds apart: the number of commits
+ * (it goes up with every change) and the day it was built, e.g. "v61 · 22 Nov".
+ */
+function appVersion() {
+  const built = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  try {
+    const commits = execSync('git rev-list --count HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+    return `v${commits} · ${built}`;
+  } catch {
+    return built; // not a git checkout
+  }
+}
+
 export default defineConfig({
+  define: { __APP_VERSION__: JSON.stringify(appVersion()) },
   // Relative paths so the build works from any folder on a static host
   // (GitHub Pages serves it from /sprout-bot/).
   base: './',
