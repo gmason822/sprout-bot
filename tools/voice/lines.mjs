@@ -12,6 +12,7 @@ const read = (name) => JSON.parse(readFileSync(new URL(`../../content/${name}.js
 
 const { content, errors } = validateContent({
   animals: read('animals'), skills: read('skills'), letters: read('letters'), rewards: read('rewards'), words: read('words'),
+  colours: read('colours'), groups: read('groups'),
 }, GENERATOR_IDS);
 for (const message of errors) console.error(`[content] ${message}`);
 

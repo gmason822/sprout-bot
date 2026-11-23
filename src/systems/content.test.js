@@ -104,7 +104,7 @@ describe('validateContent', () => {
 
   it('survives files that are missing or the wrong shape', () => {
     const { content, errors } = validateContent({}, GEN);
-    expect(content).toEqual({ animals: [], skills: [], letters: [], rewards: [], small: [], words: [] });
+    expect(content).toEqual({ animals: [], skills: [], letters: [], rewards: [], small: [], words: [], colours: [], groups: [] });
     expect(errors).toHaveLength(4);
   });
 });

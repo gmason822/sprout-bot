@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "_comment": "Kinds of thing, as pictures. 'Odd one out' shows three of one kind and one of another; 'Find the same one' picks its pictures from one kind, so the wrong choices are near misses. Which kinds a game uses, and which it pairs, is set by its tiers in skills.json. Each kind needs at least four pictures, all different, and none shared with another kind.",
+  "groups": [
+    { "id": "animals",    "name": "Animals",    "emoji": ["🐶", "🐱", "🐮", "🐷", "🐸", "🐵", "🐻", "🐰"] },
+    { "id": "vehicles",   "name": "Vehicles",   "emoji": ["🚗", "🚌", "🚜", "🚂", "✈️", "🚲", "🚀", "⛵"] },
+    { "id": "fruit",      "name": "Fruit",      "emoji": ["🍎", "🍌", "🍇", "🍓", "🍊", "🍐", "🍉", "🍒"] },
+    { "id": "clothes",    "name": "Clothes",    "emoji": ["👕", "👖", "🧦", "👟", "🧢", "🧤", "👗", "🧥"] },
+    { "id": "vegetables", "name": "Vegetables", "emoji": ["🥕", "🌽", "🥦", "🥔", "🍆", "🥒", "🥬", "🌶️"] },
+    { "id": "food",       "name": "Food",       "emoji": ["🍞", "🧀", "🍕", "🥚", "🍪", "🥞", "🍔", "🥨"] },
+    { "id": "toys",       "name": "Toys",       "emoji": ["🧸", "⚽", "🎈", "🎲", "🧩", "🥁", "🏀", "🎁"] }
+  ]
+}

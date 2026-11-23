@@ -4,6 +4,7 @@ import { loadContent } from './content.js';
 import { GENERATOR_IDS, makeRequest } from '../skills/index.js';
 import { correctionLine, numberWord } from '../skills/count.js';
 import { FIXED_LINES } from './phrases.js';
+import { EVERYTHING_SOLID } from './tryGame.js';
 
 const content = loadContent(GENERATOR_IDS);
 const lines = new Set(allLines(content));
@@ -30,7 +31,8 @@ describe('allLines', () => {
 
     const missing = new Set();
     const check = (text) => { if (text !== null && !lines.has(text)) missing.add(text); };
-    for (const mastery of [{}, mastered]) {
+    // The last one has every level of every game open, which covers the newer games.
+    for (const mastery of [{}, mastered, EVERYTHING_SOLID]) {
       for (const animal of content.animals) {
         for (let i = 0; i < 600; i++) {
           const request = makeRequest(animal.skill, { content, mastery, hasClip: () => false, childName: i % 2 ? 'Zoe' : '' });

@@ -52,10 +52,14 @@ describe('progressGroups', () => {
 
   it('lists every item of every game, met or not', () => {
     const groups = progressGroups(content, {});
-    expect(groups.map((g) => g.title)).toEqual([
+    // The first games, in the order they are listed; newer games follow.
+    expect(groups.map((g) => g.title).slice(0, 10)).toEqual([
       'Counting', 'Letter names', 'Lowercase letters', 'Letter sounds', 'Left, right and middle',
       'Finding numbers', 'How many?', 'First sounds', 'Shapes', 'Harder shapes',
     ]);
+    // Every tier of every game has a group of its own (or shares one by title).
+    const titles = new Set(content.skills.flatMap((s) => s.tiers.map((t) => t.title ?? t.id)));
+    expect(new Set(groups.map((g) => g.title))).toEqual(titles);
     // The two counting tiers share a title and are merged, with no number twice.
     expect(group(groups, 'Counting').items.map((i) => i.label)).toEqual(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
     expect(group(groups, 'Letter names').items).toHaveLength(26);
@@ -84,13 +88,15 @@ describe('progressGroups', () => {
   });
 
   it('never hides a record it does not recognise', () => {
-    const groups = progressGroups(content, { 'colour:red': rec(2) });
-    expect(groups.at(-1)).toEqual({ title: 'Other', items: [{ id: 'colour:red', label: 'colour:red', box: 2, seen: 2, correct: 2 }] });
+    const groups = progressGroups(content, { 'old-game:thing': rec(2) });
+    expect(groups.at(-1)).toEqual({ title: 'Other', items: [{ id: 'old-game:thing', label: 'old-game:thing', box: 2, seen: 2, correct: 2 }] });
   });
 
   it('summarises met and solid items', () => {
     const groups = progressGroups(content, { 'count:1': rec(5), 'count:2': rec(3), 'count:3': rec(1) });
-    expect(progressSummary(groups)).toEqual({ met: 3, solid: 2, total: 145 });
+    const total = groups.reduce((n, g) => n + g.items.length, 0);
+    expect(total).toBeGreaterThanOrEqual(145);
+    expect(progressSummary(groups)).toEqual({ met: 3, solid: 2, total });
   });
 });
 

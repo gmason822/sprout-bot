@@ -108,5 +108,32 @@ export function validateContent(raw, generatorIds, soundNames = null) {
     return true;
   });
 
-  return { content: { animals, skills, letters, rewards, small, words }, errors };
+  // Colours are optional: without them the colour games have nothing to ask.
+  const seenColours = new Set();
+  const colours = (Array.isArray(raw.colours?.colours) ? raw.colours.colours : []).filter((c) => {
+    if (typeof c?.id !== 'string' || !/^[a-z]+$/.test(c.id)) return bad(`colours.json: "${c?.id}" is not a lowercase colour name`);
+    if (seenColours.has(c.id)) return bad(`colours.json: colour "${c.id}" appears twice`);
+    if (!/^#[0-9a-f]{6}$/i.test(c.hex ?? '')) return bad(`colours.json: colour "${c.id}" needs a hex like "#ff0000"`);
+    seenColours.add(c.id);
+    return true;
+  }).map((c) => ({ ...c, tint: parseInt(c.hex.slice(1), 16) }));
+
+  // Kinds of thing, as pictures. No picture may be in two kinds, or "odd one out"
+  // could have two right answers.
+  const seenGroups = new Set();
+  const seenPictures = new Set();
+  const groups = (Array.isArray(raw.groups?.groups) ? raw.groups.groups : []).filter((g) => {
+    if (typeof g?.id !== 'string' || !/^[a-z]+$/.test(g.id)) return bad(`groups.json: "${g?.id}" is not a lowercase name`);
+    if (seenGroups.has(g.id)) return bad(`groups.json: kind "${g.id}" appears twice`);
+    const pictures = Array.isArray(g.emoji) ? g.emoji.filter((e) => typeof e === 'string' && e) : [];
+    if (new Set(pictures).size !== pictures.length) return bad(`groups.json: kind "${g.id}" has the same picture twice`);
+    if (pictures.length < 4) return bad(`groups.json: kind "${g.id}" needs at least four pictures`);
+    const shared = pictures.find((e) => seenPictures.has(e));
+    if (shared) return bad(`groups.json: ${shared} is in "${g.id}" and in another kind`);
+    pictures.forEach((e) => seenPictures.add(e));
+    seenGroups.add(g.id);
+    return true;
+  });
+
+  return { content: { animals, skills, letters, rewards, small, words, colours, groups }, errors };
 }

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "One entry per game. 'answer' is how he answers: 'count' (load N, then send) or 'pick' (tap one of 2-4). Each tier is one group in the parent's progress view, labelled by its 'title'. 'unlockAfter': the tier opens when two thirds of the earlier tier's items are in box 3+. 'perItemAfter': each item opens separately, once the same item in the earlier tier is in box 3+. 'start': how many of the tier's items are in play from the first day; the rest arrive one at a time.",
+  "_comment": "One entry per game. 'answer' is how he answers: 'count' (load N, then send) or 'pick' (tap one of 2-4). Each tier is one group in the parent's progress view, labelled by its 'title'. 'unlockAfter': the tier opens when two thirds of the earlier tier's items are in box 3+. 'perItemAfter': each item opens separately, once the same item in the earlier tier is in box 3+. 'start': how many of the tier's items are in play from the first day; the rest arrive one at a time. 'items': what a tier asks about, for the newer games. 'title' on a game is its name in the parent area.",
   "skills": [
     {
       "id": "count",
@@ -56,6 +56,17 @@
       "tiers": [
         { "id": "shape",  "title": "Shapes", "shapes": ["circle", "square", "triangle", "star", "heart"], "choices": 3 },
         { "id": "shape2", "title": "Harder shapes", "shapes": ["rectangle", "oval", "diamond"], "choices": 3, "unlockAfter": "shape" }
+      ]
+    },
+    {
+      "id": "colours",
+      "title": "Colours",
+      "answer": "pick",
+      "shapes": ["circle", "square", "star", "heart", "triangle"],
+      "tiers": [
+        { "id": "colour",  "title": "Colours",                "items": ["red", "blue", "yellow", "green"], "choices": 3 },
+        { "id": "colour2", "title": "More colours",           "items": ["orange", "purple", "pink"], "choices": 3, "unlockAfter": "colour" },
+        { "id": "colour3", "title": "Brown, black and white", "items": ["brown", "black", "white"], "choices": 3, "unlockAfter": "colour2" }
       ]
     }
   ]

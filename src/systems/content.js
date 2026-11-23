@@ -6,6 +6,8 @@ import skillsJson from '../../content/skills.json';
 import lettersJson from '../../content/letters.json';
 import rewardsJson from '../../content/rewards.json';
 import wordsJson from '../../content/words.json';
+import coloursJson from '../../content/colours.json';
+import groupsJson from '../../content/groups.json';
 import { validateContent } from './validateContent.js';
 import { SOUND_NAMES } from './sfx.js';
 
@@ -14,7 +16,10 @@ export { validateContent };
 /** Load, validate and report. Called once at boot. */
 export function loadContent(generatorIds) {
   const { content, errors } = validateContent(
-    { animals: animalsJson, skills: skillsJson, letters: lettersJson, rewards: rewardsJson, words: wordsJson },
+    {
+      animals: animalsJson, skills: skillsJson, letters: lettersJson, rewards: rewardsJson, words: wordsJson,
+      colours: coloursJson, groups: groupsJson,
+    },
     generatorIds,
     SOUND_NAMES,
   );

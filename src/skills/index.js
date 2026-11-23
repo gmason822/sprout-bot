@@ -7,6 +7,7 @@ import { generateLeftRight, leftRightLines } from './leftright.js';
 import { generateNumbers, numberLines } from './numbers.js';
 import { generateFirstSound, firstSoundLines } from './firstsound.js';
 import { generateShapes, shapeLines } from './shapes.js';
+import { generateColours, colourLines } from './colours.js';
 
 const GENERATORS = {
   count: generateCount,
@@ -15,6 +16,7 @@ const GENERATORS = {
   numbers: generateNumbers,
   firstsound: generateFirstSound,
   shapes: generateShapes,
+  colours: generateColours,
 };
 
 export const GENERATOR_IDS = Object.keys(GENERATORS);
@@ -27,6 +29,7 @@ const LINES = {
   numbers: numberLines,
   firstsound: firstSoundLines,
   shapes: shapeLines,
+  colours: colourLines,
 };
 
 /** Every line the skills in this content can say. */

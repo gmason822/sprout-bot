@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "_comment": "The colours the games can name and show. 'id' is the word that is spoken, 'hex' the colour itself. Which ones a game asks about, and in what order, is set by that game's tiers in skills.json. Keep neighbours easy to tell apart on a phone screen.",
+  "colours": [
+    { "id": "red",    "hex": "#ef4444" },
+    { "id": "blue",   "hex": "#3b82f6" },
+    { "id": "yellow", "hex": "#fde047" },
+    { "id": "green",  "hex": "#22c55e" },
+    { "id": "orange", "hex": "#f97316" },
+    { "id": "purple", "hex": "#9333ea" },
+    { "id": "pink",   "hex": "#f9a8d4" },
+    { "id": "brown",  "hex": "#8b5a2b" },
+    { "id": "black",  "hex": "#1f2937" },
+    { "id": "white",  "hex": "#ffffff" }
+  ]
+}
