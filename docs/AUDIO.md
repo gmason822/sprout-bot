@@ -61,9 +61,9 @@ Animal lines are more fun in a silly voice for each animal. One voice for everyt
 | `num-1.mp3` … `num-7.mp3` | "one" … "seven" (he can load up to 7 apples, and each one is counted) |
 | `item-apple.mp3` | "apple" |
 | `item-apples.mp3` | "apples" |
-| `one-more.mp3` | "One more!" |
-| `more.mp3` | "More!" |
-| `too-many.mp3` | "Too many! Take one out." |
+| `not-enough.mp3` | "Not enough!" |
+| `too-many.mp3` | "Too many!" |
+| `count-again.mp3` | "Count again!" |
 | `thank-you.mp3` | "Thank you!" |
 | `great-job.mp3` | "Great job!" |
 | `you-did-it.mp3` | "You did it!" |

@@ -9,7 +9,7 @@ Each milestone ends with something playable. **Playtest with him after every mil
 The only question this milestone answers: does he want to do it again?
 - Vite + Phaser 3 project scaffold, `npm run dev` / `build` / `test`.
 - One animal (the hen) and counting requests only, 1–5, hardcoded.
-- Tap things into the truck while the voice counts, green ▶ sends it, too-few / too-many corrections, delivery celebration, then the next request.
+- Tap things into the truck while the voice counts, tapping the truck sends it, a wrong count goes back to the pile to be counted again, delivery celebration, then the next request.
 - `input.js` (actions, locked during animations) and `audio.js` (clip sequence with a speechSynthesis fallback).
 - Real truck, robot and animal art and a few sounds from the start (drawn and synthesized for this project rather than taken from Kenney).
 - The "Milestone 1" clips in `docs/AUDIO.md` recorded if possible; TTS covers the rest.

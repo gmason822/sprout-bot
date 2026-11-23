@@ -68,22 +68,22 @@ export function judgeCount(target, loaded) {
 }
 
 /**
- * After two misses the send button glows, but only while the truck holds
- * the right number, so the hint still makes him count.
+ * After two misses the truck glows, but only while it holds the right number,
+ * so the hint still makes him count.
  */
 export function sendGlows(misses, loaded, target) {
   return misses >= 2 && loaded === target;
 }
 
-/** What the animal says after a wrong delivery. */
+/**
+ * What the animal says after a wrong delivery. Nothing can be taken out of the truck,
+ * so either way everything goes back and he is asked to count again.
+ */
 export function correctionLine(target, loaded) {
-  if (loaded > target) {
-    return { say: ['too-many'], tts: 'Too many! Take one out.' };
-  }
-  const oneShort = target - loaded === 1;
+  const many = loaded > target;
   return {
-    say: ['need', `num-${target}`, oneShort ? 'one-more' : 'more'],
-    tts: `I need ${numberWord(target)}. ${oneShort ? 'One more!' : 'More!'}`,
+    say: [many ? 'too-many' : 'not-enough', 'need', `num-${target}`, 'count-again'],
+    tts: `${many ? 'Too many!' : 'Not enough!'} I need ${numberWord(target)}. Count again!`,
   };
 }
 
@@ -95,12 +95,14 @@ export function countLines(skill) {
     for (let n = tier.min; n <= tier.max; n++) numbers.add(n);
     top = Math.max(top, tier.max + EXTRA);
   }
-  const lines = [correctionLine(1, 2).tts];
+  const lines = [];
   // Each thing is counted aloud as it is loaded, up to the biggest pile.
   for (let n = 1; n <= top; n++) lines.push(numberWord(n));
   for (const n of numbers) {
     for (const thing of skill.items ?? []) lines.push(buildCountRequest(n, { id: thing, plural: plural(thing) }, 0).tts);
-    lines.push(correctionLine(n, n - 1).tts, correctionLine(n, n - 2).tts);
+    lines.push(correctionLine(n, n + 1).tts);
+    // An empty truck is never sent, so "not enough" is never said when one is wanted.
+    if (n > 1) lines.push(correctionLine(n, n - 1).tts);
   }
   return lines;
 }

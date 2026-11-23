@@ -90,14 +90,19 @@ describe('sendGlows', () => {
 });
 
 describe('correctionLine', () => {
-  it('says "one more" when exactly one short', () => {
-    expect(correctionLine(3, 2)).toEqual({ say: ['need', 'num-3', 'one-more'], tts: 'I need three. One more!' });
+  it('says there are not enough, how many are wanted, and to count again', () => {
+    expect(correctionLine(3, 2)).toEqual({
+      say: ['not-enough', 'need', 'num-3', 'count-again'],
+      tts: 'Not enough! I need three. Count again!',
+    });
+    // The same line however far short he is: everything goes back either way.
+    expect(correctionLine(5, 1)).toEqual(correctionLine(5, 4));
   });
-  it('says "more" when further short', () => {
-    expect(correctionLine(5, 2).say).toEqual(['need', 'num-5', 'more']);
-  });
-  it('says "too many" when over', () => {
-    expect(correctionLine(2, 4)).toEqual({ say: ['too-many'], tts: 'Too many! Take one out.' });
+  it('says there are too many', () => {
+    expect(correctionLine(2, 4)).toEqual({
+      say: ['too-many', 'need', 'num-2', 'count-again'],
+      tts: 'Too many! I need two. Count again!',
+    });
   });
 });
 

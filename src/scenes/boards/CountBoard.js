@@ -1,13 +1,17 @@
 import Phaser from 'phaser';
 import { judgeCount, sendGlows, correctionLine } from '../../skills/count.js';
 import { BASKET, TRUCK_AT_ANIMAL_X, ANIMAL, HINT_COLOR } from '../layout.js';
-import { makePlayButton, tween, wait, bounce, popNumber } from '../ui.js';
+import { tween, wait, bounce, popNumber } from '../ui.js';
 
 // The "count" answer: a pile of identical things. Each tap loads one into the truck
-// while the voice counts it, and the green button sends the truck.
+// while the voice counts it, and tapping the truck sends it. Nothing can be taken
+// out again: a wrong count comes back, is tipped out, and he counts again from one.
 
-const SEND = { x: 1140, y: 580, radius: 92 };
 const PILE_MAX = 12;
+// The whole truck is the target, cab and bed.
+const TRUCK_HIT = { x: -220, y: -135, width: 440, height: 255 };
+// With something loaded and nothing happening, the truck hops: "I am ready to go".
+const NUDGE_MS = 3200;
 
 /** Where the things sit, left to right. Small piles get bigger targets. */
 function spotsFor(available) {
@@ -62,7 +66,6 @@ export class CountBoard {
     this.drawSource();
     this.buildThings();
     this.buildTruckParts();
-    this.buildSendButton();
     this.basket = scene.add.image(BASKET.x, BASKET.y, 'basket').setDisplaySize(160, 110).setDepth(4);
     this.refresh();
   }
@@ -106,31 +109,36 @@ export class CountBoard {
 
   buildTruckParts() {
     const { s } = this;
-    // Tapping the bed takes the last thing out. One big target beats many small ones.
-    s.in.tappable(s.truck, 'truck', new Phaser.Geom.Rectangle(-70, -170, 300, 220), Phaser.Geom.Rectangle.Contains);
+    s.in.tappable(s.truck, 'truck',
+      new Phaser.Geom.Rectangle(TRUCK_HIT.x, TRUCK_HIT.y, TRUCK_HIT.width, TRUCK_HIT.height), Phaser.Geom.Rectangle.Contains);
     // No running total is shown on the truck. With a numeral there, he could match it
     // to the numeral in the animal's bubble and never count.
-  }
 
-  buildSendButton() {
-    const { s } = this;
-    this.sendGlow = s.add.graphics().setDepth(7).setVisible(false);
-    this.sendGlow.fillStyle(HINT_COLOR, 0.9).fillCircle(SEND.x, SEND.y, SEND.radius + 26);
-    s.tweens.add({ targets: this.sendGlow, alpha: 0.25, duration: 450, yoyo: true, repeat: -1 });
+    // The hint after two misses: a glow behind the truck, riding along with it.
+    this.glow = s.add.graphics().setVisible(false);
+    this.glow.fillStyle(HINT_COLOR, 0.9).fillEllipse(0, 14, 540, 320);
+    s.truck.addAt(this.glow, 0);
+    s.tweens.add({ targets: this.glow, alpha: 0.25, duration: 450, yoyo: true, repeat: -1 });
 
-    this.sendButton = makePlayButton(s, SEND.x, SEND.y, SEND.radius).setDepth(8);
-    s.in.tappable(this.sendButton, 'send',
-      new Phaser.Geom.Circle(0, 0, SEND.radius + 16), Phaser.Geom.Circle.Contains);
+    this.lastLoadAt = 0;
+    s.time.addEvent({
+      delay: NUDGE_MS,
+      loop: true,
+      callback: () => {
+        if (s.in.locked || this.loaded.length === 0 || s.time.now - this.lastLoadAt < NUDGE_MS) return;
+        bounce(s, s.truck, -16, 150);
+      },
+    });
   }
 
   // ---------- what the scene asks of a board ----------
 
-  /** Things the highlight can land on, left to right, with the send button last. */
+  /** Things the highlight can land on, left to right, with the truck last. */
   focusables() {
     const things = this.things
       .map((t, i) => ({ id: `thing:${i}`, x: t.x, y: t.y, r: this.layout.hit, visible: t.visible }))
       .filter((t) => t.visible);
-    return [...things, { id: 'send', x: SEND.x, y: SEND.y, r: SEND.radius + 14 }];
+    return [...things, { id: 'truck', x: this.s.truck.x, y: this.s.truck.y - 10, r: 150 }];
   }
 
   /** What this delivery leaves in the day's row on the farm. */
@@ -139,8 +147,7 @@ export class CountBoard {
   }
 
   onTap(id) {
-    if (id === 'send') return this.send();
-    if (id === 'truck') return this.unload();
+    if (id === 'truck') return this.send();
     if (id.startsWith('thing:')) return this.load(Number(id.slice(6)));
   }
 
@@ -181,35 +188,46 @@ export class CountBoard {
       },
     });
 
+    this.lastLoadAt = s.time.now;
     s.sfx.pop(n);
     s.sayNumber(n);
     this.refresh();
     s.refreshFocus();
   }
 
-  unload() {
+  /** Everything in the truck goes back where it came from, so he can count again. */
+  async tipOut() {
     const { s } = this;
-    if (this.loaded.length === 0) return;
-    const i = this.loaded.pop();
-    this.bedThings.pop().destroy();
-
-    const thing = this.things[i];
-    thing.setVisible(true).setScale(0);
-    thing.input.enabled = true;
-    s.tweens.add({ targets: thing, scale: thing.baseScale, duration: 220, ease: 'Back.out' });
-
-    s.sfx.drop();
-    // Hearing the new total tells him whether "take one out" has worked.
-    if (this.loaded.length > 0) s.sayNumber(this.loaded.length);
-    else s.audio.stop();
+    const size = this.bed.size;
+    const flights = [];
+    while (this.loaded.length > 0) {
+      const thing = this.things[this.loaded.pop()];
+      const inBed = this.bedThings.pop();
+      const flyer = s.add.image(s.truck.x + inBed.x, s.truck.y + inBed.y, this.art).setDisplaySize(size, size).setDepth(10);
+      inBed.destroy();
+      flights.push(tween(s, {
+        targets: flyer,
+        x: thing.x,
+        y: thing.y,
+        displayWidth: this.layout.size,
+        displayHeight: this.layout.size,
+        delay: flights.length * 70,
+        duration: 300,
+        ease: 'Quad.out',
+        onStart: () => s.sfx.drop(),
+      }).then(() => {
+        flyer.destroy();
+        thing.setVisible(true).setScale(thing.baseScale);
+        thing.input.enabled = true;
+      }));
+    }
+    await Promise.all(flights);
     this.refresh();
     s.refreshFocus();
   }
 
   refresh() {
-    const loaded = this.loaded.length;
-    this.sendButton.setAlpha(loaded > 0 ? 1 : 0.45);
-    this.sendGlow.setVisible(sendGlows(this.s.misses, loaded, this.answer.target));
+    this.glow.setVisible(sendGlows(this.s.misses, this.loaded.length, this.answer.target));
   }
 
   // ---------- sending ----------
@@ -225,7 +243,7 @@ export class CountBoard {
 
     s.in.lock();
     s.hideFocus();
-    this.sendGlow.setVisible(false);
+    this.glow.setVisible(false);
     const { target } = this.answer;
     const verdict = judgeCount(target, loaded);
     s.judge(verdict === 'right');
@@ -257,7 +275,7 @@ export class CountBoard {
     await s.audio.say(line.say, line.tts);
 
     await s.drive(s.truckHomeX);
-    this.refresh();
+    await this.tipOut();
     s.in.unlock();
     s.resetIdle();
   }
