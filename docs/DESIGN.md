@@ -21,7 +21,7 @@ A farm day is `deliveriesPerDay` deliveries, set by the parent (default 5, range
 - **Animals**: three animals waiting, the row of today's deliveries, and a house button to the home farm.
 - **Request**: animal on one side, the things to pick in the middle, the truck at the bottom.
 - **Sunset**: end-of-day celebration and reward.
-- **Home farm**: free play. Everything he has earned ends up here, and the logo button leads back to the animals.
+- **Home farm**: free play. Everything he has earned ends up here, and the logo button leads back to the animals. It is one wide place made of pages (see "The farm is wide" below): two arrows drive the truck to the page next door and a house button drives it home.
 
 Hidden **Parent Gate**: hold the top-right corner of the picture for 3 seconds, or tap it five times quickly (the sun used to sit there; it now moves through the day), then tap three numbers that are written out as words ("seven, two, five") on a keypad. A white ring closes in around the finger from the second second of a hold, so a parent can see it counting. The hold zone is measured from the game picture rather than the screen, because a wide phone shows the picture with bars at the sides. The numbers change every time. One wrong tap, or 20 seconds of nothing, closes it and the game carries on.
 
@@ -166,29 +166,36 @@ A big reward must feel different from a small one, and it must be obvious that t
 3. **It shows what it does,** once, by itself (the barn's cow comes out, the tree drops its apples).
 4. **A finger points at it** until he taps it himself.
 
-So that the buildings are not mistaken for scenery, they are drawn large and stand in front of the fence, and every few seconds one of them gives a little hop.
+So that the buildings are not mistaken for scenery, they are drawn large, and every few seconds one of those on the page he is looking at gives a little hop.
 
-| Day | Big reward | When tapped |
-|---|---|---|
-| 1 | Tent (the first home) | The flap lifts and a lantern glows inside |
-| 3 | Fence and gate | The gate swings open or shut |
-| 5 | Garage | The door rolls up and his paints and hats come out to choose from |
-| 8 | Barn | The doors open and a cow comes out and moos |
-| 11 | Cabin (replaces the tent) | Lights go on or off, the door opens, the chimney smokes |
-| 14 | Pond | A fish jumps and splashes |
-| 17 | Apple tree | It shakes and apples drop and bounce |
-| 20 | Hen house | A hen pops out and lays an egg, which hatches |
-| 23 | Vegetable garden | Tap to plant, tap to ripen, tap to pick |
-| 26 | Well | The bucket goes down, splashes and comes up |
-| 29 | Windmill | The sails spin fast, then settle |
-| 32 | Farmhouse (replaces the cabin, adds a path) | Lights, door and chimney |
-| 35 | Silo | Grain pours out and two birds fly down for it |
-| 38 | Beehive | Bees fly out, loop around and come home |
-| 41 | Scarecrow | It wobbles and the crow flaps off, then sneaks back |
-| 44 | Rain cloud | It rains, then a rainbow comes out for a while |
-| 47 | Big farmhouse (replaces the farmhouse) | Lights window by window, door, chimney, a flag |
+**The farm is wide.** It is several pages side by side, each the size of the screen, with Home in the middle: `Pond, Animals, HOME, Crops, Yard` (`src/systems/farmPages.js`). He sees one page at a time.
+- **A page exists once its first building is earned.** On day 1 there is only Home and no arrows. The farm gets wider as he plays, and the days below take turns between the pages so that each keeps growing.
+- **Three buttons, always in the same places.** A blue arrow at the left end of the road and an orange arrow at the right end (the same colours as LEFT and RIGHT everywhere else) drive the truck to the page next door; an arrow is only there when there is a page that way. A house button on the shelf drives straight home from anywhere, and is hidden on Home. The logo, back to the animals, is on every page.
+- **The truck drives along a dirt road** that runs through every page, and the view goes with it. Nothing can be tapped while it drives.
+- He always arrives on Home. A building earned for another page is built there: the truck drives to it first.
+- An arrow bobs, with a picture above it, while something he has not placed yet is waiting on a shelf that way.
 
-- The tent, cabin, farmhouse and big farmhouse are four stages of one home. Only the best one he owns is drawn.
+| Day | Big reward | Page | When tapped |
+|---|---|---|---|
+| 1 | Tent (the first home) | Home | The flap lifts and a lantern glows inside |
+| 3 | Vegetable garden | Crops | Tap to plant, tap to ripen, tap to pick |
+| 5 | Hen house | Animals | A hen pops out and lays an egg, which hatches |
+| 8 | Garage | Home | The door rolls up and his paints and hats come out to choose from |
+| 11 | Fence and gate | Home | The gate swings open or shut |
+| 14 | Scarecrow | Crops | It wobbles and the crow flaps off, then sneaks back |
+| 17 | Barn | Animals | The doors open and a cow comes out and moos |
+| 20 | Cabin (replaces the tent) | Home | Lights go on or off, the door opens, the chimney smokes |
+| 23 | Pond | Pond | A fish jumps and splashes |
+| 26 | Windmill | Crops | The sails spin fast, then settle |
+| 29 | Apple tree | Home | It shakes and apples drop and bounce |
+| 32 | Rain cloud | Crops | It rains, then a rainbow comes out for a while |
+| 35 | Well | Home | The bucket goes down, splashes and comes up |
+| 38 | Farmhouse (replaces the cabin, adds a path) | Home | Lights, door and chimney |
+| 41 | Silo | Crops | Grain pours out and two birds fly down for it |
+| 44 | Beehive | Crops | Bees fly out, loop around and come home |
+| 47 | Big farmhouse (replaces the farmhouse) | Home | Lights window by window, door, chimney, a flag |
+
+- A building can grow in stages: its `replaces` names the one it takes the place of. The tent, cabin, farmhouse and big farmhouse are four stages of one home. Only the best stage he owns is drawn, and an early stage is never given once he has a later one.
 - If a building's day has passed and he does not have it (the schedule was edited, or an older save is further on), the earliest one still owed is given, one per day.
 - A toy ignores taps while it is still doing its thing, so mashing cannot tangle it.
 
@@ -196,13 +203,14 @@ So that the buildings are not mistaken for scenery, they are drawn large and sta
 - **Plain decorations** (flowers, vegetables, bugs, small trees), which can repeat.
 - **One-offs**, each given only once: animal friends, a few bigger decorations, truck paints and robot hats.
 - Paints and hats are only given once he has the garage, and go straight on.
+- **Each small thing belongs to a page.** Flowers, rocks, bugs and decorations belong at Home; carrots, corn, pumpkins and sunflowers on Crops; most animal friends on Animals, and the duck on the Pond. A thing is only given once its page is open. (Something from an older save whose page is not open yet is kept at Home until it is.)
 
 **On the home farm**
-- Small things he has not placed wait on a shelf along the bottom, eight at a time, oldest first.
-- Tapping one makes it hop onto the farm at a free spot. He can then drag it anywhere. Dragging it back down onto the shelf puts it away.
+- Small things he has not placed wait on a shelf along the bottom, eight at a time, oldest first. Each page's shelf shows only the things that belong on that page.
+- Tapping one makes it hop onto the page at a free spot. He can then drag it anywhere on that page. Dragging it back down onto the shelf puts it away.
 - Tapping a placed thing or the truck makes it wiggle.
 - Tapping the garage opens every paint and hat he owns, in two rows, with "none" first in each and the current one ringed. Tapping anywhere else closes it.
-- Things lower on the screen are drawn in front, so the farm has depth. The fence runs along the back. In front of it stand the buildings, in two loose rows: the home, barn, garage and hen house at the front, the tree, silo and windmill a little behind and between them. The pond, garden, well, beehive and scarecrow are out in the field, and the rain cloud is in the sky.
+- Things lower on the screen are drawn in front, so the farm has depth. Buildings stand along the back of their page; the garden and the pond lie flat in the field; the rain cloud is in the sky. The front right of every page is kept clear for the truck, and the two ends of the road for the arrows.
 - Every day ends at home: the sunset always leads to the home farm. A house button on the animals screen leads there at any other time, with a bouncing gift on it while something is waiting.
 - The farm holds up to 120 placed and waiting things. Past that, the oldest plain decoration makes room; one-offs are never dropped.
 - No stars, no counters, no shop.
@@ -247,12 +255,15 @@ There is no learning on the home farm on purpose. It is where the rewards for le
 
 ### `content/rewards.json`
 ```json
-"rewards": [{ "day": 8, "id": "upgrade-barn", "type": "upgrade", "name": "Barn", "value": "barn" }],
+"rewards": [{ "day": 17, "id": "upgrade-barn", "type": "upgrade", "name": "Barn", "value": "barn", "page": "animals" },
+            { "day": 20, "id": "upgrade-cabin", "type": "upgrade", "name": "Cabin", "value": "cabin", "replaces": "tent" }],
 "small":   [{ "id": "small-tulip", "name": "Tulip", "emoji": "🌷" },
-            { "id": "friend-duck", "type": "friend", "name": "Duck", "emoji": "🦆", "once": true },
+            { "id": "friend-duck", "type": "friend", "name": "Duck", "emoji": "🦆", "once": true, "page": "pond" },
             { "id": "paint-blue", "type": "paint", "name": "Blue paint", "value": "#3b82f6", "once": true, "needs": "garage" }]
 ```
 - `rewards` are the big rewards: farm buildings. `day` is the farm day each arrives on (1 is his first finished day); edit these to change how often big rewards come. `value` names a builder in `src/scenes/homeUpgrades.js`. A building has no emoji: it is never shown as a picture, only built on the farm.
+- `page` says which page of the farm a building or small thing belongs on: `pond`, `animals`, `home`, `crops` or `yard`. Left out, it is `home`. Order the days so that a page's first building never comes before the page between it and Home has one.
+- `replaces` names the building (by its `value`) that this one is the next stage of. It must be on the same page and arrive later.
 - `small` is the pool for ordinary days.
   - A plain entry (an id and an emoji) is a decoration that can repeat. Give repeatable ones an id starting with `small-`: only those are ever recycled when the farm is full.
   - `once: true` means it is given only one time.
@@ -283,7 +294,7 @@ Picture words for the first-sounds game, which uses each word's first letter. `f
     rewards: ["upgrade-tent", "friend-duck"],      // buildings and one-off cosmetics he owns
     paint: null, hat: null,                        // what the truck and robot wear
     box: ["small-tulip", "small-tulip"],           // waiting on the shelf, oldest first
-    placed: [{ item: "friend-duck", x: 470, y: 500 }],  // standing on the home farm
+    placed: [{ item: "friend-duck", x: 470, y: 500, page: "pond" }],  // standing on the home farm; x and y are within the page
     log: [{ day: 1, id: "upgrade-tent" }]          // which day gave which reward, so a day can be taken back
   },
   days: 0,

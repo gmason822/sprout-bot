@@ -43,7 +43,8 @@ export function createSfx(context = null) {
    */
   function voice({ pitch, dur, type = 'sawtooth', gain = 0.3, delay = 0, attack = 0.03, release = 0.08, filter = null, vibrato = null, tremolo = null }) {
     const a = ac();
-    if (!a) return;
+    // Turned right down, there is nothing to play, and a ramp to zero is an error.
+    if (!a || volume <= 0) return;
     const t0 = a.currentTime + delay;
     const end = t0 + dur;
     const osc = a.createOscillator();
@@ -91,7 +92,7 @@ export function createSfx(context = null) {
 
   function tone({ freq, to = freq, dur = 0.15, type = 'sine', gain = 0.3, delay = 0 }) {
     const a = ac();
-    if (!a) return;
+    if (!a || volume <= 0) return;
     const t0 = a.currentTime + delay;
     const osc = a.createOscillator();
     const g = a.createGain();

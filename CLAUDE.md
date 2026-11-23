@@ -15,7 +15,7 @@ Read `docs/DESIGN.md` for the full game design and `docs/ROADMAP.md` for the bui
 2. **Never show the answer in a form he can match by shape.** The number an animal asks for is shown as a numeral as well as spoken, and a numeral pops up whenever something is counted aloud, because a numeral still has to be counted out. There is deliberately no running total on the truck: he could match it to the asked-for numeral and never count. A requested letter or side is spoken only, because showing it would turn the task into shape matching. The one deliberate exception is the matching game ("Find the same one"), where matching by eye is the skill being practised.
 3. **Nothing to lose.** No game over, no lives, no timers. A wrong pick gets a gentle spoken correction and another try, and the right answer glows after 2 misses.
 4. **Huge tap targets.** At least 120 px on a tablet, with lots of space between them. They may scale down on the phone, but never below about 72 px.
-5. **No menus he can get lost in.** The child UI is the title screen, the animals screen, a request, the end of the day, and the home farm. Each has at most one picture button leading elsewhere. Settings live behind a hidden parent gate.
+5. **No menus he can get lost in.** The child UI is the title screen, the animals screen, a request, the end of the day, and the home farm. Each has at most one picture button leading elsewhere. The home farm is one wide place made of pages: its two arrows and its house button move along it, never out of it, and the house button always leads back to the middle. Settings live behind a hidden parent gate.
 6. **Nothing is gated.** Every subject has its own difficulty. Struggling with one never blocks another.
 7. **One loop for everything.** New learning is a new kind of request, never a new screen or mode.
 8. **Celebrate a lot.** Every delivery gets a cheer and a happy robot. Every farm day ends on a high.
@@ -45,7 +45,8 @@ src/
     mastery.js         Leitner-box tracking per content item
     day.js             Farm-day rules: which animals wait, when the day ends, rewards
     sky.js             The time of day: where the sun is and what colour the world is
-    home.js            Home-farm rules: earning, the gift box, placing, wearing
+    home.js            Home-farm rules: earning, the gift box, placing, wearing, building stages
+    farmPages.js       The home farm's pages: their order, which are open, what belongs where
     dayTravel.js       The parent's day control: jump to any day, and put his real farm back
     tryGame.js         The parent's "try a game": one chosen game, with nothing recorded
     paint.js           Recolours the truck SVG for paint rewards
@@ -73,7 +74,7 @@ Scenes listen for **actions**, never raw keys or pointers. The one exception is 
 
 ## Content and data
 - All learnable content lives in `content/*.json`. The formats are documented in `docs/DESIGN.md`. Adding a letter, an item, an animal or a reward must never need a code change.
-- Adding a farm **building** (a big reward) is one builder in `src/scenes/homeUpgrades.js`, which draws it through `add`/`put` and returns what happens when it is tapped, one line in that file's `PLACE` table saying where it stands and how big, plus one entry in `content/rewards.json`. Every building must do something when tapped, and must be large and clear of the fence. A small reward is JSON only.
+- Adding a farm **building** (a big reward) is one builder in `src/scenes/homeUpgrades.js`, which draws it through `add`/`put` and returns what happens when it is tapped, one line in that file's `PLACE` table saying where it stands on its page and how big, plus one entry in `content/rewards.json` with its `page` (and `replaces`, if it is the next stage of another building). Every building must do something when tapped, must be large, and must leave the front right of its page clear for the truck and the ends of the road clear for the arrows. A small reward is JSON only, and its `page` says where it belongs.
 - Adding a new **skill** is one generator module in `src/skills/`, one entry in `content/skills.json` (with its `icon`), and its id added to the `skills` of the animal whose family it fits in `content/animals.json`. It must not change the scenes. Only a new kind of game needs a new animal.
 - Validate content at boot. Log clear errors to the console, and skip bad items rather than crashing.
 
@@ -107,6 +108,7 @@ Scenes listen for **actions**, never raw keys or pointers. The one exception is 
 - Small modules, plain functions, and only as many classes as Phaser needs.
 - Keep game logic (skill generators, mastery, day rules, validation) in pure functions that Vitest tests without Phaser.
 - Comment the *why*, not the *what*.
+- **The home farm is wider than the screen.** Things on the farm are drawn in the wide world, at `pageX(page) + x`; the shelf, the arrows and the buttons are fixed to the screen with `setScrollFactor(0)`. Saved places are measured within the page.
 - **A Phaser scene object is reused every time the scene starts.** Anything stored on `this` survives from the last visit and may point at destroyed objects. Set every field a scene uses in `create()`, and never write `this.x ??= ...`.
 - `npm run dev` / `npm run build` / `npm test` must always work.
 

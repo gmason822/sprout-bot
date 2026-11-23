@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   earnSmall, smallOnOffer, reconcileFarm, placeFromBox, moveThing, putAway, freeSpot, wearOptions, setWear, ownedUpgrades,
-  previousHomeStage,
+  previousStage, ownedBuildings, isSuperseded, boxFor,
   clampToField, isPlaceable, MAX_THINGS, FIELD,
 } from './home.js';
 
@@ -50,6 +50,13 @@ describe('earnSmall', () => {
     expect(earnSmall(f, pool, Math.random, ['garage']).id).toBe('paint-blue');
     expect(f).toMatchObject({ paint: 'paint-blue', rewards: ['paint-blue'], box: [] });
   });
+  it('holds a thing back until its page is open', () => {
+    const pool = [{ id: 'friend-pig', type: 'friend', emoji: '🐖', once: true, page: 'animals' }, { id: 'small-rock', emoji: '🪨' }];
+    expect(smallOnOffer(farm(), pool, [], ['home']).map((s) => s.id)).toEqual(['small-rock']);
+    expect(smallOnOffer(farm(), pool, [], ['animals', 'home'])).toHaveLength(2);
+    // With no list of pages, nothing is held back.
+    expect(smallOnOffer(farm(), pool, [])).toHaveLength(2);
+  });
   it('only ever offers what can be given', () => {
     const pool = [...SMALL, ...REWARDS.filter((r) => r.type !== 'upgrade')];
     const f = farm({ rewards: ['friend-duck'] });
@@ -83,12 +90,27 @@ describe('reconcileFarm', () => {
     const f = farm({ rewards: ['friend-duck', 'deco-balloon'], box: ['deco-balloon'], placed: [{ item: 'friend-duck', x: 300, y: 400 }] });
     reconcileFarm(f, REWARDS, SMALL);
     expect(f.box).toEqual(['deco-balloon']);
-    expect(f.placed).toEqual([{ item: 'friend-duck', x: 300, y: 400 }]);
+    expect(f.placed).toEqual([{ item: 'friend-duck', x: 300, y: 400, page: 'home' }]);
   });
   it('nudges things back inside the field', () => {
     const f = farm({ rewards: ['friend-duck'], placed: [{ item: 'friend-duck', x: 300, y: 320 }, { item: 'small-rock', x: 5, y: 900 }] });
     reconcileFarm(f, REWARDS, SMALL);
-    expect(f.placed).toEqual([{ item: 'friend-duck', x: 300, y: FIELD.top }, { item: 'small-rock', x: FIELD.left, y: FIELD.bottom }]);
+    expect(f.placed).toEqual([{ item: 'friend-duck', x: 300, y: FIELD.top, page: 'home' }, { item: 'small-rock', x: FIELD.left, y: FIELD.bottom, page: 'home' }]);
+  });
+  it('moves a thing to its own page once that page is open, and home again if it closes', () => {
+    const rewards = [
+      { id: 'friend-pig', type: 'friend', emoji: '🐖', once: true, page: 'animals' },
+      { id: 'upgrade-coop', type: 'upgrade', value: 'coop', page: 'animals' },
+    ];
+    const f = farm({ rewards: ['friend-pig'], placed: [{ item: 'friend-pig', x: 300, y: 400 }] });
+    reconcileFarm(f, rewards, SMALL);
+    expect(f.placed[0].page).toBe('home');
+    f.rewards.push('upgrade-coop');
+    reconcileFarm(f, rewards, SMALL);
+    expect(f.placed).toEqual([{ item: 'friend-pig', x: 300, y: 400, page: 'animals' }]);
+    f.rewards = ['friend-pig'];
+    reconcileFarm(f, rewards, SMALL);
+    expect(f.placed[0].page).toBe('home');
   });
   it('drops things that no longer exist', () => {
     const f = farm({ rewards: ['deco-windmill'], box: ['small-gone', 'small-rock'], placed: [{ item: 'gone', x: 1, y: 1 }], paint: 'paint-old', hat: 'hat-straw' });
@@ -104,20 +126,29 @@ describe('placing', () => {
   it('moves a thing from the box to the farm, inside the field', () => {
     const f = farm({ box: ['small-rock', 'friend-duck'] });
     const thing = placeFromBox(f, 1, 5000, -20);
-    expect(thing).toEqual({ item: 'friend-duck', x: FIELD.right, y: FIELD.top });
+    expect(thing).toEqual({ item: 'friend-duck', x: FIELD.right, y: FIELD.top, page: 'home' });
     expect(f.box).toEqual(['small-rock']);
     expect(f.placed).toEqual([thing]);
     expect(placeFromBox(f, 9, 0, 0)).toBeNull();
   });
   it('moves and puts away', () => {
     const f = farm({ box: ['small-rock'] });
-    const thing = placeFromBox(f, 0, 400, 450);
+    const thing = placeFromBox(f, 0, 400, 450, 'crops');
     moveThing(thing, 612.4, 455.6);
-    expect(f.placed[0]).toEqual({ item: 'small-rock', x: 612, y: 456 });
+    expect(f.placed[0]).toEqual({ item: 'small-rock', x: 612, y: 456, page: 'crops' });
     expect(putAway(f, thing)).toBe(true);
     expect(f.placed).toEqual([]);
     expect(f.box).toEqual(['small-rock']);
     expect(putAway(f, thing)).toBe(false);
+  });
+  it('shows each page only its own things, and keeps their place in the box', () => {
+    const items = [...SMALL, { id: 'small-corn', emoji: '🌽', page: 'crops' }, { id: 'friend-duck', type: 'friend', emoji: '🦆', page: 'pond' }];
+    const f = farm({ box: ['small-rock', 'small-corn', 'friend-duck', 'small-tulip', 'small-corn'] });
+    const open = ['home', 'crops'];
+    expect(boxFor(f, items, 'crops', open)).toEqual([{ id: 'small-corn', index: 1 }, { id: 'small-corn', index: 4 }]);
+    // The pond is not open yet, so the duck waits at home.
+    expect(boxFor(f, items, 'home', open).map((e) => e.id)).toEqual(['small-rock', 'friend-duck', 'small-tulip']);
+    expect(boxFor(f, items, 'pond', ['pond', 'animals', 'home'])).toEqual([{ id: 'friend-duck', index: 2 }]);
   });
   it('clamps to the field', () => {
     expect(clampToField(0, 0)).toEqual({ x: FIELD.left, y: FIELD.top });
@@ -134,6 +165,13 @@ describe('freeSpot', () => {
       expect(s.y).toBeGreaterThanOrEqual(FIELD.top);
       expect(s.y).toBeLessThanOrEqual(FIELD.bottom);
     }
+  });
+  it('only minds the things on the same page', () => {
+    const crowd = Array.from({ length: 60 }, (_, i) => ({ item: 'small-rock', x: 260 + (i % 10) * 56, y: 390 + Math.floor(i / 10) * 36, page: 'crops' }));
+    // Home is empty, so the very first try is good enough.
+    let calls = 0;
+    freeSpot(farm({ placed: crowd }), () => { calls++; return 0.5; }, 'home');
+    expect(calls).toBe(2);
   });
   it('avoids what is already there when it can', () => {
     const f = farm({ placed: [{ item: 'small-rock', x: 600, y: 450 }] });
@@ -171,7 +209,9 @@ describe('choosing what to wear', () => {
 });
 
 describe('ownedUpgrades and isPlaceable', () => {
-  const BUILDINGS = ['tent', 'fence', 'cabin', 'barn', 'farmhouse', 'bighouse'].map((v) => ({ id: `upgrade-${v}`, type: 'upgrade', value: v }));
+  const STAGE_OF = { cabin: 'tent', farmhouse: 'cabin', bighouse: 'farmhouse' };
+  const BUILDINGS = ['tent', 'fence', 'cabin', 'barn', 'farmhouse', 'bighouse']
+    .map((v) => ({ id: `upgrade-${v}`, type: 'upgrade', value: v, ...(STAGE_OF[v] ? { replaces: STAGE_OF[v] } : {}) }));
   const owning = (...values) => farm({ rewards: values.map((v) => `upgrade-${v}`) });
 
   it('lists what he owns in the order of the reward list', () => {
@@ -184,13 +224,26 @@ describe('ownedUpgrades and isPlaceable', () => {
     expect(ownedUpgrades(owning('tent', 'cabin', 'barn', 'farmhouse', 'bighouse'), BUILDINGS)).toEqual(['barn', 'bighouse']);
     // A later stage without the earlier ones still shows.
     expect(ownedUpgrades(owning('farmhouse'), BUILDINGS)).toEqual(['farmhouse']);
+    // A stage is hidden even when the one between was never earned.
+    expect(ownedUpgrades(owning('tent', 'farmhouse'), BUILDINGS)).toEqual(['farmhouse']);
   });
-  it('knows which home was standing before a new stage', () => {
-    expect(previousHomeStage(owning('tent', 'cabin'), BUILDINGS, 'cabin')).toBe('tent');
-    expect(previousHomeStage(owning('tent', 'cabin', 'farmhouse'), BUILDINGS, 'farmhouse')).toBe('cabin');
-    expect(previousHomeStage(owning('tent'), BUILDINGS, 'tent')).toBeNull();
-    expect(previousHomeStage(owning('farmhouse'), BUILDINGS, 'farmhouse')).toBeNull();
-    expect(previousHomeStage(owning('tent', 'barn'), BUILDINGS, 'barn')).toBeNull();
+  it('still counts a replaced stage as earned', () => {
+    expect(ownedBuildings(owning('tent', 'cabin'), BUILDINGS)).toEqual(['tent', 'cabin']);
+    expect(isSuperseded(owning('tent', 'cabin'), BUILDINGS, 'tent')).toBe(true);
+    expect(isSuperseded(owning('tent', 'cabin'), BUILDINGS, 'cabin')).toBe(false);
+    expect(isSuperseded(owning('tent'), BUILDINGS, 'tent')).toBe(false);
+  });
+  it('does not hang on stages that replace each other in a circle', () => {
+    const loop = [{ id: 'upgrade-a', type: 'upgrade', value: 'a', replaces: 'b' }, { id: 'upgrade-b', type: 'upgrade', value: 'b', replaces: 'a' }];
+    // The content check refuses such a list; this only has to come back.
+    expect(() => ownedUpgrades(farm({ rewards: ['upgrade-a'] }), loop)).not.toThrow();
+  });
+  it('knows which stage was standing before a new one', () => {
+    expect(previousStage(owning('tent', 'cabin'), BUILDINGS, 'cabin')).toBe('tent');
+    expect(previousStage(owning('tent', 'cabin', 'farmhouse'), BUILDINGS, 'farmhouse')).toBe('cabin');
+    expect(previousStage(owning('tent'), BUILDINGS, 'tent')).toBeNull();
+    expect(previousStage(owning('farmhouse'), BUILDINGS, 'farmhouse')).toBeNull();
+    expect(previousStage(owning('tent', 'barn'), BUILDINGS, 'barn')).toBeNull();
   });
   it('knows what can stand on the farm', () => {
     expect(REWARDS.filter(isPlaceable).map((r) => r.id)).toEqual(['friend-duck', 'deco-balloon']);

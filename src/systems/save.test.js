@@ -26,7 +26,7 @@ describe('migrate', () => {
       ...defaultSave(),
       settings: { childName: 'Sam', deliveriesPerDay: 7, volume: 0.5, ttsOnly: true },
       mastery: { 'count:3': { box: 4, seen: 6, correct: 5, lastSeen: 123 } },
-      farm: { rewards: ['friend-duck', 'paint-blue'], paint: 'paint-blue', hat: null, box: ['small-tulip', 'small-tulip'], placed: [{ item: 'friend-duck', x: 400, y: 450 }], log: [{ day: 1, id: 'friend-duck' }, { day: 2, id: 'small-tulip' }] },
+      farm: { rewards: ['friend-duck', 'paint-blue'], paint: 'paint-blue', hat: null, box: ['small-tulip', 'small-tulip'], placed: [{ item: 'friend-duck', x: 400, y: 450, page: 'pond' }], log: [{ day: 1, id: 'friend-duck' }, { day: 2, id: 'small-tulip' }] },
       days: 3,
       today: [{ art: 'apple', numeral: 3 }, { art: 'crate', label: 'B' }, { art: 'shape-star', tint: 0xef4444 }, { emoji: '🚗', angle: 90, flipX: true }],
       skillLog: ['count', 'letters'],
@@ -48,7 +48,7 @@ describe('migrate', () => {
     });
     expect(save.settings).toEqual({ childName: '', deliveriesPerDay: 10, volume: 0.8, ttsOnly: false });
     expect(save.mastery).toEqual({ ok: { box: 5, seen: 2, correct: 2, lastSeen: 0 } });
-    expect(save.farm).toEqual({ rewards: ['a'], paint: null, hat: 'a', box: ['x'], placed: [{ item: 'x', x: 11, y: 20 }], log: [{ day: 2, id: 'x' }] });
+    expect(save.farm).toEqual({ rewards: ['a'], paint: null, hat: 'a', box: ['x'], placed: [{ item: 'x', x: 11, y: 20, page: 'home' }], log: [{ day: 2, id: 'x' }] });
     expect(save.bookmark).toBeNull();
     expect(save.days).toBe(0);
     expect(save.today).toEqual([{ art: 'apple' }]);

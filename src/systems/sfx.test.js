@@ -40,6 +40,18 @@ describe('every sound effect', () => {
     }
   });
 
+  it('is silent, not broken, with the volume right down', () => {
+    // Real Web Audio refuses an exponential ramp to zero.
+    const strict = () => ({ ...param(), exponentialRampToValueAtTime(value) { if (!(Math.abs(value) > 1e-40)) throw new RangeError('ramp to zero'); } });
+    const strictNode = () => ({ ...node(), frequency: strict(), gain: strict() });
+    const sfx = createSfx({ ...context(), createOscillator: strictNode, createGain: strictNode });
+    sfx.setVolume(0);
+    for (const [name, effect] of Object.entries(sfx)) {
+      if (name === 'animal' || name === 'setVolume') continue;
+      expect(() => effect.call(sfx), name).not.toThrow();
+    }
+  });
+
   it('answers for every noise content can name, and for nothing else', () => {
     const sfx = createSfx(context());
     for (const name of SOUND_NAMES) expect(sfx.animal(name), name).toBeGreaterThan(100);

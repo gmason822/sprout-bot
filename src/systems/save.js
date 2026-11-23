@@ -107,7 +107,8 @@ function migrateFarm(raw) {
     farm.placed = raw.placed
       .filter((p) => isObject(p) && typeof p.item === 'string' && Number.isFinite(p.x) && Number.isFinite(p.y))
       .slice(0, THINGS_MAX)
-      .map((p) => ({ item: p.item, x: Math.round(p.x), y: Math.round(p.y) }));
+      // Which page of the farm it stands on. Boot checks it against the content.
+      .map((p) => ({ item: p.item, x: Math.round(p.x), y: Math.round(p.y), page: typeof p.page === 'string' ? p.page : 'home' }));
   }
   if (Array.isArray(raw.log)) {
     farm.log = raw.log

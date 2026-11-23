@@ -11,6 +11,7 @@
 
 import Phaser from 'phaser';
 import { emoji } from './ui.js';
+import { PAGES, PAGE_WIDTH } from '../systems/farmPages.js';
 
 export const HORIZON = 250;
 // The ground line the builders draw on, in their own coordinates.
@@ -141,7 +142,7 @@ const bighouse = (scene, api) => house(scene, api, {
 
 function fence(scene, { sfx, add, put }) {
   const d = depthAt(BASE);
-  // The gate is in the gap between the barn and the windmill, where it can be seen.
+  // The gate is in the gap between the well and the garage, where it can be seen.
   const gate = { left: 805, right: 865 };
   const g = add.graphics().setDepth(d);
   g.fillStyle(0xe8c58c, 1);
@@ -564,32 +565,36 @@ const UPGRADES = {
   pond, garden, well, beehive, scarecrow, raincloud,
 };
 
-// Where each upgrade stands. `anchor` is the middle of its foot in the builder's own
-// coordinates, `at` is where that point goes on the farm, and `scale` is how big it
-// is drawn. The buildings are large and stand in front of the fence, in two loose
-// rows: the home, barn, garage and hen house at the front, the tree, silo and
-// windmill a little behind and between them.
+// Where each upgrade stands on its page (rewards.json says which page that is).
+// `anchor` is the middle of its foot in the builder's own coordinates, `at` is where
+// that point goes on the page, and `scale` is how big it is drawn. Buildings are
+// large and stand along the back of their page. The front right of every page is
+// kept clear, because that is where the truck parks, and so are the two ends of the
+// road, where the arrows to the next page are.
 const PLACE = {
-  tent: { anchor: [170, BASE], at: [165, 345], scale: 1.3 },
-  cabin: { anchor: [170, BASE], at: [165, 345], scale: 1.3 },
-  farmhouse: { anchor: [170, BASE], at: [165, 345], scale: 1.3 },
-  bighouse: { anchor: [170, BASE], at: [168, 345], scale: 1.25 },
-  tree: { anchor: [385, 304], at: [372, 326], scale: 1.15 },
-  barn: { anchor: [560, BASE], at: [560, 350], scale: 1.3 },
-  silo: { anchor: [717, BASE], at: [742, 320], scale: 1.15 },
-  windmill: { anchor: [840, BASE], at: [905, 322], scale: 1.15 },
-  garage: { anchor: [1010, BASE], at: [1040, 345], scale: 1.25 },
-  coop: { anchor: [1178, 304], at: [1195, 342], scale: 1.25 },
+  // Home: the house, the tree, the well and the garage, with the fence behind.
+  tent: { anchor: [170, BASE], at: [215, 345], scale: 1.3 },
+  cabin: { anchor: [170, BASE], at: [215, 345], scale: 1.3 },
+  farmhouse: { anchor: [170, BASE], at: [215, 345], scale: 1.3 },
+  bighouse: { anchor: [170, BASE], at: [218, 345], scale: 1.25 },
+  tree: { anchor: [385, 304], at: [478, 330], scale: 1.2 },
+  well: { anchor: [78, 498], at: [690, 358], scale: 1.25 },
+  garage: { anchor: [1010, BASE], at: [985, 345], scale: 1.25 },
   // The fence runs along the back, behind everything.
   fence: { anchor: [640, BASE], at: [640, BASE], scale: 1 },
-  // Out in the field. The pond and garden lie flat, under anything he places.
-  pond: { anchor: [400, 512], at: [400, 522], scale: 1, depth: 0.9 },
-  garden: { anchor: [640, 372], at: [650, 432], scale: 1, depth: 0.9 },
-  well: { anchor: [78, 498], at: [82, 506], scale: 1 },
-  beehive: { anchor: [1190, 446], at: [1232, 452], scale: 1 },
-  scarecrow: { anchor: [806, 436], at: [808, 476], scale: 1 },
+  // Animals.
+  coop: { anchor: [1178, 304], at: [330, 352], scale: 1.7 },
+  barn: { anchor: [560, BASE], at: [800, 352], scale: 1.45 },
+  // Crops. The garden lies flat in the field, under anything he places.
+  windmill: { anchor: [840, BASE], at: [270, 330], scale: 1.25 },
+  scarecrow: { anchor: [806, 436], at: [560, 372], scale: 1.3 },
+  beehive: { anchor: [1190, 446], at: [780, 366], scale: 1.4 },
+  silo: { anchor: [717, BASE], at: [1010, 326], scale: 1.2 },
+  garden: { anchor: [640, 372], at: [470, 478], scale: 1.5, depth: 0.9 },
   // In the sky, behind the hills, so the rainbow's feet are hidden.
   raincloud: { anchor: [560, 86], at: [260, 56], scale: 1, depth: 0.3 },
+  // The pond fills most of its page, and lies flat too.
+  pond: { anchor: [400, 512], at: [520, 450], scale: 1.5, depth: 0.9 },
 };
 
 export const UPGRADE_IDS = Object.keys(UPGRADES).filter((id) => PLACE[id]);
@@ -613,15 +618,16 @@ function addInto(scene, layer) {
 /**
  * Draw one upgrade on the farm and return { id, pivot, zone, depth, scale, tap }.
  * `pivot` is the whole upgrade as one object, standing on its foot, so it can be
- * grown, shrunk or nudged as a unit. `api` is { sfx, openWardrobe }.
+ * grown, shrunk or nudged as a unit. `api` is { sfx, openWardrobe }, and `left` is
+ * where its page starts in the wide world.
  */
-export function buildUpgrade(scene, id, api) {
+export function buildUpgrade(scene, id, api, left = 0) {
   const place = PLACE[id];
   const build = UPGRADES[id];
   if (!place || !build) return null;
   const scale = place.scale ?? 1;
   const depth = place.depth ?? depthAt(place.at[1]);
-  const pivot = scene.add.container(place.at[0], place.at[1]).setScale(scale).setDepth(depth);
+  const pivot = scene.add.container(left + place.at[0], place.at[1]).setScale(scale).setDepth(depth);
   const layer = scene.add.container(-place.anchor[0], -place.anchor[1]);
   pivot.add(layer);
   const put = (x, y, char, px) => {
@@ -632,7 +638,7 @@ export function buildUpgrade(scene, id, api) {
   const built = build(scene, { ...api, add: addInto(scene, layer), put });
   const z = built.zone;
   const zone = rect(
-    place.at[0] + (z.x - place.anchor[0]) * scale,
+    left + place.at[0] + (z.x - place.anchor[0]) * scale,
     place.at[1] + (z.y - place.anchor[1]) * scale,
     z.width * scale,
     z.height * scale,
@@ -641,28 +647,55 @@ export function buildUpgrade(scene, id, api) {
   return { id, pivot, zone, depth: depth + 0.5, scale, tap: built.tap };
 }
 
-/** Where an upgrade stands: { x, y } of its foot. */
-export function upgradeSpot(id) {
+/** Where an upgrade stands: { x, y } of its foot. `left` is where its page starts. */
+export function upgradeSpot(id, left = 0) {
   const place = PLACE[id];
-  return place ? { x: place.at[0], y: place.at[1], scale: place.scale ?? 1 } : null;
+  return place ? { x: left + place.at[0], y: place.at[1], scale: place.scale ?? 1 } : null;
 }
 
-/** The home farm with nothing on it yet: sky, sun, grass. */
+// The dirt road the truck drives along, from one page to the next.
+export const ROAD = { top: 548, bottom: 602 };
+
+/**
+ * The home farm with nothing on it yet: sky and sun, which stay put while the view
+ * slides, and grass and the road, which run the whole width of the farm.
+ */
 export function drawHomeBackdrop(scene) {
   const { width, height } = scene.scale;
-  const g = scene.add.graphics().setDepth(0);
-  g.fillGradientStyle(0x6ebcf0, 0x6ebcf0, 0xcdeeff, 0xcdeeff, 1);
-  g.fillRect(0, 0, width, HORIZON + 60);
-  g.fillStyle(0xfff3b0, 0.6).fillCircle(1160, 90, 78);
-  g.fillStyle(0xffd94a, 1).fillCircle(1160, 90, 56);
-  g.fillStyle(0xffffff, 0.9);
-  for (const [x, y, s] of [[640, 52, 0.9], [960, 40, 0.7]]) {
-    g.fillEllipse(x, y, 150 * s, 56 * s);
-    g.fillEllipse(x - 50 * s, y + 12 * s, 100 * s, 44 * s);
-    g.fillEllipse(x + 56 * s, y + 14 * s, 110 * s, 42 * s);
+  const world = PAGES.length * PAGE_WIDTH;
+  const sky = scene.add.graphics().setDepth(0).setScrollFactor(0);
+  sky.fillGradientStyle(0x6ebcf0, 0x6ebcf0, 0xcdeeff, 0xcdeeff, 1);
+  sky.fillRect(0, 0, width, HORIZON + 60);
+  sky.fillStyle(0xfff3b0, 0.6).fillCircle(1160, 90, 78);
+  sky.fillStyle(0xffd94a, 1).fillCircle(1160, 90, 56);
+
+  // Clouds slide past more slowly than the ground, so driving feels like going somewhere.
+  const drift = 0.35;
+  const clouds = scene.add.graphics().setDepth(0.1).setScrollFactor(drift, 0);
+  clouds.fillStyle(0xffffff, 0.9);
+  for (let x = 200, i = 0; x < width + world * drift; x += 330 + (i % 3) * 90, i++) {
+    const y = 40 + (i % 4) * 14;
+    const s = 0.65 + (i % 3) * 0.14;
+    clouds.fillEllipse(x, y, 150 * s, 56 * s);
+    clouds.fillEllipse(x - 50 * s, y + 12 * s, 100 * s, 44 * s);
+    clouds.fillEllipse(x + 56 * s, y + 14 * s, 110 * s, 42 * s);
   }
+
   const ground = scene.add.graphics().setDepth(0.5);
-  ground.fillStyle(0x9bd67a, 1).fillEllipse(640, HORIZON + 60, 1700, 190);
-  ground.fillStyle(0x7ec850, 1).fillRect(0, HORIZON + 50, width, height - HORIZON - 50);
-  ground.fillStyle(0x8ad45c, 1).fillEllipse(360, 480, 520, 120).fillEllipse(900, 560, 620, 130);
+  ground.fillStyle(0x9bd67a, 1);
+  for (let i = 0; i < PAGES.length; i++) ground.fillEllipse(i * PAGE_WIDTH + 640, HORIZON + 60, 1700, 190);
+  ground.fillStyle(0x7ec850, 1).fillRect(0, HORIZON + 50, world, height - HORIZON - 50);
+  ground.fillStyle(0x8ad45c, 1);
+  for (let i = 0; i < PAGES.length; i++) {
+    const left = i * PAGE_WIDTH;
+    // Not the same on every page, or driving would look like standing still.
+    ground.fillEllipse(left + 300 + (i % 2) * 140, 470 - (i % 3) * 14, 520, 120);
+    ground.fillEllipse(left + 880 - (i % 2) * 120, 500 + (i % 3) * 10, 560, 110);
+  }
+
+  const road = scene.add.graphics().setDepth(0.6);
+  road.fillStyle(0xc9a877, 1).fillRect(0, ROAD.top, world, ROAD.bottom - ROAD.top);
+  road.fillStyle(0xd9b98a, 1).fillRect(0, ROAD.top + 5, world, ROAD.bottom - ROAD.top - 10);
+  road.fillStyle(0xc7a474, 1);
+  for (let x = 40, i = 0; x < world; x += 118, i++) road.fillEllipse(x, ROAD.top + 16 + (i % 3) * 11, 30, 9);
 }

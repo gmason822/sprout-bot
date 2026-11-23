@@ -1,5 +1,7 @@
-// Checks the parsed content/*.json files. Pure, with no imports, so that both the
-// game and the command-line tools (tools/voice/) can use it.
+// Checks the parsed content/*.json files. Pure, and it imports only another pure
+// module, so that both the game and the command-line tools (tools/voice/) can use it.
+
+import { PAGES } from './farmPages.js';
 
 const ANSWER_KINDS = ['count', 'pick'];
 const REWARD_TYPES = ['friend', 'paint', 'hat', 'decoration', 'upgrade'];
@@ -19,6 +21,13 @@ export function validateContent(raw, generatorIds, soundNames = null) {
     bad(`${file}: "${item.id}" has unknown sound "${item.sound}"`);
     const { sound, ...quiet } = item;
     return quiet;
+  };
+  // A page that does not exist is dropped, and the thing lives at Home.
+  const checkPage = (item) => {
+    if (item.page === undefined || PAGES.includes(item.page)) return item;
+    bad(`rewards.json: "${item.id}" is on unknown page "${item.page}"`);
+    const { page, ...atHome } = item;
+    return atHome;
   };
 
   // Letters first: skills and other letters refer to them.
@@ -91,6 +100,18 @@ export function validateContent(raw, generatorIds, soundNames = null) {
     if (!Number.isInteger(r.day) || r.day < 1) return bad(`rewards.json: reward "${r.id}" needs a "day" (1 or more) to arrive on`);
     seenRewards.add(r.id);
     return true;
+  }).map(checkPage).map((r, _, all) => {
+    // A stage must follow the building it replaces, on the same page: otherwise the
+    // older one would never come down, or would come down somewhere else.
+    if (r.replaces === undefined) return r;
+    const older = all.find((o) => o.type === 'upgrade' && o.value === r.replaces);
+    const why = !older ? 'is not a building in "rewards"'
+      : older.day >= r.day ? 'does not arrive before it'
+        : (older.page ?? 'home') !== (r.page ?? 'home') ? 'is on another page' : null;
+    if (!why) return r;
+    bad(`rewards.json: reward "${r.id}" replaces "${r.replaces}", which ${why}`);
+    const { replaces, ...alone } = r;
+    return alone;
   });
 
   // Small things: the reward on any day with no big one. Optional.
@@ -108,7 +129,7 @@ export function validateContent(raw, generatorIds, soundNames = null) {
     if (r.needs !== undefined && !buildings.has(r.needs)) return bad(`${where} needs "${r.needs}", which is not a building in "rewards"`);
     seenRewards.add(r.id);
     return true;
-  }).map(checkSound('rewards.json'));
+  }).map(checkSound('rewards.json')).map(checkPage);
 
   // Words are optional: a content set with none simply has fewer first-sound pictures.
   const seenWords = new Set();

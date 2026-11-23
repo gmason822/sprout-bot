@@ -3,16 +3,20 @@
 //
 //   rewards  ids of the big rewards he owns (friends, hats, paints, upgrades...)
 //   box      ids of things waiting to be placed, oldest first (repeats allowed)
-//   placed   [{ item, x, y }] things standing on the farm
+//   placed   [{ item, x, y, page }] things standing on the farm; x and y are
+//            measured within the page (see farmPages.js)
 //   paint, hat   what the truck and robot are wearing
+
+import { HOME_PAGE, pageOf, farmPages, livesOn } from './farmPages.js';
 
 // Each placed thing is its own picture, so there is a limit to how many a phone
 // can show comfortably. Past it, the oldest small thing makes room for the new one.
 export const MAX_THINGS = 120;
 
-// Where things may stand on the home farm, in game pixels.
-// The buildings stand along the back, so the field starts below their feet.
-export const FIELD = { left: 50, right: 1230, top: 378, bottom: 590 };
+// Where things may stand on one page of the home farm, in game pixels.
+// The buildings stand along the back, so the field starts below their feet, and it
+// stops short of the sides, where the arrows to the next page are.
+export const FIELD = { left: 150, right: 1130, top: 378, bottom: 590 };
 
 const PLACEABLE = ['friend', 'decoration'];
 
@@ -33,11 +37,15 @@ function makeRoom(farm) {
   if (standing >= 0) farm.placed.splice(standing, 1);
 }
 
-/** Which small things could be given today. `upgrades` are the buildings he owns. */
-export function smallOnOffer(farm, small, upgrades = []) {
+/**
+ * Which small things could be given today. `upgrades` are the buildings he owns, and
+ * `open` the pages he can drive to (left out, every page counts as open).
+ */
+export function smallOnOffer(farm, small, upgrades = [], open = null) {
   return small.filter((s) => {
     if (s.once && farm.rewards.includes(s.id)) return false;   // he already has it
     if (s.needs && !upgrades.includes(s.needs)) return false;  // e.g. paint before the garage
+    if (open && !open.includes(pageOf(s))) return false;       // e.g. a piglet before there is anywhere for it
     return true;
   });
 }
@@ -47,8 +55,8 @@ export function smallOnOffer(farm, small, upgrades = []) {
  * goes on the shelf for him to place; a paint or hat goes straight on. Something
  * marked `once` is remembered so it is never given twice.
  */
-export function earnSmall(farm, small, rng = Math.random, upgrades = []) {
-  const offer = smallOnOffer(farm, small ?? [], upgrades);
+export function earnSmall(farm, small, rng = Math.random, upgrades = [], open = null) {
+  const offer = smallOnOffer(farm, small ?? [], upgrades, open);
   if (offer.length === 0) return null;
   const item = offer[Math.min(offer.length - 1, Math.floor(rng() * offer.length))];
   if (item.once) farm.rewards.push(item.id);
@@ -64,13 +72,16 @@ export function earnSmall(farm, small, rng = Math.random, upgrades = []) {
 /**
  * Make an older save, or one from before a content change, fit today's content:
  * anything he owns that can be placed but is neither placed nor waiting goes into
- * the box, and anything that no longer exists is dropped.
+ * the box, and anything that no longer exists is dropped. Each placed thing stands
+ * on its own page, where it was, or at Home while that page is not open.
  */
 export function reconcileFarm(farm, rewards, small) {
   const known = new Map([...rewards, ...small].map((r) => [r.id, r]));
+  const open = farmPages(farm, rewards);
   farm.box = farm.box.filter((id) => known.has(id));
   // Things placed before the field changed shape are nudged back inside it.
-  farm.placed = farm.placed.filter((p) => known.has(p.item)).map((p) => ({ ...p, ...clampToField(p.x, p.y) }));
+  farm.placed = farm.placed.filter((p) => known.has(p.item))
+    .map((p) => ({ item: p.item, ...clampToField(p.x, p.y), page: livesOn(known.get(p.item), open) }));
   const accounted = new Set([...farm.box, ...farm.placed.map((p) => p.item)]);
   for (const id of farm.rewards) {
     if (isPlaceable(known.get(id)) && !accounted.has(id)) farm.box.push(id);
@@ -88,12 +99,24 @@ export function clampToField(x, y) {
   };
 }
 
-/** Take the thing at `boxIndex` out of the gift box and stand it on the farm. */
-export function placeFromBox(farm, boxIndex, x, y) {
+/**
+ * What is waiting on one page's shelf, oldest first: [{ id, index }], where `index`
+ * is the thing's place in the whole gift box. `items` is every reward, big and small,
+ * and `open` the pages he can drive to.
+ */
+export function boxFor(farm, items, page, open) {
+  const known = new Map(items.map((r) => [r.id, r]));
+  return farm.box
+    .map((id, index) => ({ id, index }))
+    .filter(({ id }) => livesOn(known.get(id), open) === page);
+}
+
+/** Take the thing at `boxIndex` out of the gift box and stand it on a page of the farm. */
+export function placeFromBox(farm, boxIndex, x, y, page = HOME_PAGE) {
   const item = farm.box[boxIndex];
   if (item === undefined) return null;
   farm.box.splice(boxIndex, 1);
-  const thing = { item, ...clampToField(x, y) };
+  const thing = { item, ...clampToField(x, y), page };
   farm.placed.push(thing);
   return thing;
 }
@@ -113,15 +136,16 @@ export function putAway(farm, thing) {
 }
 
 /**
- * A free spot for something new: near the middle, away from what is already there
- * if possible, so things do not land in one heap.
+ * A free spot on a page for something new: near the middle, away from what is
+ * already there if possible, so things do not land in one heap.
  */
-export function freeSpot(farm, rng = Math.random) {
+export function freeSpot(farm, rng = Math.random, page = HOME_PAGE) {
+  const here = farm.placed.filter((p) => (p.page ?? HOME_PAGE) === page);
   let best = null;
   let bestGap = -1;
   for (let attempt = 0; attempt < 12; attempt++) {
     const spot = clampToField(260 + rng() * 560, FIELD.top + 10 + rng() * (FIELD.bottom - FIELD.top - 30));
-    const gap = Math.min(...farm.placed.map((p) => Math.hypot(p.x - spot.x, p.y - spot.y)), Infinity);
+    const gap = Math.min(...here.map((p) => Math.hypot(p.x - spot.x, p.y - spot.y)), Infinity);
     if (gap > bestGap) {
       best = spot;
       bestGap = gap;
@@ -148,26 +172,47 @@ export function setWear(farm, items, type, id) {
   return true;
 }
 
-// The home is one building that grows. Only the best stage he owns is drawn.
-export const HOME_STAGES = ['tent', 'cabin', 'farmhouse', 'bighouse'];
+// Some buildings grow in stages: a reward's `replaces` names the building it is the
+// next stage of (tent, cabin, farmhouse, big farmhouse). Only the best stage he owns
+// is drawn.
 
-/**
- * The buildings and features to draw on his farm, in the order of the reward list.
- * Of the home's stages, only the highest one he owns is kept.
- */
-export function ownedUpgrades(farm, rewards) {
-  const owned = rewards.filter((r) => r.type === 'upgrade' && farm.rewards.includes(r.id)).map((r) => r.value);
-  const best = HOME_STAGES.filter((s) => owned.includes(s)).at(-1);
-  return owned.filter((v) => !HOME_STAGES.includes(v) || v === best);
+const ownedBuildingRewards = (farm, rewards) => rewards.filter((r) => r.type === 'upgrade' && farm.rewards.includes(r.id));
+
+/** Every stage below `value`, nearest first, whether he owns them or not. */
+function stagesBelow(rewards, value) {
+  const below = [];
+  let stage = rewards.find((r) => r.type === 'upgrade' && r.value === value);
+  // The length check stops a list that replaces itself in a circle.
+  while (stage?.replaces && below.length < rewards.length) {
+    below.push(stage.replaces);
+    stage = rewards.find((r) => r.type === 'upgrade' && r.value === stage.replaces);
+  }
+  return below;
+}
+
+/** Every building he has earned, including stages that have since been replaced. */
+export function ownedBuildings(farm, rewards) {
+  return ownedBuildingRewards(farm, rewards).map((r) => r.value);
+}
+
+/** Has a later stage of this building already been earned? */
+export function isSuperseded(farm, rewards, value) {
+  return ownedBuildings(farm, rewards).some((owned) => stagesBelow(rewards, owned).includes(value));
 }
 
 /**
- * When a new stage of the home arrives, which stage was standing there before?
- * Returns null if `stage` is not a home stage or there was no home yet.
+ * The buildings and features to draw on his farm, in the order of the reward list.
+ * Of a building's stages, only the highest one he owns is kept.
  */
-export function previousHomeStage(farm, rewards, stage) {
-  const index = HOME_STAGES.indexOf(stage);
-  if (index <= 0) return null;
-  const owned = rewards.filter((r) => r.type === 'upgrade' && farm.rewards.includes(r.id)).map((r) => r.value);
-  return HOME_STAGES.slice(0, index).filter((s) => owned.includes(s)).at(-1) ?? null;
+export function ownedUpgrades(farm, rewards) {
+  return ownedBuildings(farm, rewards).filter((value) => !isSuperseded(farm, rewards, value));
+}
+
+/**
+ * When a new stage arrives, which stage was standing there before? Returns null if
+ * `value` is not a later stage of anything, or nothing earlier had been built.
+ */
+export function previousStage(farm, rewards, value) {
+  const owned = ownedBuildings(farm, rewards);
+  return stagesBelow(rewards, value).find((stage) => owned.includes(stage)) ?? null;
 }

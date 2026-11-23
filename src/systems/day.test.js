@@ -122,6 +122,26 @@ describe('bigRewardFor', () => {
     expect(bigRewardFor(REWARDS, ['upgrade-tent'], 10).id).toBe('upgrade-garage');
     expect(bigRewardFor(REWARDS, ['upgrade-tent', 'upgrade-garage'], 11).id).toBe('upgrade-barn');
   });
+  it('never owes an early stage once he has a later one', () => {
+    const staged = [...REWARDS, { id: 'upgrade-cabin', type: 'upgrade', value: 'cabin', day: 6, replaces: 'tent' }];
+    // An older save that was given the cabin and the garage, but never the tent.
+    expect(bigRewardFor(staged, ['upgrade-cabin', 'upgrade-garage'], 9).id).toBe('upgrade-barn');
+    expect(bigRewardFor(staged, ['upgrade-cabin', 'upgrade-garage', 'upgrade-barn'], 9)).toBeNull();
+    // Without the cabin, the tent is still owed.
+    expect(bigRewardFor(staged, ['upgrade-garage'], 9).id).toBe('upgrade-tent');
+  });
+  it('gives a small thing only if its page is open', () => {
+    const rewards = [...REWARDS, { id: 'upgrade-coop', type: 'upgrade', value: 'coop', day: 9, page: 'animals' }];
+    const small = [{ id: 'friend-pig', type: 'friend', emoji: '🐖', once: true, page: 'animals' }];
+    const before = fresh(1);
+    before.farm.rewards = ['upgrade-tent'];
+    before.today = [{}];
+    expect(endDay(before, rewards, small).gift).toBeNull();
+    const after = fresh(1);
+    after.farm.rewards = ['upgrade-tent', 'upgrade-garage', 'upgrade-barn', 'upgrade-coop'];
+    after.today = [{}];
+    expect(endDay(after, rewards, small).gift.id).toBe('friend-pig');
+  });
   it('does not depend on the order of the file', () => {
     expect(bigRewardFor([...REWARDS].reverse(), [], 5).id).toBe('upgrade-tent');
   });

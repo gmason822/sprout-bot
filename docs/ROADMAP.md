@@ -76,6 +76,29 @@ Built, waiting for its playtest:
 - Small things wait on a shelf. He taps one to put it on the farm and drags it wherever he likes; dragging it back onto the shelf puts it away.
 - Three animals are offered at a time, and the counting game no longer shows a running total on the truck.
 
+## A farm in sections
+The home farm was one screen with a line of buildings. It is becoming one wide place made of pages, each with its own line of things that grow, and Home in the middle: `Pond, Animals, HOME, Crops, Yard`. Big rewards take turns between the lines.
+
+| Line | Page | What arrives (→ means the next stage replaces the last) |
+|---|---|---|
+| Home | Home | tent → cabin → farmhouse → ranch home; fence, well, apple tree |
+| Workshop | Home | garage → workshop → depot. Each stage adds a door: paint and hats, then wheels, horns and flags, then trailers |
+| Crops | Crops | planter box → vegetable patch → corn field → big fields; scarecrow, windmill, silo, beehive |
+| Animals | Animals | hen coop, pig pen, barn and pasture, horse stables |
+| Pond | Pond | pond, dock, boat |
+| Yard | Yard | tractor, digger, combine harvester |
+| Sky | every page | rain cloud, hot-air balloon, a moon that turns the farm to night and back |
+
+Built in phases, each one played with before the next:
+1. **The wide farm** (built, waiting for its playtest). Pages, the road, the blue and orange arrows, the house button, a shelf per page, and the 17 existing buildings moved to their pages on a schedule that takes turns. No new drawings.
+2. **Crops.** The planter, corn field and big fields. A plot is rows, each one big tap target: water, grow, ripen, pick. The rain cloud waters every row.
+3. **Animals.** Pig pen and stables. Each pen has a food bin that brings the animals trotting over. The coop's eggs roll out one by one while the voice counts them. Friends appear in their pens and wander.
+4. **Workshop and the truck.** Workshop and depot stages, each with its own door. New small rewards: wheels, horns, flags and trailers, all JSON only.
+5. **Pond and Yard.** The dock and boat; the tractor, digger and combine, each driving off to do its job.
+6. **Sky.** A hot-air balloon, and a moon that brings night and stars.
+
+Noted for after that: robot parts and a robot lab; picked crops feeding the animals; trailers doing jobs on the Crops page; a market stall; an orchard; seasons; crops that keep growing between visits.
+
 ## Voice
 Built, waiting for a listen on the phone:
 - Every line is generated ahead of time with a neural voice (Kokoro, "Heart", at 80% speed) and shipped as audio files, instead of using each device's built-in voice.

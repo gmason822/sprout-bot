@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { validateContent, loadContent } from './content.js';
 import { GENERATOR_IDS } from '../skills/index.js';
+import { PAGES, pageOf } from './farmPages.js';
 
 const good = () => ({
   letters: { letters: [{ id: 'B' }, { id: 'C', sameSoundAs: ['K'] }, { id: 'K', sameSoundAs: ['C'] }] },
@@ -94,6 +95,32 @@ describe('validateContent', () => {
     expect(errors).toHaveLength(6);
   });
 
+  it('checks pages and stages', () => {
+    const raw = good();
+    raw.rewards.rewards.push(
+      { id: 'u1', type: 'upgrade', value: 'tent', day: 5 },
+      { id: 'u2', type: 'upgrade', value: 'cabin', day: 8, replaces: 'tent' },
+      { id: 'u3', type: 'upgrade', value: 'coop', day: 9, page: 'animals' },
+      { id: 'u4', type: 'upgrade', value: 'moonbase', day: 10, page: 'moon' },             // no such page
+      { id: 'u5', type: 'upgrade', value: 'pen', day: 11, page: 'animals', replaces: 'tent' },  // the tent is on another page
+      { id: 'u6', type: 'upgrade', value: 'early', day: 2, replaces: 'tent' },             // arrives before what it replaces
+      { id: 'u7', type: 'upgrade', value: 'castle', day: 12, replaces: 'palace' },         // replaces nothing
+    );
+    raw.rewards.small = [{ id: 'friend-pig', type: 'friend', emoji: '🐖', once: true, page: 'animals' }, { id: 'small-x', emoji: '🪨', page: 'sea' }];
+    const { content, errors } = validateContent(raw, GEN);
+    const by = Object.fromEntries([...content.rewards, ...content.small].map((r) => [r.id, r]));
+    expect(by.u2.replaces).toBe('tent');
+    expect(by.u3.page).toBe('animals');
+    // The thing is kept, and the bad part dropped: it lives at home and replaces nothing.
+    expect(by.u4.page).toBeUndefined();
+    expect(by.u5.replaces).toBeUndefined();
+    expect(by.u6.replaces).toBeUndefined();
+    expect(by.u7.replaces).toBeUndefined();
+    expect(by['friend-pig'].page).toBe('animals');
+    expect(by['small-x'].page).toBeUndefined();
+    expect(errors).toHaveLength(5);
+  });
+
   it('drops a noise the game cannot make, and keeps the thing', () => {
     const raw = good();
     raw.animals.animals[0].sound = 'cluck';
@@ -135,6 +162,17 @@ describe('the real content files', () => {
     expect(content.rewards.every((r) => r.type === 'upgrade')).toBe(true);
     expect(content.small.filter((r) => r.type === 'paint' || r.type === 'hat').every((r) => r.once)).toBe(true);
     expect(content.letters).toHaveLength(26);
+    // The farm widens one page at a time: a page's first building never arrives
+    // before the page between it and home has one.
+    const firstDay = (page) => Math.min(...content.rewards.filter((r) => pageOf(r) === page).map((r) => r.day));
+    const home = PAGES.indexOf('home');
+    PAGES.forEach((page, i) => {
+      if (i === home || firstDay(page) === Infinity) return;
+      const inner = PAGES[i + Math.sign(home - i)];
+      if (inner !== 'home') expect(firstDay(page), page).toBeGreaterThan(firstDay(inner));
+    });
+    // Day 1 builds at home.
+    expect(pageOf(content.rewards.find((r) => r.day === 1))).toBe('home');
     // Most animals have a noise of their own; one without stays quiet.
     expect(content.animals.filter((a) => typeof a.sound === 'string').length).toBeGreaterThanOrEqual(5);
     spy.mockRestore();

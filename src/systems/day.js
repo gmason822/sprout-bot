@@ -1,7 +1,8 @@
 // The farm day: which animals wait, how far through the day he is, and what
 // arrives at sunset. Pure functions over the saved state.
 
-import { isPlaceable, earnSmall, ownedUpgrades } from './home.js';
+import { isPlaceable, earnSmall, ownedBuildings, isSuperseded } from './home.js';
+import { farmPages } from './farmPages.js';
 import { shuffle } from './mastery.js';
 
 const RECENT = 20;
@@ -57,9 +58,13 @@ export function isDayDone(today, deliveriesPerDay) {
  * if this is an ordinary day. Each big reward names the day it arrives on. If one was
  * missed (the schedule was edited, or an old save is further on), the earliest one
  * still owed is given, so he catches up one day at a time and never gets two at once.
+ * An early stage of a building is never owed once he has a later stage of it: a tent
+ * would not be put up beside his cabin.
  */
 export function bigRewardFor(rewards, owned, dayNumber) {
-  const due = rewards.filter((r) => r.day <= dayNumber && !owned.includes(r.id));
+  const farm = { rewards: owned };
+  const due = rewards.filter((r) => r.day <= dayNumber && !owned.includes(r.id)
+    && !(r.type === 'upgrade' && isSuperseded(farm, rewards, r.value)));
   if (due.length === 0) return null;
   return due.reduce((first, r) => (r.day < first.day ? r : first));
 }
@@ -97,7 +102,7 @@ export function giveDayReward(farm, dayNumber, rewards, small = [], rng = Math.r
     // A friend or decoration waits on the shelf for him to place at home.
     if (isPlaceable(reward)) farm.box.push(reward.id);
   } else {
-    gift = earnSmall(farm, small, rng, ownedUpgrades(farm, rewards));
+    gift = earnSmall(farm, small, rng, ownedBuildings(farm, rewards), farmPages(farm, rewards));
   }
   const given = reward ?? gift;
   if (given) {
