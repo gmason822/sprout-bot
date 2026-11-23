@@ -9,6 +9,7 @@ import { generateColours, colourLines } from './colours.js';
 import { generateSame, sameLines } from './same.js';
 import { generateWhoSays, whoSaysLines } from './whosays.js';
 import { generateOddOne, oddOneLines } from './oddone.js';
+import { generatePattern, patternLines } from './pattern.js';
 import { ANIMAL_CLIPS } from '../systems/animalClips.js';
 
 const content = loadContent(GENERATOR_IDS);
@@ -210,5 +211,70 @@ describe('odd one out', () => {
   it('has nothing to ask without the kinds', () => {
     expect(generateOddOne({ skill, content: { ...content, groups: [] } })).toBeNull();
     expect(oddOneLines()).toHaveLength(2);
+  });
+});
+
+describe('patterns', () => {
+  const skill = skillOf('pattern');
+  const look = ({ art, emoji, tint }) => `${art ?? emoji}/${tint ?? ''}`;
+  /** Does the row repeat every `length` pictures once `picture` is put in the gap? */
+  const repeats = (row, picture, length) => {
+    const filled = row.map((p) => look(p ?? picture));
+    return filled.every((p, i) => i + length >= filled.length || p === filled[i + length]);
+  };
+
+  it('has exactly one picture on the table that keeps the row repeating', () => {
+    ask('pattern', EVERYTHING_SOLID, (request) => {
+      const { row } = request.bubble;
+      const form = request.itemId.split(':')[1].split('-')[0];
+      expect(row.filter((p) => p === null)).toHaveLength(1);
+      expect(row.length).toBeLessThanOrEqual(7);
+      const fits = request.answer.choices.filter((c) => repeats(row, c, form.length));
+      expect(fits.map((c) => c.id), request.itemId).toEqual([request.answer.correct]);
+      // At least two whole repeats are on show, so it can be worked out and not guessed.
+      expect(row.length - 1).toBeGreaterThanOrEqual(form.length * 2);
+      // The row is made of exactly as many different pictures as the pattern has.
+      expect(new Set(row.filter(Boolean).map(look)).size).toBe(new Set(form).size);
+    }, 600);
+  });
+
+  it('puts the gap at the end to start with, and in the middle on the last level', () => {
+    ask('pattern', {}, (r) => {
+      expect(r.itemId.startsWith('pattern:AB-')).toBe(true);
+      expect(r.bubble.row.at(-1)).toBeNull();
+      expect(r.tts).toBe('What comes next?');
+    });
+    const last = { ...skill, tiers: [{ ...skill.tiers[3], unlockAfter: undefined }] };
+    for (let i = 0; i < 200; i++) {
+      const r = generatePattern({ skill: last, content });
+      const gap = r.bubble.row.indexOf(null);
+      expect(gap).toBeGreaterThanOrEqual(2);
+      expect(gap).toBeLessThanOrEqual(r.bubble.row.length - 3);
+      expect(r.tts).toBe('What is missing?');
+    }
+  });
+
+  it('does not always answer with the first picture in the row', () => {
+    const first = new Set();
+    ask('pattern', EVERYTHING_SOLID, (r) => {
+      const answer = r.answer.choices.find((c) => c.id === r.answer.correct);
+      first.add(look(answer) === look(r.bubble.row.find(Boolean)));
+    });
+    expect(first).toEqual(new Set([true, false]));
+  });
+
+  it('gives each kind of picture its own note for reading the row aloud', () => {
+    ask('pattern', EVERYTHING_SOLID, (r) => {
+      const notes = new Map();
+      for (const p of r.bubble.row.filter(Boolean)) {
+        expect(notes.get(look(p)) ?? p.note).toBe(p.note);
+        notes.set(look(p), p.note);
+      }
+      expect(new Set(notes.values()).size).toBe(notes.size);
+    });
+  });
+
+  it('says three things', () => {
+    expect(patternLines()).toEqual(['What comes next?', 'What is missing?', 'Not that one. Look at the pattern.']);
   });
 });

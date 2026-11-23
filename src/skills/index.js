@@ -11,6 +11,7 @@ import { generateColours, colourLines } from './colours.js';
 import { generateSame, sameLines } from './same.js';
 import { generateWhoSays, whoSaysLines } from './whosays.js';
 import { generateOddOne, oddOneLines } from './oddone.js';
+import { generatePattern, patternLines } from './pattern.js';
 
 const GENERATORS = {
   count: generateCount,
@@ -23,6 +24,7 @@ const GENERATORS = {
   same: generateSame,
   whosays: generateWhoSays,
   oddone: generateOddOne,
+  pattern: generatePattern,
 };
 
 export const GENERATOR_IDS = Object.keys(GENERATORS);
@@ -39,6 +41,7 @@ const LINES = {
   same: sameLines,
   whosays: whoSaysLines,
   oddone: oddOneLines,
+  pattern: patternLines,
 };
 
 /** Every line the skills in this content can say. */

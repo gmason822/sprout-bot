@@ -11,6 +11,7 @@
     { "id": "sheep",  "name": "Sheep",  "skill": "colours",    "emoji": "🐑", "icon": "🎨" },
     { "id": "cat",    "name": "Cat",    "skill": "same",       "emoji": "🐱", "icon": "🧩", "sound": "meow" },
     { "id": "duck",   "name": "Duck",   "skill": "whosays",    "emoji": "🦆", "icon": "🔊" },
-    { "id": "horse",  "name": "Horse",  "skill": "oddone",     "emoji": "🐴", "icon": "🤔", "sound": "neigh" }
+    { "id": "horse",  "name": "Horse",  "skill": "oddone",     "emoji": "🐴", "icon": "🤔", "sound": "neigh" },
+    { "id": "dog",    "name": "Dog",    "skill": "pattern",    "emoji": "🐶", "icon": "📿", "sound": "woof" }
   ]
 }

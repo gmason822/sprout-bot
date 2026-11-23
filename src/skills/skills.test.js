@@ -151,7 +151,8 @@ describe('makeRequest', () => {
       const r = makeRequest(animal.skill, ctx);
       expect(r, animal.id).not.toBeNull();
       expect(['count', 'pick']).toContain(r.answer.kind);
-      expect(r.bubble.art ?? r.bubble.emoji, animal.id).toBeTruthy();
+      // The bubble shows one picture, or a row of them.
+      expect(r.bubble.art ?? r.bubble.emoji ?? r.bubble.row, animal.id).toBeTruthy();
       expect(r.answer.choices?.length ?? 2, animal.id).toBeGreaterThanOrEqual(2);
     }
   });
