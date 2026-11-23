@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "_comment": "Each animal owns one game from skills.json. Three animals are offered at a time. 'id' is also the name of its picture. 'icon' is what its thought bubble shows on the farm: a picture name, or an emoji.",
+  "_comment": "Each animal owns one game from skills.json. Three animals are offered at a time. 'id' is also the name of its picture. 'icon' is what its thought bubble shows on the farm: a picture name, or an emoji. 'sound' is the noise it makes when tapped: one of the names in src/systems/sfx.js.",
   "animals": [
-    { "id": "hen",    "name": "Hen",    "skill": "count",      "emoji": "🐔", "icon": "apple" },
-    { "id": "cow",    "name": "Cow",    "skill": "letters",    "emoji": "🐮", "icon": "crate" },
-    { "id": "pig",    "name": "Pig",    "skill": "leftright",  "emoji": "🐷", "icon": "barrel" },
-    { "id": "owl",    "name": "Owl",    "skill": "numbers",    "emoji": "🦉", "icon": "🔢" },
-    { "id": "rabbit", "name": "Rabbit", "skill": "firstsound", "emoji": "🐰", "icon": "👂" },
-    { "id": "mouse",  "name": "Mouse",  "skill": "shapes",     "emoji": "🐭", "icon": "shape-star" }
+    { "id": "hen",    "name": "Hen",    "skill": "count",      "emoji": "🐔", "icon": "apple", "sound": "cluck" },
+    { "id": "cow",    "name": "Cow",    "skill": "letters",    "emoji": "🐮", "icon": "crate", "sound": "moo" },
+    { "id": "pig",    "name": "Pig",    "skill": "leftright",  "emoji": "🐷", "icon": "barrel", "sound": "oink" },
+    { "id": "owl",    "name": "Owl",    "skill": "numbers",    "emoji": "🦉", "icon": "🔢", "sound": "hoot" },
+    { "id": "rabbit", "name": "Rabbit", "skill": "firstsound", "emoji": "🐰", "icon": "👂", "sound": "boing" },
+    { "id": "mouse",  "name": "Mouse",  "skill": "shapes",     "emoji": "🐭", "icon": "shape-star", "sound": "squeak" }
   ]
 }

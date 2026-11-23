@@ -81,6 +81,19 @@ describe('validateContent', () => {
     expect(errors).toHaveLength(6);
   });
 
+  it('drops a noise the game cannot make, and keeps the thing', () => {
+    const raw = good();
+    raw.animals.animals[0].sound = 'cluck';
+    raw.animals.animals[1].sound = 'roar';
+    raw.rewards.small = [{ id: 's1', emoji: '🦆', sound: 'quack' }, { id: 's2', emoji: '🐉', sound: 'fire' }];
+    const { content, errors } = validateContent(raw, GEN, ['cluck', 'quack']);
+    expect(content.animals.map((a) => a.sound)).toEqual(['cluck', undefined]);
+    expect(content.small.map((s) => s.sound)).toEqual(['quack', undefined]);
+    expect(errors).toHaveLength(2);
+    // Without a list of noises nothing is checked (the voice tools do not need one).
+    expect(validateContent(raw, GEN).errors).toEqual([]);
+  });
+
   it('skips bad words', () => {
     const raw = good();
     raw.words = { words: [{ id: 'cat', emoji: '🐱' }, { id: 'cat', emoji: '🐱' }, { id: 'Dog', emoji: '🐶' }, { id: 'sun' }] };
@@ -109,6 +122,8 @@ describe('the real content files', () => {
     expect(content.rewards.every((r) => r.type === 'upgrade')).toBe(true);
     expect(content.small.filter((r) => r.type === 'paint' || r.type === 'hat').every((r) => r.once)).toBe(true);
     expect(content.letters).toHaveLength(26);
+    // Every animal that asks for things has a noise of its own.
+    expect(content.animals.every((a) => typeof a.sound === 'string')).toBe(true);
     spy.mockRestore();
   });
 });

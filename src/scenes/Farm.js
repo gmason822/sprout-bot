@@ -6,7 +6,7 @@ import { GOOD_MORNING, WHO_HELPS } from '../systems/phrases.js';
 import { drawFarmBackdrop } from './farmBackdrop.js';
 import { dayTime } from '../systems/sky.js';
 import { TRUCK_Y } from './layout.js';
-import { tween, makeTruck, drawFocusRing, drawDayRow, emoji } from './ui.js';
+import { tween, wait, makeTruck, drawFocusRing, drawDayRow, emoji } from './ui.js';
 
 // How the waiting animals are laid out, by how many there are.
 const LAYOUT = {
@@ -182,12 +182,16 @@ export class Farm extends Phaser.Scene {
     this.idleTimer?.remove();
     this.focusRing.setVisible(false);
     this.audio.stop();
-    this.sfx.honk();
+    // The animal answers in its own voice. One with no noise gets the truck's horn.
+    const spoke = this.sfx.animal(picked.animal.sound);
+    if (!spoke) this.sfx.honk();
 
     this.tweens.killTweensOf(this.truck);
     this.tweens.add({ targets: picked.sprite, scale: picked.sprite.scale * 1.12, duration: 160, yoyo: true });
     this.sfx.engine(0.5);
     await tween(this, { targets: this.truck, x: Phaser.Math.Linear(640, picked.x, 0.6), duration: 500, ease: 'Sine.inOut' });
+    // Let the noise finish, so the request is not spoken over it.
+    if (spoke) await wait(this, 450);
     this.scene.start('Request', { animal: picked.animal });
   }
 }

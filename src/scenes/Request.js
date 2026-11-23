@@ -130,9 +130,15 @@ export class Request extends Phaser.Scene {
     await this.audio.say(this.request.say, this.request.tts);
   }
 
-  async repeatRequest(fromTimer = false) {
+  /** Say the request again. When he tapped the animal, it makes its noise first. */
+  async repeatRequest(fromTimer = false, tapped = false) {
     if (this.in.locked) return;
     this.in.lock();
+    if (tapped && this.sfx.animal(this.animal.sound)) {
+      this.audio.stop();
+      bounce(this, this.animalSprite, -34);
+      await wait(this, 950);
+    }
     await this.sayRequest();
     this.in.unlock();
     this.resetIdle(fromTimer);
@@ -207,7 +213,7 @@ export class Request extends Phaser.Scene {
 
   onTap(id) {
     this.resetIdle();
-    if (id === 'animal') return this.repeatRequest();
+    if (id === 'animal') return this.repeatRequest(false, true);
     this.board.onTap(id);
   }
 

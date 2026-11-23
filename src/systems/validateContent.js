@@ -5,13 +5,21 @@ const ANSWER_KINDS = ['count', 'pick'];
 const REWARD_TYPES = ['friend', 'paint', 'hat', 'decoration', 'upgrade'];
 
 /**
- * Pure. `raw` is the parsed JSON files; `generatorIds` are the skills the code can generate.
+ * Pure. `raw` is the parsed JSON files; `generatorIds` are the skills the code can generate;
+ * `soundNames` are the noises the game can make (left out, sounds are not checked).
  * Returns the usable content plus a list of human-readable problems.
  */
-export function validateContent(raw, generatorIds) {
+export function validateContent(raw, generatorIds, soundNames = null) {
   const errors = [];
   const bad = (msg) => { errors.push(msg); return false; };
   const list = (value, file) => (Array.isArray(value) ? value : (bad(`${file}: expected a list`), []));
+  // A noise the game cannot make is dropped, and the thing itself is kept: it just stays quiet.
+  const checkSound = (file) => (item) => {
+    if (item.sound === undefined || !soundNames || soundNames.includes(item.sound)) return item;
+    bad(`${file}: "${item.id}" has unknown sound "${item.sound}"`);
+    const { sound, ...quiet } = item;
+    return quiet;
+  };
 
   // Letters first: skills and other letters refer to them.
   const seenLetters = new Set();
@@ -57,7 +65,7 @@ export function validateContent(raw, generatorIds) {
     if (!seenSkills.has(a.skill)) return bad(`animals.json: animal "${a.id}" owns unknown or unusable skill "${a.skill}"`);
     seenAnimals.add(a.id);
     return true;
-  });
+  }).map(checkSound('animals.json'));
 
   const seenRewards = new Set();
   const rewards = list(raw.rewards?.rewards, 'rewards.json').filter((r) => {
@@ -88,7 +96,7 @@ export function validateContent(raw, generatorIds) {
     if (r.needs !== undefined && !buildings.has(r.needs)) return bad(`${where} needs "${r.needs}", which is not a building in "rewards"`);
     seenRewards.add(r.id);
     return true;
-  });
+  }).map(checkSound('rewards.json'));
 
   // Words are optional: a content set with none simply has fewer first-sound pictures.
   const seenWords = new Set();

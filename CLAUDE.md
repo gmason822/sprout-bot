@@ -94,7 +94,7 @@ Scenes listen for **actions**, never raw keys or pointers. The one exception is 
 - At play time `audio.js` uses, in order: hand-recorded clips for the line if all exist, the generated line, then speechSynthesis (slow rate, about 0.85).
 - The game learns which clips exist at build time: `vite.config.js` lists the folder as the module `virtual:voice-clips`. Never probe the server for clips at runtime.
 - **Letter sounds cannot be generated or spoken by TTS.** They must be recorded before the letter-sound requests ship.
-- Sound effects are synthesized in `src/systems/sfx.js`.
+- Sound effects are synthesized in `src/systems/sfx.js`, including each animal's noise. Content names a noise with `"sound"`; the names it may use are `SOUND_NAMES` in that file.
 
 ## Hosting
 - The game is public at https://gmason822.github.io/sprout-bot/ (GitHub Pages). Every push to `main` tests, builds and publishes it.

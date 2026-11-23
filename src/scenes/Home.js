@@ -264,7 +264,8 @@ export class Home extends Phaser.Scene {
     if (id === 'truck') return this.wiggle(this.truck, this.sfx.honk);
     if (id.startsWith('box:')) return this.place(Number(id.slice(4)));
     const entry = this.things.get(id);
-    if (entry) this.wiggle(entry.obj, () => this.sfx.pop(3));
+    // A friend answers in its own voice; anything else just pops.
+    if (entry) this.wiggle(entry.obj, () => this.sfx.animal(this.items.get(entry.thing.item)?.sound) || this.sfx.pop(3));
   }
 
   /** Tap something on the shelf: it hops onto the farm. */

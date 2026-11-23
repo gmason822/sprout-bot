@@ -7,6 +7,7 @@ import lettersJson from '../../content/letters.json';
 import rewardsJson from '../../content/rewards.json';
 import wordsJson from '../../content/words.json';
 import { validateContent } from './validateContent.js';
+import { SOUND_NAMES } from './sfx.js';
 
 export { validateContent };
 
@@ -15,6 +16,7 @@ export function loadContent(generatorIds) {
   const { content, errors } = validateContent(
     { animals: animalsJson, skills: skillsJson, letters: lettersJson, rewards: rewardsJson, words: wordsJson },
     generatorIds,
+    SOUND_NAMES,
   );
   for (const message of errors) console.error(`[content] ${message}`);
   return content;
