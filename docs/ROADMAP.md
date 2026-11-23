@@ -88,8 +88,28 @@ Built, waiting for a listen on the phone:
 ## Long-term
 - **Button box.** Not needed while he plays by touch. The firmware is in `hardware/`, and the game already answers to its keys (arrows move a highlight, Space picks, 1 to 4 pick directly), so building the box later needs no game changes beyond testing.
 
+## Game ideas to come back to
+Each fits the existing loop (an animal asks, he taps one thing, the truck delivers) unless it says otherwise.
+
+| Idea | What he would hear and see | Notes |
+|---|---|---|
+| Memory pairs | Face-down crates. He turns two over; a matching pair rides off on the truck. | The classic matching game. Needs a third kind of board, so it is the biggest build here. |
+| What goes together? | The bubble shows a sock; he picks the shoe. Rain and umbrella, bee and flower. | Needs a hand-made list of pairs in a content file. |
+| Big and little letters | The bubble shows B; he picks b, with no voice clue. | Reuses `letters.json`. Avoid lookalike pairs at first. |
+| Sound patterns | "Moo, oink, moo, oink... what comes next?" | A level of the pattern game. Better once more animals have recordings. |
+| Rhymes | "Which one rhymes with cat?" with pictures of a hat, a dog and the sun. | The voice says whole words well. Needs a list of rhyming picture words. |
+| More or fewer | Two baskets: "Which has more?" | Then "which has fewer?" |
+| One more, one less | "What is one more than 3?" picked from numbered crates. | Follows on from the owl's number games. |
+| Biggest and smallest | "Bring me the biggest pumpkin." | Needs choices drawn at different sizes. |
+| Adding with objects | "2 apples and 1 more. How many?" | Later, once counting to 10 is solid. |
+| Simple words | Picture and three written words, or a word and three pictures. | `words.json` already has `text` and `level` for this. |
+| Letter sounds, sounding out | "Bear. b, b, bear." | On hold: generated sounds were tried and rejected. Needs recorded sounds. |
+
+Also still open:
+- **One game per animal will not last.** There are eleven animals and eleven games, and every idea above would need another animal. The link between animals and games needs rethinking before the next game is added.
+- **More animal recordings:** owl, duck, goat, rooster, turkey, llama and chick are still quiet.
+
 ## Ideas for later
-- More games: memory pairs (needs a new kind of board), sound patterns, rhymes, more or fewer, biggest and smallest, one more / one less, adding with objects, simple words.
 - More animals and places (orchard, pond, pumpkin patch).
 - Free play on the farm between requests.
 - Optional driving stretches where he steers the truck himself.
