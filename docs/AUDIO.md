@@ -120,6 +120,21 @@ All of these fall back to text-to-speech, so record them whenever you like.
 - Shapes: `shape-circle.mp3`, `shape-square.mp3`, `shape-triangle.mp3`, `shape-star.mp3`, `shape-heart.mp3`, `shape-rectangle.mp3`, `shape-oval.mp3`, `shape-diamond.mp3`.
 - First-sound words: `word-<id>.mp3` for each letter's example in `content/letters.json` and each entry in `content/words.json` (for example `word-bear.mp3`).
 
+## The five newer games
+All generated; hand recordings would use these names.
+| File | Say |
+|------|-----|
+| `bring-the.mp3`, `colour-<name>.mp3`, `one.mp3` | "Bring me the red one!" |
+| `thats.mp3`, `colour-<name>.mp3` | "That's red." |
+| `find-same.mp3` | "Find the same one!" |
+| `different.mp3` | "That one is different." |
+| `who-says.mp3` | "Who says that?" |
+| `thats-a.mp3`, `animal-<id>.mp3` | "That's a cow." |
+| `which-not-belong.mp3` | "Which one does not belong?" |
+| `that-belongs.mp3` | "That one belongs with the others." |
+| `what-next.mp3`, `what-missing.mp3` | "What comes next?", "What is missing?" |
+| `look-pattern.mp3` | "Not that one. Look at the pattern." |
+
 ## Farm and day (Milestone 3)
 | File | Say |
 |------|-----|

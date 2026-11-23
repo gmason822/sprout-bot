@@ -55,6 +55,15 @@ Built, waiting for its playtest. Replay value was thin with three games, so ther
 - **Pig** adds "the one in the middle", with three things on the table, once left and right are going well.
 - **Hen** has strawberries and tomatoes to count as well.
 
+## Five more games
+Each has its own new animal, so eleven animals now take turns three at a time.
+- **Sheep, colours:** "Bring me the red one!"
+- **Cat, find the same one:** the bubble shows a picture to match.
+- **Duck, who says that?:** a real animal noise, then pick the animal.
+- **Horse, odd one out:** three of a kind and one that does not belong.
+- **Dog, patterns:** a repeating row with a gap to fill.
+- **Try a game** in the parent area plays any one game on its own, with nothing recorded.
+
 ## Home farm (free play)
 Built, waiting for its playtest:
 - A home farm on its own screen, reached by the house button on the animals screen. It starts as an empty field.
@@ -80,7 +89,7 @@ Built, waiting for a listen on the phone:
 - **Button box.** Not needed while he plays by touch. The firmware is in `hardware/`, and the game already answers to its keys (arrows move a highlight, Space picks, 1 to 4 pick directly), so building the box later needs no game changes beyond testing.
 
 ## Ideas for later
-- More skills: first sounds, one more / one less, colors, shapes, big/small, adding with objects, simple words.
+- More games: memory pairs (needs a new kind of board), sound patterns, rhymes, more or fewer, biggest and smallest, one more / one less, adding with objects, simple words.
 - More animals and places (orchard, pond, pumpkin patch).
 - Free play on the farm between requests.
 - Optional driving stretches where he steers the truck himself.

@@ -29,6 +29,7 @@ The **parent area** is plain HTML over the paused game, because a parent needs t
 - **Settings:** child name, deliveries per day (3 to 10), volume, computer-voice-only mode.
 - **Progress:** every item of every skill as a dot coloured by its box, hollow if he has not met it yet, with how often it was asked and how often he was right first time.
 - **Farm day:** a number to set how many farm days are finished, for testing what arrives when. Going forward gives every skipped day its reward, exactly as playing would; going back takes away what was earned after that day. The first change keeps a copy of his real farm (the `bookmark` in the save), and "Return to his real farm" puts it back exactly, placed things and all. The rules are in `src/systems/dayTravel.js`.
+- **Try a game:** a button for every game. Choosing one makes the animals screen offer only that game, over and over, optionally with every level mixed in. Nothing is recorded while it is on (no mastery, no deliveries, the day does not move on), and it is kept only until the game is closed, so it cannot be left on for him by accident. The rules are in `src/systems/tryGame.js`.
 - **Reset everything**, behind a second confirmation.
 
 Changing a setting saves it and restarts the game at the play button, so nothing on screen is left out of step with the new values. Closing without changes resumes exactly where he was.
@@ -97,6 +98,11 @@ In a `pick` request the truck fetches whatever he taps and takes it to the anima
 | `numbers` | Owl | "Bring me the box with the number 4!" and "How many eggs? Bring me that number!" | `pick` from numbered crates | 1–5 for each kind of question, then up to 10 one number at a time |
 | `firstsound` | Rabbit | A picture and its word: "Bear. What letter does bear start with?" | `pick` from lettered crates | Six letters at first, then the rest one at a time |
 | `shapes` | Mouse | "Bring me the triangle!" | `pick` from three shapes | Circle, square, triangle, star, heart; then rectangle, oval, diamond |
+| `colours` | Sheep | "Bring me the red one!" | `pick` from one shape in three colours | Red, blue, yellow, green; then orange, purple, pink; then brown, black, white |
+| `same` | Cat | "Find the same one!" The bubble shows the picture to find. | `pick` from 3–4 pictures | Different things of one kind; then one shape in different colours; then one picture turned four ways |
+| `whosays` | Duck | A real animal noise, then "Who says that?" | `pick` from animal drawings | Four animals at first, then every animal that has a recording |
+| `oddone` | Horse | "Which one does not belong?" | `pick` from four pictures, three of a kind | Kinds that are far apart (animals, vehicles); then close ones (fruit, vegetables) |
+| `pattern` | Dog | A row of pictures with a gap: "What comes next?" | `pick` from three pictures | AB; then AAB and ABB; then ABC; then the gap moves to the middle ("What is missing?") |
 
 Notes:
 - **Counting** shows 2 more things than the biggest number in the tier, so over-counting is possible.
@@ -105,9 +111,18 @@ Notes:
 - **Numbers**: when he is asked to find a numeral, the bubble shows only a crate. When he is asked how many, the bubble shows the things to count, in rows of five. Wrong choices are always numbers he is already working with.
 - **First sounds** speaks the whole word, so it needs no letter-sound recordings. Words come from each letter's `example` and from `words.json`. A word marked `firstSound: false` is left out (fox for X, tree with its "tr").
 - **Shapes** in one request share one random colour, so colour is never the clue. The bubble shows a question mark, because any shape there would look like the answer.
+- **Colours** is the mirror image: every choice is the same shape, so colour is the only clue. The bubble shows a paint palette, never a colour.
+- **Find the same one** is the one game that shows its answer on purpose: looking closely and matching is the skill. Its wrong choices are near misses (other things of the same kind, the same shape in another colour, the same picture turned).
+- **Who says that?** plays the noise before the words, and a wrong animal answers in its own voice before it is named ("oink... That's a pig."). It only asks about real recordings. Tapping the duck replays the noise, not a quack.
+- **Odd one out** takes its pictures from `content/groups.json`. No picture may be in two kinds, or there could be two right answers.
+- **Patterns** always shows at least two whole repeats, starts the row anywhere in the pattern (so the answer is not always the first picture), and puts every picture of the pattern on the table. When the request is spoken the row is read out: each picture hops with its own note. A pattern is made of different things, of one shape in different colours, or of different shapes in one colour.
+- The five newer games share `src/skills/tiers.js` for choosing what to ask: a tier lists its `items`, may open after another tier (`unlockAfter`) and may bring its items in a few at a time (`start`).
 
 ### Later skills (same loop, same two answer kinds)
-One more / one less, colors, big/small, adding with objects, simple words. Each needs a generator, an entry in `skills.json`, voice clips and an animal.
+One more / one less, more or fewer, biggest and smallest, rhymes, sound patterns, adding with objects, simple words. Each needs a generator, an entry in `skills.json`, voice clips and an animal. Memory pairs would need a third kind of board.
+
+### Pictures
+A request's bubble, a choice on the table and a delivery in the day's row all describe a picture the same way: `art` (a drawing in `public/assets/art/`) or `emoji`, with an optional `tint`, `angle` and `flipX`. A bubble may instead hold a `row` of pictures with one `null` for the gap. A choice may also have a `cue`: a noise it makes when picked wrongly.
 
 ## Which animals are offered
 After each delivery the game picks three different animals out of the six:
