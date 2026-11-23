@@ -8,6 +8,7 @@ import { EVERYTHING_SOLID } from '../systems/tryGame.js';
 import { generateColours, colourLines } from './colours.js';
 import { generateSame, sameLines } from './same.js';
 import { generateWhoSays, whoSaysLines } from './whosays.js';
+import { generateOddOne, oddOneLines } from './oddone.js';
 import { ANIMAL_CLIPS } from '../systems/animalClips.js';
 
 const content = loadContent(GENERATOR_IDS);
@@ -172,5 +173,42 @@ describe('who says that?', () => {
       expect(request.cue).not.toBe('moo');
       expect(request.answer.choices.map((c) => c.id)).not.toContain('cow');
     }
+  });
+});
+
+describe('odd one out', () => {
+  const skill = skillOf('oddone');
+  const kindOf = (emoji) => content.groups.find((g) => g.emoji.includes(emoji)).id;
+
+  it('puts three of a kind on the table and one that is not', () => {
+    ask('oddone', EVERYTHING_SOLID, (request) => {
+      const kind = request.itemId.split(':')[1];
+      const { choices, correct } = request.answer;
+      expect(choices).toHaveLength(4);
+      expect(choices.filter((c) => kindOf(c.emoji) === kind)).toHaveLength(3);
+      expect(kindOf(correct)).not.toBe(kind);
+      expect(request.tts).toBe('Which one does not belong?');
+    });
+  });
+
+  it('starts with kinds that are far apart, then pairs close ones', () => {
+    ask('oddone', {}, (r) => expect(r.itemId.split(':')[0]).toBe('odd'));
+    // Once the first kinds are solid, the closer ones arrive, one at a time.
+    const open = solid(skill.tiers[0].items.map((k) => `odd:${k}`));
+    const arrived = new Set();
+    ask('oddone', open, (r) => arrived.add(r.itemId));
+    expect([...arrived].filter((id) => id.startsWith('odd2:'))).toEqual(['odd2:vegetables']);
+
+    const pairs = new Set();
+    ask('oddone', EVERYTHING_SOLID, (r) => {
+      const [tier, kind] = r.itemId.split(':');
+      if (tier === 'odd2') pairs.add(`${kind}/${kindOf(r.answer.correct)}`);
+    }, 800);
+    expect([...pairs].sort()).toEqual(['food/fruit', 'food/vegetables', 'toys/clothes', 'toys/vehicles', 'vegetables/fruit']);
+  });
+
+  it('has nothing to ask without the kinds', () => {
+    expect(generateOddOne({ skill, content: { ...content, groups: [] } })).toBeNull();
+    expect(oddOneLines()).toHaveLength(2);
   });
 });
