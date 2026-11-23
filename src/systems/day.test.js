@@ -1,27 +1,30 @@
 import { describe, it, expect } from 'vitest';
-import { chooseAnimals, isDayDone, bigRewardFor, endDay } from './day.js';
+import { chooseOffers, isDayDone, bigRewardFor, endDay } from './day.js';
 
-const hen = { id: 'hen', skill: 'count' };
-const cow = { id: 'cow', skill: 'letters' };
-const pig = { id: 'pig', skill: 'leftright' };
+const hen = { id: 'hen', skills: ['count'] };
+const cow = { id: 'cow', skills: ['letters'] };
+const pig = { id: 'pig', skills: ['leftright'] };
 
-const owl = { id: 'owl', skill: 'numbers' };
-const rabbit = { id: 'rabbit', skill: 'firstsound' };
-const mouse = { id: 'mouse', skill: 'shapes' };
+const owl = { id: 'owl', skills: ['numbers'] };
+const rabbit = { id: 'rabbit', skills: ['firstsound'] };
+const mouse = { id: 'mouse', skills: ['shapes'] };
 const ALL = [hen, cow, pig, owl, rabbit, mouse];
+const always = () => true;
+const who = (offers) => offers.map((o) => o.animal);
 
-describe('chooseAnimals', () => {
-  it('offers three different animals', () => {
+describe('chooseOffers', () => {
+  it('offers three different animals, each with one of its own games', () => {
     for (let i = 0; i < 200; i++) {
-      const offered = chooseAnimals(ALL, []);
-      expect(offered).toHaveLength(3);
-      expect(new Set(offered).size).toBe(3);
+      const offers = chooseOffers(ALL, always, []);
+      expect(offers).toHaveLength(3);
+      expect(new Set(who(offers)).size).toBe(3);
+      for (const offer of offers) expect(offer.animal.skills).toContain(offer.skill);
     }
   });
 
-  it('always includes the skill he has practised least', () => {
+  it('always includes the game he has practised least', () => {
     const log = ['count', 'count', 'leftright', 'numbers', 'firstsound', 'shapes', 'shapes'];
-    for (let i = 0; i < 200; i++) expect(chooseAnimals(ALL, log)).toContain(cow);
+    for (let i = 0; i < 200; i++) expect(who(chooseOffers(ALL, always, log))).toContain(cow);
   });
 
   it('only looks at recent deliveries', () => {
@@ -29,7 +32,7 @@ describe('chooseAnimals', () => {
     // Letters were all long ago, so letters and shapes are equally neglected now.
     const first = new Set();
     for (let i = 0; i < 300; i++) {
-      const offered = chooseAnimals(ALL, log);
+      const offered = who(chooseOffers(ALL, always, log));
       expect(offered.includes(cow) || offered.includes(mouse)).toBe(true);
       offered.forEach((a) => first.add(a.id));
     }
@@ -38,18 +41,48 @@ describe('chooseAnimals', () => {
 
   it('puts them in different places on screen', () => {
     const slots = new Set();
-    for (let i = 0; i < 200; i++) slots.add(chooseAnimals(ALL, ['count']).indexOf(cow));
+    for (let i = 0; i < 200; i++) slots.add(who(chooseOffers(ALL, always, ['count'])).indexOf(cow));
     expect(slots.has(0) && slots.has(1) && slots.has(2)).toBe(true);
   });
 
   it('returns what there is when there are three or fewer', () => {
-    expect(chooseAnimals([hen, cow, pig], [])).toEqual([hen, cow, pig]);
-    expect(chooseAnimals([hen], [])).toEqual([hen]);
-    expect(chooseAnimals([], [])).toEqual([]);
+    expect(who(chooseOffers([hen, cow, pig], always, [])).sort((a, b) => a.id.localeCompare(b.id))).toEqual([cow, hen, pig]);
+    expect(chooseOffers([hen], always, [])).toEqual([{ animal: hen, skill: 'count' }]);
+    expect(chooseOffers([], always, [])).toEqual([]);
   });
 
   it('can still be asked for two', () => {
-    expect(chooseAnimals(ALL, [], Math.random, 2)).toHaveLength(2);
+    expect(chooseOffers(ALL, always, [], Math.random, 2)).toHaveLength(2);
+  });
+
+  describe('with families of games', () => {
+    const numbers = { id: 'hen', skills: ['count', 'more', 'onemore'] };
+    const letters = { id: 'cow', skills: ['letters', 'rhymes'] };
+    const farm = [numbers, letters, pig, mouse];
+
+    it('an animal asks for the game in its family he has practised least', () => {
+      const log = ['count', 'count', 'more', 'letters', 'leftright', 'shapes', 'rhymes'];
+      for (let i = 0; i < 200; i++) {
+        const offers = chooseOffers(farm, always, log);
+        // "onemore" has never been played, so the hen is there and that is what it asks.
+        expect(offers.find((o) => o.animal === numbers)?.skill).toBe('onemore');
+      }
+    });
+
+    it('gets round to every game in a family', () => {
+      const asked = new Set();
+      for (let i = 0; i < 300; i++) chooseOffers(farm, always, []).forEach((o) => asked.add(o.skill));
+      expect([...asked].sort()).toEqual(['count', 'leftright', 'letters', 'more', 'onemore', 'rhymes', 'shapes']);
+    });
+
+    it('never offers a game that has nothing to ask, or an animal with none that does', () => {
+      const ready = (skill) => !['more', 'onemore', 'letters', 'rhymes'].includes(skill);
+      for (let i = 0; i < 100; i++) {
+        const offers = chooseOffers(farm, ready, []);
+        expect(who(offers)).not.toContain(letters);
+        expect(offers.find((o) => o.animal === numbers)?.skill ?? 'count').toBe('count');
+      }
+    });
   });
 });
 

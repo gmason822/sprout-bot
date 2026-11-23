@@ -1,11 +1,11 @@
 import Phaser from 'phaser';
 import { createInput, moveFocus, ACTIONS } from '../systems/input.js';
 import { makeRequest } from '../skills/index.js';
-import { chooseAnimals, isDayDone } from '../systems/day.js';
+import { chooseOffers, isDayDone } from '../systems/day.js';
 import { GOOD_MORNING, WHO_HELPS } from '../systems/phrases.js';
 import { drawFarmBackdrop } from './farmBackdrop.js';
 import { dayTime } from '../systems/sky.js';
-import { masteryFor, animalsToOffer } from '../systems/tryGame.js';
+import { masteryFor, offerToTry } from '../systems/tryGame.js';
 import { TRUCK_Y } from './layout.js';
 import { tween, wait, makeTruck, drawFocusRing, drawDayRow, emoji } from './ui.js';
 
@@ -68,11 +68,12 @@ export class Farm extends Phaser.Scene {
       hasClip: (id) => this.audio.has(id),
       childName: this.state.settings.childName,
     };
-    const ready = this.content.animals.filter((a) => makeRequest(a.skill, ctx) !== null);
-    const only = animalsToOffer(trying, ready);
+    // Each animal asks for one game from its family; the bubble shows which.
+    const ready = (skill) => makeRequest(skill, ctx) !== null;
+    const only = offerToTry(trying, this.content.animals, ready);
     // A game being tried that has nothing to ask is dropped, rather than half applied.
     if (trying && !only) this.registry.set('trying', null);
-    const pair = only ?? chooseAnimals(ready, this.state.skillLog);
+    const pair = only ?? chooseOffers(this.content.animals, ready, this.state.skillLog);
     if (only) {
       this.add.text(18, 710, 'Trying this game. Nothing is recorded.', {
         fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif', fontSize: '22px', color: '#5b4636', resolution: 2,
@@ -80,7 +81,7 @@ export class Farm extends Phaser.Scene {
     }
     if (pair.length === 0) console.error('[farm] no animal has anything to ask; check the content files');
     this.layout = LAYOUT[Math.min(3, pair.length)] ?? LAYOUT[1];
-    this.animals = pair.slice(0, 3).map((animal, i) => this.buildAnimal(animal, this.layout.xs[i], i));
+    this.animals = pair.slice(0, 3).map((offer, i) => this.buildAnimal(offer, this.layout.xs[i], i));
 
     this.in.on(ACTIONS.TAP, (id) => this.onTap(id));
     this.in.on(ACTIONS.LEFT, () => this.moveFocus(-1));
@@ -112,7 +113,7 @@ export class Farm extends Phaser.Scene {
     }
   }
 
-  buildAnimal(animal, x, i) {
+  buildAnimal({ animal, skill }, x, i) {
     const { y, size } = this.layout;
     const sprite = this.add.image(x, y, animal.id).setDisplaySize(size, size).setDepth(3);
     const k = sprite.width / size;
@@ -132,12 +133,13 @@ export class Farm extends Phaser.Scene {
     bubble.fillStyle(0xffffff, 1);
     bubble.fillCircle(bx - 62 * s, by + 78 * s, 10 * s).fillCircle(bx - 40 * s, by + 58 * s, 16 * s).fillCircle(bx, by, 66 * s);
     bubble.lineStyle(5, 0x5b4636, 1).strokeCircle(bx, by, 66 * s);
-    if (this.textures.exists(animal.icon)) {
-      this.add.image(bx, by, animal.icon).setDisplaySize(88 * s, 88 * s).setDepth(3);
-    } else if (animal.icon) {
-      emoji(this, bx, by, animal.icon, 72 * s).setDepth(3);
+    const icon = this.content.skills.find((entry) => entry.id === skill)?.icon;
+    if (this.textures.exists(icon)) {
+      this.add.image(bx, by, icon).setDisplaySize(88 * s, 88 * s).setDepth(3);
+    } else if (icon) {
+      emoji(this, bx, by, icon, 72 * s).setDepth(3);
     }
-    return { animal, sprite, x };
+    return { animal, skill, sprite, x };
   }
 
   // ---------- talking ----------
@@ -204,6 +206,6 @@ export class Farm extends Phaser.Scene {
     // Let the noise finish, so the request is not spoken over it. (The truck's drive
     // and the pause before a request already cover the first part of it.)
     if (spoke) await wait(this, Math.max(0, spoke - 700));
-    this.scene.start('Request', { animal: picked.animal });
+    this.scene.start('Request', { animal: picked.animal, skill: picked.skill });
   }
 }

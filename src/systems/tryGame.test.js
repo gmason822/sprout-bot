@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { EVERYTHING_SOLID, masteryFor, animalsToOffer, gameList } from './tryGame.js';
+import { EVERYTHING_SOLID, masteryFor, offerToTry, gameList } from './tryGame.js';
 import { isSolid, boxOf, activeItems } from './mastery.js';
 import { loadContent } from './content.js';
 import { GENERATOR_IDS, makeRequest } from '../skills/index.js';
@@ -16,26 +16,30 @@ describe('trying a game', () => {
   });
 
   it('offers only the chosen game, or everything if it has nothing to ask', () => {
-    const ready = [{ id: 'hen', skill: 'count' }, { id: 'cow', skill: 'letters' }];
-    expect(animalsToOffer(null, ready)).toBeNull();
-    expect(animalsToOffer({ skill: 'letters' }, ready)).toEqual([ready[1]]);
-    expect(animalsToOffer({ skill: 'gone' }, ready)).toBeNull();
+    const animals = [{ id: 'hen', skills: ['count', 'more'] }, { id: 'cow', skills: ['letters'] }];
+    const ready = (skill) => skill !== 'letters';
+    expect(offerToTry(null, animals, ready)).toBeNull();
+    // The second game in a family can be tried on its own, asked by its animal.
+    expect(offerToTry({ skill: 'more' }, animals, ready)).toEqual([{ animal: animals[0], skill: 'more' }]);
+    expect(offerToTry({ skill: 'letters' }, animals, ready)).toBeNull();
+    expect(offerToTry({ skill: 'gone' }, animals, ready)).toBeNull();
   });
 
   it('lists every game by its animal and what it teaches', () => {
     const content = loadContent(GENERATOR_IDS);
     const list = gameList(content);
-    expect(list).toHaveLength(content.animals.length);
+    expect(list).toHaveLength(content.skills.length);
+    expect(new Set(list.map((g) => g.skill)).size).toBe(list.length);
     expect(list.find((g) => g.skill === 'count').label).toBe('Hen: Counting');
     for (const game of list) expect(game.label).not.toMatch(/undefined/);
   });
 
   it('every game can ask something with every level unlocked', () => {
     const content = loadContent(GENERATOR_IDS);
-    for (const animal of content.animals) {
+    for (const skill of content.animals.flatMap((animal) => animal.skills)) {
       for (let i = 0; i < 50; i++) {
-        const request = makeRequest(animal.skill, { content, mastery: EVERYTHING_SOLID, hasClip: () => false, childName: '' });
-        expect(request, animal.skill).not.toBeNull();
+        const request = makeRequest(skill, { content, mastery: EVERYTHING_SOLID, hasClip: () => false, childName: '' });
+        expect(request, skill).not.toBeNull();
       }
     }
   });

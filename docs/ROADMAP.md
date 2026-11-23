@@ -106,7 +106,7 @@ Each fits the existing loop (an animal asks, he taps one thing, the truck delive
 | Letter sounds, sounding out | "Bear. b, b, bear." | On hold: generated sounds were tried and rejected. Needs recorded sounds. |
 
 Also still open:
-- **One game per animal will not last.** There are eleven animals and eleven games, and every idea above would need another animal. The link between animals and games needs rethinking before the next game is added.
+- **Animals now own families of games** (see "Which animals are offered" in `docs/DESIGN.md`), so each idea above joins an existing animal's family rather than needing a new animal.
 - **More animal recordings:** owl, duck, goat, rooster, turkey, llama and chick are still quiet.
 
 ## Ideas for later

@@ -59,13 +59,25 @@ export function validateContent(raw, generatorIds, soundNames = null) {
   });
 
   const seenAnimals = new Set();
+  const ownedSkills = new Map();
   const animals = list(raw.animals?.animals, 'animals.json').filter((a) => {
     if (typeof a?.id !== 'string' || !a.id) return bad('animals.json: an animal has no id');
     if (seenAnimals.has(a.id)) return bad(`animals.json: animal "${a.id}" appears twice`);
-    if (!seenSkills.has(a.skill)) return bad(`animals.json: animal "${a.id}" owns unknown or unusable skill "${a.skill}"`);
     seenAnimals.add(a.id);
     return true;
-  }).map(checkSound('animals.json'));
+  }).map(checkSound('animals.json')).map((a) => {
+    // An animal owns a family of games ('skills'; a lone 'skill' is still read). A game
+    // it cannot play is dropped, and a game belongs to the first animal that lists it.
+    const { skill, ...rest } = a;
+    const wanted = Array.isArray(a.skills) ? a.skills : (skill === undefined ? [] : [skill]);
+    const skillsOwned = wanted.filter((id) => {
+      if (!seenSkills.has(id)) return bad(`animals.json: animal "${a.id}" owns unknown or unusable skill "${id}"`);
+      if (ownedSkills.has(id)) return bad(`animals.json: skill "${id}" is owned by "${ownedSkills.get(id)}" and "${a.id}"`);
+      ownedSkills.set(id, a.id);
+      return true;
+    });
+    return { ...rest, skills: skillsOwned };
+  }).filter((a) => a.skills.length > 0 || bad(`animals.json: animal "${a.id}" has no game it can play`));
 
   const seenRewards = new Set();
   const rewards = list(raw.rewards?.rewards, 'rewards.json').filter((r) => {

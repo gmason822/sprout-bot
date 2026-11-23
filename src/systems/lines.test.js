@@ -33,9 +33,9 @@ describe('allLines', () => {
     const check = (text) => { if (text !== null && !lines.has(text)) missing.add(text); };
     // The last one has every level of every game open, which covers the newer games.
     for (const mastery of [{}, mastered, EVERYTHING_SOLID]) {
-      for (const animal of content.animals) {
+      for (const skill of content.animals.flatMap((animal) => animal.skills)) {
         for (let i = 0; i < 600; i++) {
-          const request = makeRequest(animal.skill, { content, mastery, hasClip: () => false, childName: i % 2 ? 'Zoe' : '' });
+          const request = makeRequest(skill, { content, mastery, hasClip: () => false, childName: i % 2 ? 'Zoe' : '' });
           check(request.tts);
           for (const choice of request.answer.choices ?? []) check(choice.wrong.tts);
         }

@@ -147,8 +147,8 @@ describe('makeRequest', () => {
   const ctx = { content, mastery: {}, hasClip: () => false };
 
   it('builds a request for every skill an animal owns', () => {
-    for (const animal of content.animals) {
-      const r = makeRequest(animal.skill, ctx);
+    for (const [animal, skill] of content.animals.flatMap((a) => a.skills.map((s) => [a, s]))) {
+      const r = makeRequest(skill, ctx);
       expect(r, animal.id).not.toBeNull();
       expect(['count', 'pick']).toContain(r.answer.kind);
       // The bubble shows one picture, or a row of them.

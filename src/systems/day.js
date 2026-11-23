@@ -11,22 +11,40 @@ export const LOG_MAX = 1500;
 export const ANIMALS_OFFERED = 3;
 
 /**
- * Offer three animals: one owns the skill he has practised least lately, so nothing
- * can be avoided forever; the others are random. Their order on screen is random.
- * `skillLog` is the list of skill ids he has delivered for, oldest first.
+ * Offer three animals, each asking for one of its own games. The game he has
+ * practised least lately is always among them, so nothing can be avoided forever;
+ * the other animals are random, and each asks for the least-practised game in its
+ * family. Their order on screen is random.
+ * `ready` says which games have something to ask right now. `skillLog` is the list
+ * of games he has delivered for, oldest first. Returns [{ animal, skill }].
  */
-export function chooseAnimals(animals, skillLog, rng = Math.random, count = ANIMALS_OFFERED) {
-  if (animals.length <= count) return [...animals];
-
+export function chooseOffers(animals, ready, skillLog, rng = Math.random, count = ANIMALS_OFFERED) {
   const recent = skillLog.slice(-RECENT);
-  const practised = (animal) => recent.filter((s) => s === animal.skill).length;
-  const fewest = Math.min(...animals.map(practised));
-  const neglected = animals.filter((a) => practised(a) === fewest);
+  const practised = (skill) => recent.filter((s) => s === skill).length;
   const pick = (list) => list[Math.min(list.length - 1, Math.floor(rng() * list.length))];
+  /** The least-practised of an animal's games; a tie is settled at random. */
+  const gameFor = (animal) => {
+    const fewest = Math.min(...animal.playable.map(practised));
+    return pick(animal.playable.filter((skill) => practised(skill) === fewest));
+  };
 
-  const chosen = [pick(neglected)];
-  while (chosen.length < count) chosen.push(pick(animals.filter((a) => !chosen.includes(a))));
-  return shuffle(chosen, rng);
+  const able = animals
+    .map((animal) => ({ animal, playable: animal.skills.filter((skill) => ready(skill)) }))
+    .filter((entry) => entry.playable.length > 0);
+  if (able.length === 0) return [];
+
+  // The most neglected game of all, and the animal that owns it, come first.
+  const fewest = Math.min(...able.flatMap((entry) => entry.playable.map(practised)));
+  const first = pick(able.filter((entry) => entry.playable.some((skill) => practised(skill) === fewest)));
+  const offers = [{ animal: first.animal, skill: pick(first.playable.filter((skill) => practised(skill) === fewest)) }];
+
+  let others = able.filter((entry) => entry !== first);
+  while (offers.length < count && others.length > 0) {
+    const next = pick(others);
+    offers.push({ animal: next.animal, skill: gameFor(next) });
+    others = others.filter((entry) => entry !== next);
+  }
+  return shuffle(offers, rng);
 }
 
 /** The day ends when he has made the number of deliveries the parent chose. */

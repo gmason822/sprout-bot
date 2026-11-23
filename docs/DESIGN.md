@@ -125,11 +125,24 @@ One more / one less, more or fewer, biggest and smallest, rhymes, sound patterns
 A request's bubble, a choice on the table and a delivery in the day's row all describe a picture the same way: `art` (a drawing in `public/assets/art/`) or `emoji`, with an optional `tint`, `angle` and `flipX`. A bubble may instead hold a `row` of pictures with one `null` for the gap. A choice may also have a `cue`: a noise it makes when picked wrongly.
 
 ## Which animals are offered
-After each delivery the game picks three different animals out of the six:
-- one owns the skill he has practised least over his last 20 deliveries, so nothing is avoided forever;
-- the other two are random.
+**Animals own families of games.** There are more games than there will ever be animals, so an animal owns a family of related games rather than one, and asks for one of them each time. He can still choose by character ("I want the dog"), and the picture in the thought bubble shows which game it is this time. A new game joins the family it fits, and only a new *kind* of game needs a new animal.
 
-Their left-to-right order is random too.
+| Animal | Its family | Games so far |
+|---|---|---|
+| Hen, Owl | numbers | counting; finding numbers and how many |
+| Cow, Rabbit | letters and sounds | letters; first sounds |
+| Mouse, Sheep | shapes and colours | shapes; colours |
+| Pig | directions and sizes | left and right |
+| Cat | matching | find the same one |
+| Dog | patterns | what comes next |
+| Horse | sorting and thinking | odd one out |
+| Duck | listening | who says that |
+
+After each delivery the game picks three different animals (`chooseOffers` in `src/systems/day.js`):
+- one owns the game he has practised least over his last 20 deliveries, and asks for it, so nothing is avoided forever;
+- the other two are random, and each asks for the least-practised game in its own family.
+
+Their left-to-right order is random too. A game with nothing to ask is never offered, and nor is an animal whose whole family has nothing to ask.
 
 ## Mastery (`src/systems/mastery.js`)
 - Each item has a record `{ box: 1–5, seen, correct, lastSeen }`. Items are things like `count:3`, `letter-name:B`, `letter-sound:B`, `side:left`.
@@ -200,9 +213,9 @@ There is no learning on the home farm on purpose. It is where the rewards for le
 
 ### `content/animals.json`
 ```json
-{ "id": "hen", "name": "Hen", "skill": "count", "emoji": "🐔", "icon": "apple" }
+{ "id": "hen", "name": "Hen", "skills": ["count"], "emoji": "🐔", "sound": "cluck" }
 ```
-`id` is also the name of its picture. `icon` is what its thought bubble shows on the farm: a picture name, or an emoji.
+`id` is also the name of its picture. `skills` is its family of games: it asks for one of them each time, and its thought bubble shows that game's `icon` (set in `skills.json`). A game belongs to one animal only. `sound` is the noise it makes when tapped.
 
 ### `content/skills.json`
 ```json

@@ -50,17 +50,21 @@ export function masteryFor(trying, mastery) {
   return trying?.allLevels ? EVERYTHING_SOLID : mastery;
 }
 
-/** The animals to offer: only the game being tried, if there is one and it can ask something. */
-export function animalsToOffer(trying, ready) {
-  if (!trying) return null;
-  const only = ready.filter((animal) => animal.skill === trying.skill);
-  return only.length > 0 ? only : null;
+/**
+ * What to offer while a game is being tried: only that game, asked by the animal that
+ * owns it. Null if nothing is being tried, or the game has nothing to ask.
+ * `ready` says which games can ask something right now.
+ */
+export function offerToTry(trying, animals, ready) {
+  if (!trying || !ready(trying.skill)) return null;
+  const animal = animals.find((a) => a.skills.includes(trying.skill));
+  return animal ? [{ animal, skill: trying.skill }] : null;
 }
 
 /** What to call each game in the parent's list: its animal, and what it teaches. */
 export function gameList(content) {
-  return content.animals.map((animal) => {
-    const skill = content.skills.find((s) => s.id === animal.skill);
-    return { skill: animal.skill, label: `${animal.name}: ${skill?.title ?? skill?.tiers?.[0]?.title ?? animal.skill}` };
-  });
+  return content.animals.flatMap((animal) => animal.skills.map((id) => {
+    const skill = content.skills.find((s) => s.id === id);
+    return { skill: id, label: `${animal.name}: ${skill?.title ?? skill?.tiers?.[0]?.title ?? id}` };
+  }));
 }

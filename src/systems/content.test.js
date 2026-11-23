@@ -30,7 +30,20 @@ describe('validateContent', () => {
     const { content, errors } = validateContent(raw, GEN);
     expect(content.skills.map((s) => s.id)).toEqual(['count', 'letters']);
     expect(content.animals.map((a) => a.id)).toEqual(['hen', 'cow']);
-    expect(errors).toHaveLength(2);
+    // The skill, the game the owl cannot play, and the owl left with nothing.
+    expect(errors).toHaveLength(3);
+  });
+
+  it('lets an animal own a family of games, each game belonging to one animal', () => {
+    const raw = good();
+    raw.animals.animals = [{ id: 'hen', skills: ['count', 'letters', 'juggling'] }, { id: 'cow', skills: ['letters'] }, { id: 'pig', skill: 'count' }];
+    const { content, errors } = validateContent(raw, GEN);
+    // The hen keeps the two games that exist. The cow and pig only wanted games the hen has.
+    expect(content.animals).toEqual([{ id: 'hen', skills: ['count', 'letters'] }]);
+    expect(errors).toHaveLength(5);
+    // A lone 'skill' is still read, and comes out as a family of one.
+    const old = good();
+    expect(validateContent(old, GEN).content.animals.map((a) => a.skills)).toEqual([['count'], ['letters']]);
   });
 
   it('skips a skill with a bad answer kind or a broken tier link', () => {

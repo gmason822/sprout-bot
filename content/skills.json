@@ -1,9 +1,11 @@
 {
   "version": 1,
-  "_comment": "One entry per game. 'answer' is how he answers: 'count' (load N, then send) or 'pick' (tap one of 2-4). Each tier is one group in the parent's progress view, labelled by its 'title'. 'unlockAfter': the tier opens when two thirds of the earlier tier's items are in box 3+. 'perItemAfter': each item opens separately, once the same item in the earlier tier is in box 3+. 'start': how many of the tier's items are in play from the first day; the rest arrive one at a time. 'items': what a tier asks about, for the newer games. In 'pattern' an item names the repeating unit and what it is made of: 'AAB-colours' is two of one colour then one of another ('things' uses the game's 'items', 'colours' one shape in different colours, 'shapes' different shapes in one colour); 'gap': 'middle' puts the empty place inside the row instead of at its end. In 'oddone' the items are kinds from groups.json (the kind there are three of), and 'against' lists the kinds the odd one may come from; without it, any other kind in the tier. In 'whosays' the items are noises: each must be a recording (see src/systems/animalClips.js) and the 'sound' of an animal in animals.json. In 'same', 'match' says what kind of matching the tier is: 'kind' (items are kinds from groups.json), 'colour' (items are shapes) or 'turned' (items are the pictures themselves, which must look different when turned). 'title' on a game is its name in the parent area.",
+  "_comment": "One entry per game. 'answer' is how he answers: 'count' (load N, then send) or 'pick' (tap one of 2-4). Each tier is one group in the parent's progress view, labelled by its 'title'. 'unlockAfter': the tier opens when two thirds of the earlier tier's items are in box 3+. 'perItemAfter': each item opens separately, once the same item in the earlier tier is in box 3+. 'start': how many of the tier's items are in play from the first day; the rest arrive one at a time. 'items': what a tier asks about, for the newer games. In 'pattern' an item names the repeating unit and what it is made of: 'AAB-colours' is two of one colour then one of another ('things' uses the game's 'items', 'colours' one shape in different colours, 'shapes' different shapes in one colour); 'gap': 'middle' puts the empty place inside the row instead of at its end. In 'oddone' the items are kinds from groups.json (the kind there are three of), and 'against' lists the kinds the odd one may come from; without it, any other kind in the tier. In 'whosays' the items are noises: each must be a recording (see src/systems/animalClips.js) and the 'sound' of an animal in animals.json. In 'same', 'match' says what kind of matching the tier is: 'kind' (items are kinds from groups.json), 'colour' (items are shapes) or 'turned' (items are the pictures themselves, which must look different when turned). 'title' on a game is its name in the parent area, and 'icon' is the picture in its animal's thought bubble: a drawing's name, or an emoji.",
   "skills": [
     {
       "id": "count",
+      "title": "Counting",
+      "icon": "apple",
       "answer": "count",
       "tiers": [
         { "id": "count-1-5",  "title": "Counting", "min": 1, "max": 5 },
@@ -13,6 +15,8 @@
     },
     {
       "id": "letters",
+      "title": "Letters",
+      "icon": "crate",
       "answer": "pick",
       "source": "letters.json",
       "startWith": "childName",
@@ -25,6 +29,8 @@
     },
     {
       "id": "leftright",
+      "title": "Left and right",
+      "icon": "barrel",
       "answer": "pick",
       "tiers": [
         { "id": "side", "title": "Left, right and middle", "sides": ["left", "right", "middle"], "start": 2 }
@@ -33,6 +39,8 @@
     },
     {
       "id": "numbers",
+      "title": "Numbers",
+      "icon": "🔢",
       "answer": "pick",
       "tiers": [
         { "id": "numeral", "title": "Finding numbers", "ask": "find",  "min": 1, "max": 10, "start": 5, "choices": 3 },
@@ -42,6 +50,8 @@
     },
     {
       "id": "firstsound",
+      "title": "First sounds",
+      "icon": "👂",
       "answer": "pick",
       "source": "letters.json",
       "startWith": "childName",
@@ -52,6 +62,8 @@
     },
     {
       "id": "shapes",
+      "title": "Shapes",
+      "icon": "shape-star",
       "answer": "pick",
       "tiers": [
         { "id": "shape",  "title": "Shapes", "shapes": ["circle", "square", "triangle", "star", "heart"], "choices": 3 },
@@ -60,6 +72,7 @@
     },
     {
       "id": "colours",
+      "icon": "🎨",
       "title": "Colours",
       "answer": "pick",
       "shapes": ["circle", "square", "star", "heart", "triangle"],
@@ -71,6 +84,7 @@
     },
     {
       "id": "same",
+      "icon": "🧩",
       "title": "Find the same one",
       "answer": "pick",
       "tiers": [
@@ -81,6 +95,7 @@
     },
     {
       "id": "whosays",
+      "icon": "🔊",
       "title": "Who says that?",
       "answer": "pick",
       "tiers": [
@@ -89,6 +104,7 @@
     },
     {
       "id": "oddone",
+      "icon": "🤔",
       "title": "Odd one out",
       "answer": "pick",
       "tiers": [
@@ -99,6 +115,7 @@
     },
     {
       "id": "pattern",
+      "icon": "📿",
       "title": "Patterns",
       "answer": "pick",
       "items": ["apple", "carrot", "egg", "pumpkin", "strawberry", "tomato"],

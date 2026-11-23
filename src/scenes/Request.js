@@ -29,8 +29,10 @@ export class Request extends Phaser.Scene {
     super('Request');
   }
 
+  /** `data` is { animal, skill }: who is asking, and which of its games this is. */
   init(data) {
     this.animal = data.animal;
+    this.skillId = data.skill ?? data.animal.skills[0];
   }
 
   create() {
@@ -43,12 +45,12 @@ export class Request extends Phaser.Scene {
     // A parent trying a game out: it is asked from a pretend record if they want
     // every level, and nothing that happens is written down.
     this.trying = this.registry.get('trying') ?? null;
-    this.request = makeRequest(this.animal.skill, {
+    this.request = makeRequest(this.skillId, {
       content: this.registry.get('content'),
       mastery: masteryFor(this.trying, this.state.mastery),
       hasClip: (id) => this.audio.has(id),
       childName: this.state.settings.childName,
-      prevItemId: (this.trying ? this.registry.get('tryLast') : this.state.lastItem[this.animal.skill]) ?? null,
+      prevItemId: (this.trying ? this.registry.get('tryLast') : this.state.lastItem[this.skillId]) ?? null,
     });
     const Board = this.request && BOARDS[this.request.answer.kind];
     if (!Board) {

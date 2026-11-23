@@ -1,17 +1,17 @@
 {
   "version": 1,
-  "_comment": "Each animal owns one game from skills.json. Three animals are offered at a time. 'id' is also the name of its picture. 'icon' is what its thought bubble shows on the farm: a picture name, or an emoji. 'sound' is the noise it makes when tapped: one of the names in src/systems/sfx.js.",
+  "_comment": "Each animal owns a family of related games from skills.json, listed in 'skills', and asks for one of them each time; its thought bubble shows that game's 'icon'. Three animals are offered at a time. A game belongs to one animal only. 'id' is also the name of its picture. 'sound' is the noise it makes when tapped: one of the names in src/systems/sfx.js. Families so far, for placing new games: hen and owl do numbers; cow and rabbit letters and sounds; mouse and sheep shapes and colours; pig directions and sizes; cat matching; dog patterns; horse sorting and thinking; duck listening.",
   "animals": [
-    { "id": "hen",    "name": "Hen",    "skill": "count",      "emoji": "🐔", "icon": "apple", "sound": "cluck" },
-    { "id": "cow",    "name": "Cow",    "skill": "letters",    "emoji": "🐮", "icon": "crate", "sound": "moo" },
-    { "id": "pig",    "name": "Pig",    "skill": "leftright",  "emoji": "🐷", "icon": "barrel", "sound": "oink" },
-    { "id": "owl",    "name": "Owl",    "skill": "numbers",    "emoji": "🦉", "icon": "🔢" },
-    { "id": "rabbit", "name": "Rabbit", "skill": "firstsound", "emoji": "🐰", "icon": "👂", "sound": "boing" },
-    { "id": "mouse",  "name": "Mouse",  "skill": "shapes",     "emoji": "🐭", "icon": "shape-star", "sound": "squeak" },
-    { "id": "sheep",  "name": "Sheep",  "skill": "colours",    "emoji": "🐑", "icon": "🎨", "sound": "baa" },
-    { "id": "cat",    "name": "Cat",    "skill": "same",       "emoji": "🐱", "icon": "🧩", "sound": "meow" },
-    { "id": "duck",   "name": "Duck",   "skill": "whosays",    "emoji": "🦆", "icon": "🔊" },
-    { "id": "horse",  "name": "Horse",  "skill": "oddone",     "emoji": "🐴", "icon": "🤔", "sound": "neigh" },
-    { "id": "dog",    "name": "Dog",    "skill": "pattern",    "emoji": "🐶", "icon": "📿", "sound": "woof" }
+    { "id": "hen",    "name": "Hen",    "skills": ["count"],      "emoji": "🐔", "sound": "cluck" },
+    { "id": "cow",    "name": "Cow",    "skills": ["letters"],    "emoji": "🐮", "sound": "moo" },
+    { "id": "pig",    "name": "Pig",    "skills": ["leftright"],  "emoji": "🐷", "sound": "oink" },
+    { "id": "owl",    "name": "Owl",    "skills": ["numbers"],    "emoji": "🦉" },
+    { "id": "rabbit", "name": "Rabbit", "skills": ["firstsound"], "emoji": "🐰", "sound": "boing" },
+    { "id": "mouse",  "name": "Mouse",  "skills": ["shapes"],     "emoji": "🐭", "sound": "squeak" },
+    { "id": "sheep",  "name": "Sheep",  "skills": ["colours"],    "emoji": "🐑", "sound": "baa" },
+    { "id": "cat",    "name": "Cat",    "skills": ["same"],       "emoji": "🐱", "sound": "meow" },
+    { "id": "duck",   "name": "Duck",   "skills": ["whosays"],    "emoji": "🦆" },
+    { "id": "horse",  "name": "Horse",  "skills": ["oddone"],     "emoji": "🐴", "sound": "neigh" },
+    { "id": "dog",    "name": "Dog",    "skills": ["pattern"],    "emoji": "🐶", "sound": "woof" }
   ]
 }
