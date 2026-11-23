@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_comment": "One reward is given at each sunset. On a set day it is a big one, otherwise a small one. The home farm is several pages side by side (pond, animals, home, crops, yard: see src/systems/farmPages.js), and 'page' says which one a thing belongs on; left out, it is home. A page opens when its first building is earned, so the days below take turns between the pages. BIG ('rewards'): farm buildings and features. Each has the 'day' it arrives on (1 = his first finished farm day) and a 'value' naming a drawing in src/scenes/homeUpgrades.js; it has no emoji, because it is never shown as a picture: the sunset shows a present and the building is then built on the farm. 'replaces' names the building this one is the next stage of (tent, cabin, farmhouse, bighouse are four stages of one home): only the best stage he owns is drawn. SMALL ('small'): cosmetics, picked at random. Plain entries can repeat. 'once': true means it is given only one time. 'type' is friend or decoration (placed on the farm, the default), paint (truck colour; 'value' is #rrggbb or rainbow) or hat (for the robot). A small thing is only given once its page is open. 'needs' names a building he must own before this can be given. 'sound' is the noise a placed thing makes when tapped: one of the names in src/systems/sfx.js.",
+  "_comment": "One reward is given at each sunset. On a set day it is a big one, otherwise a small one. The home farm is several pages side by side (pond, animals, home, crops, yard: see src/systems/farmPages.js), and 'page' says which one a thing belongs on; left out, it is home. A page opens when its first building is earned, so the days below take turns between the pages. BIG ('rewards'): farm buildings and features. Each has the 'day' it arrives on (1 = his first finished farm day) and a 'value' naming a drawing in src/scenes/homeUpgrades.js; it has no emoji, because it is never shown as a picture: the sunset shows a present and the building is then built on the farm. 'replaces' names the building this one is the next stage of (tent, cabin, farmhouse, bighouse are four stages of one home; planter, garden, field, bigfield are four stages of the crops): only the best stage he owns is drawn. SMALL ('small'): cosmetics, picked at random. Plain entries can repeat. 'once': true means it is given only one time. 'type' is friend or decoration (placed on the farm, the default), paint (truck colour; 'value' is #rrggbb or rainbow) or hat (for the robot). A small thing is only given once its page is open. 'needs' names a building he must own before this can be given. 'sound' is the noise a placed thing makes when tapped: one of the names in src/systems/sfx.js.",
   "small": [
     { "id": "small-tulip", "name": "Tulip", "emoji": "🌷" },
     { "id": "small-sunflower", "page": "crops", "name": "Sunflower", "emoji": "🌻" },
@@ -47,21 +47,24 @@
   ],
   "rewards": [
     { "day": 1, "id": "upgrade-tent", "type": "upgrade", "name": "Tent", "value": "tent", "page": "home" },
-    { "day": 3, "id": "upgrade-garden", "type": "upgrade", "name": "Vegetable garden", "value": "garden", "page": "crops" },
+    { "day": 3, "id": "upgrade-planter", "type": "upgrade", "name": "Planter box", "value": "planter", "page": "crops" },
     { "day": 5, "id": "upgrade-coop", "type": "upgrade", "name": "Hen house", "value": "coop", "page": "animals" },
     { "day": 8, "id": "upgrade-garage", "type": "upgrade", "name": "Garage", "value": "garage", "page": "home" },
-    { "day": 11, "id": "upgrade-fence", "type": "upgrade", "name": "Fence and gate", "value": "fence", "page": "home" },
-    { "day": 14, "id": "upgrade-scarecrow", "type": "upgrade", "name": "Scarecrow", "value": "scarecrow", "page": "crops" },
+    { "day": 11, "id": "upgrade-garden", "type": "upgrade", "name": "Vegetable patch", "value": "garden", "page": "crops", "replaces": "planter" },
+    { "day": 14, "id": "upgrade-fence", "type": "upgrade", "name": "Fence and gate", "value": "fence", "page": "home" },
     { "day": 17, "id": "upgrade-barn", "type": "upgrade", "name": "Barn", "value": "barn", "page": "animals" },
-    { "day": 20, "id": "upgrade-cabin", "type": "upgrade", "name": "Cabin", "value": "cabin", "page": "home", "replaces": "tent" },
-    { "day": 23, "id": "upgrade-pond", "type": "upgrade", "name": "Pond", "value": "pond", "page": "pond" },
-    { "day": 26, "id": "upgrade-windmill", "type": "upgrade", "name": "Windmill", "value": "windmill", "page": "crops" },
-    { "day": 29, "id": "upgrade-tree", "type": "upgrade", "name": "Apple tree", "value": "tree", "page": "home" },
-    { "day": 32, "id": "upgrade-raincloud", "type": "upgrade", "name": "Rain cloud", "value": "raincloud", "page": "crops" },
-    { "day": 35, "id": "upgrade-well", "type": "upgrade", "name": "Well", "value": "well", "page": "home" },
-    { "day": 38, "id": "upgrade-farmhouse", "type": "upgrade", "name": "Farmhouse", "value": "farmhouse", "page": "home", "replaces": "cabin" },
-    { "day": 41, "id": "upgrade-silo", "type": "upgrade", "name": "Silo", "value": "silo", "page": "crops" },
-    { "day": 44, "id": "upgrade-beehive", "type": "upgrade", "name": "Beehive", "value": "beehive", "page": "crops" },
-    { "day": 47, "id": "upgrade-bighouse", "type": "upgrade", "name": "Big farmhouse", "value": "bighouse", "page": "home", "replaces": "farmhouse" }
+    { "day": 20, "id": "upgrade-scarecrow", "type": "upgrade", "name": "Scarecrow", "value": "scarecrow", "page": "crops" },
+    { "day": 23, "id": "upgrade-cabin", "type": "upgrade", "name": "Cabin", "value": "cabin", "page": "home", "replaces": "tent" },
+    { "day": 26, "id": "upgrade-pond", "type": "upgrade", "name": "Pond", "value": "pond", "page": "pond" },
+    { "day": 29, "id": "upgrade-field", "type": "upgrade", "name": "Corn field", "value": "field", "page": "crops", "replaces": "garden" },
+    { "day": 32, "id": "upgrade-tree", "type": "upgrade", "name": "Apple tree", "value": "tree", "page": "home" },
+    { "day": 35, "id": "upgrade-windmill", "type": "upgrade", "name": "Windmill", "value": "windmill", "page": "crops" },
+    { "day": 38, "id": "upgrade-well", "type": "upgrade", "name": "Well", "value": "well", "page": "home" },
+    { "day": 41, "id": "upgrade-raincloud", "type": "upgrade", "name": "Rain cloud", "value": "raincloud", "page": "crops" },
+    { "day": 44, "id": "upgrade-farmhouse", "type": "upgrade", "name": "Farmhouse", "value": "farmhouse", "page": "home", "replaces": "cabin" },
+    { "day": 47, "id": "upgrade-silo", "type": "upgrade", "name": "Silo", "value": "silo", "page": "crops" },
+    { "day": 50, "id": "upgrade-bigfield", "type": "upgrade", "name": "Big fields", "value": "bigfield", "page": "crops", "replaces": "field" },
+    { "day": 53, "id": "upgrade-beehive", "type": "upgrade", "name": "Beehive", "value": "beehive", "page": "crops" },
+    { "day": 56, "id": "upgrade-bighouse", "type": "upgrade", "name": "Big farmhouse", "value": "bighouse", "page": "home", "replaces": "farmhouse" }
   ]
 }

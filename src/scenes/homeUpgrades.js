@@ -6,7 +6,8 @@
 // tapped, and what happens. A builder draws in its own coordinates through `add` and
 // `put`; PLACE then says where on the farm it stands and how big. So a building can
 // be moved or enlarged without touching its drawing, and can be grown out of the
-// ground as one piece when it is first built. Adding an upgrade is one builder, one
+// ground as one piece when it is first built. A builder returns { zone, tap }, or
+// { zone, parts: [{ zone, tap }] } when it has more than one thing to tap. Adding an upgrade is one builder, one
 // line in PLACE, and one line in rewards.json.
 
 import Phaser from 'phaser';
@@ -28,10 +29,10 @@ const pause = (scene, ms) => new Promise((resolve) => scene.time.delayedCall(ms,
 /** A toy ignores taps while it is still doing its thing, so mashing cannot tangle it. */
 function oneAtATime(fn) {
   let busy = false;
-  return async () => {
+  return async (...args) => {
     if (busy) return;
     busy = true;
-    try { await fn(); } finally { busy = false; }
+    try { await fn(...args); } finally { busy = false; }
   };
 }
 
@@ -394,42 +395,152 @@ function pond(scene, { sfx, add, put }) {
   };
 }
 
-function garden(scene, { sfx, add, put }) {
-  const x = 640;
-  const y = 372;
-  const g = add.graphics().setDepth(0.9);
-  g.fillStyle(0x6b4423, 1).fillRoundedRect(x - 112, y - 44, 224, 88, 14);
-  g.fillStyle(0x8d5a2b, 1).fillRoundedRect(x - 104, y - 36, 208, 72, 10);
-  g.fillStyle(0x7a4b22, 1);
-  for (const dy of [-12, 14]) g.fillRoundedRect(x - 92, y + dy, 184, 6, 3);
-  const crops = ['🥕', '🌽', '🍅', '🎃'];
-  const plants = crops.map((_, i) => put(x - 78 + i * 52, y - 4, '🌱', 34).setDepth(depthAt(y)).setScale(0));
-  let stage = 0; // 0 bare, then one more sprout per tap, then ripe, then picked
-  return {
-    zone: rect(x - 112, y - 44, 224, 88),
-    // Tap to plant a row, tap again to ripen it, tap again to pick it.
-    tap: oneAtATime(async () => {
-      if (stage < crops.length) {
-        const plant = plants[stage++];
-        plant.setText('🌱');
-        sfx.pop(stage);
-        await tw(scene, { targets: plant, scale: 1, duration: 220, ease: 'Back.out' });
-      } else if (stage === crops.length) {
-        stage++;
-        sfx.chime();
-        plants.forEach((plant, i) => plant.setText(crops[i]));
-        await Promise.all(plants.map((plant, i) => tw(scene, { targets: plant, scale: { from: 0.6, to: 1.25 }, delay: i * 70, duration: 240, ease: 'Back.out' })));
-      } else {
-        stage = 0;
-        for (const [i, plant] of plants.entries()) {
-          sfx.pop(i + 3);
-          await tw(scene, { targets: plant, y: y - 50, scale: 0, duration: 200, ease: 'Quad.in' });
-          plant.setY(y - 4);
+// ---------- crops: beds he waters, grows, ripens and picks ----------
+
+// One bed is one tap target, so it is as big as a building's door.
+const BED = { width: 130, height: 150, gap: 12 };
+const CRATE = { width: 72, holds: 6 };
+// Where the four plants stand in a bed, from its middle.
+const PLANTS = [[-30, -34], [30, -34], [-30, 28], [30, 28]];
+
+/** A little watering can, drawn with its spout to the left, pivoting on its handle. */
+function wateringCan(add, x, y) {
+  const g = add.graphics();
+  g.fillStyle(0x4f83cc, 1).fillRoundedRect(-18, -14, 36, 30, 6);
+  g.lineStyle(6, 0x4f83cc, 1).lineBetween(-16, 4, -40, -12);
+  g.fillStyle(0x3b6cb0, 1).fillCircle(-42, -14, 7);
+  g.lineStyle(5, 0x3b6cb0, 1).strokeEllipse(20, 0, 18, 24);
+  return add.container(x, y, [g]).setScale(1.5);
+}
+
+/**
+ * A plot of beds with a crate beside it, lying flat in the field and centred on the
+ * builder's origin. Each bed grows one crop, and each tap takes it one step on:
+ * water it, it grows, it ripens, pick it. What is picked hops into the crate.
+ * `crops` is one picture per bed. A `boxed` plot is a wooden planter. `wheat` adds
+ * a field of wheat along the back of the page.
+ */
+function plot(scene, { sfx, add, put }, { crops, boxed = false, wheat = false }) {
+  const n = crops.length;
+  const total = n * BED.width + n * BED.gap + CRATE.width;
+  const left = -total / 2;
+  const top = -BED.height / 2;
+
+  if (wheat) {
+    // Behind the buildings, from one end of the page to the other.
+    const w = add.graphics();
+    w.fillStyle(0xd9a93a, 1).fillRoundedRect(-330, -178, 980, 84, 26);
+    w.fillStyle(0xe8c14a, 1).fillRoundedRect(-330, -178, 980, 70, 26);
+    w.lineStyle(4, 0xd9a93a, 1);
+    for (let x = -300; x < 640; x += 36) w.lineBetween(x, -170, x + 10, -116);
+    for (let i = 0; i < 9; i++) {
+      const ear = put(-290 + i * 112, -150, '🌾', 44);
+      scene.tweens.add({ targets: ear, angle: { from: -7, to: 7 }, duration: 1500 + (i % 3) * 300, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+    }
+  }
+
+  // The crate stands at the right-hand end.
+  const crateX = left + n * (BED.width + BED.gap) + CRATE.width / 2;
+  const crateY = 24;
+  const box = add.graphics();
+  box.fillStyle(0x8d5a2b, 1).fillRoundedRect(crateX - 36, crateY - 26, 72, 64, 8);
+  box.fillStyle(0xc98f4a, 1).fillRoundedRect(crateX - 31, crateY - 21, 62, 54, 6);
+  box.lineStyle(4, 0x8d5a2b, 1);
+  for (const dy of [-3, 15]) box.lineBetween(crateX - 31, crateY + dy, crateX + 31, crateY + dy);
+  let picked = [];
+  const intoCrate = (char) => {
+    // The crate only holds so many: the oldest makes room.
+    if (picked.length >= CRATE.holds) picked.shift().destroy();
+    picked.forEach((p, i) => p.setPosition(crateX - 18 + (i % 3) * 18, crateY - 24 - Math.floor(i / 3) * 16));
+    const i = picked.length;
+    picked.push(put(crateX - 18 + (i % 3) * 18, crateY - 24 - Math.floor(i / 3) * 16, char, 26));
+  };
+
+  const beds = crops.map((crop, b) => {
+    const cx = left + BED.width / 2 + b * (BED.width + BED.gap);
+    const g = add.graphics();
+    const edge = boxed ? 0xb9793f : 0x6b4423;
+    g.fillStyle(edge, 1).fillRoundedRect(cx - BED.width / 2, top, BED.width, BED.height, boxed ? 8 : 16);
+    if (boxed) g.lineStyle(3, 0x8d5a2b, 1).strokeRoundedRect(cx - BED.width / 2, top, BED.width, BED.height, 8);
+    const inset = boxed ? 12 : 8;
+    const soil = (colour) => g.fillStyle(colour, 1).fillRoundedRect(cx - BED.width / 2 + inset, top + inset, BED.width - inset * 2, BED.height - inset * 2, 10);
+    soil(0x8d5a2b);
+    // Watered soil is darker. It is drawn over the dry soil and faded in.
+    const wet = add.graphics().setAlpha(0);
+    wet.fillStyle(0x5f3a1a, 1).fillRoundedRect(cx - BED.width / 2 + inset, top + inset, BED.width - inset * 2, BED.height - inset * 2, 10);
+    const furrows = add.graphics();
+    furrows.fillStyle(0x7a4b22, 1);
+    for (const dy of [-22, 40]) furrows.fillRoundedRect(cx - 44, dy, 88, 6, 3);
+    const plants = PLANTS.map(([dx, dy]) => put(cx + dx, dy, '🌱', 34).setScale(0));
+
+    let stage = 0; // 0 bare, 1 sprouting, 2 grown, 3 ripe
+    const drops = () => Promise.all([0, 1, 2].map(async (i) => {
+      const drop = put(cx - 30 + i * 30, top - 30, '💧', 24);
+      await tw(scene, { targets: drop, y: 6, alpha: 0.2, delay: i * 90, duration: 380, ease: 'Quad.in' });
+      drop.destroy();
+    }));
+    const show = (char, px, scale) => Promise.all(plants.map((plant, i) => {
+      plant.setText(char).setFontSize(px);
+      return tw(scene, { targets: plant, scale: { from: scale * 0.5, to: scale }, delay: i * 60, duration: 240, ease: 'Back.out' });
+    }));
+    /** One step on. `byHand` is a tap; otherwise it is the rain, which never picks. */
+    const step = oneAtATime(async (byHand = true) => {
+      if (stage === 0) {
+        stage = 1;
+        if (byHand) {
+          const can = wateringCan(add, cx + 34, top - 20);
+          sfx.splash();
+          await tw(scene, { targets: can, angle: -38, duration: 220, ease: 'Sine.out' });
+          await drops();
+          can.destroy();
+        } else {
+          await drops();
         }
+        scene.tweens.add({ targets: wet, alpha: 1, duration: 300 });
+        sfx.pop(2);
+        await show('🌱', 34, 1);
+      } else if (stage === 1) {
+        stage = 2;
+        if (!byHand) await drops();
+        sfx.pop(4);
+        await show('🌿', 44, 1);
+      } else if (stage === 2) {
+        stage = 3;
+        if (!byHand) await drops();
+        sfx.chime();
+        await show(crop, 46, 1.1);
+      } else if (byHand) {
+        // Picked: each one hops into the crate, and the bed is bare and dry again.
+        for (const [i, plant] of plants.entries()) {
+          const home = { x: plant.x, y: plant.y };
+          sfx.pop(i + 4);
+          scene.tweens.add({ targets: plant, x: crateX, duration: 300, ease: 'Sine.inOut' });
+          await tw(scene, { targets: plant, y: crateY - 70, scale: 0.6, duration: 150, ease: 'Quad.out' });
+          await tw(scene, { targets: plant, y: crateY - 20, duration: 150, ease: 'Quad.in' });
+          plant.setScale(0).setPosition(home.x, home.y);
+          intoCrate(crop);
+        }
+        stage = 0;
+        scene.tweens.add({ targets: wet, alpha: 0, duration: 500 });
       }
-    }),
+    });
+    return { zone: rect(cx - BED.width / 2, top, BED.width, BED.height), tap: () => step(true), rain: () => step(false) };
+  });
+
+  return {
+    zone: rect(left, top, total, BED.height),
+    // Every bed is its own thing to tap.
+    parts: beds.map(({ zone, tap }) => ({ zone, tap })),
+    // The rain cloud takes every bed one step on, but leaves the picking to him.
+    water: () => beds.forEach((bed) => bed.rain()),
   };
 }
+
+// The crops grow in four stages, each with one more bed and one more crop.
+const planter = (scene, api) => plot(scene, api, { crops: ['🥕'], boxed: true });
+const garden = (scene, api) => plot(scene, api, { crops: ['🥕', '🍅'] });
+const field = (scene, api) => plot(scene, api, { crops: ['🥕', '🍅', '🌽'] });
+const bigfield = (scene, api) => plot(scene, api, { crops: ['🥕', '🍅', '🌽', '🎃'], wheat: true });
 
 function well(scene, { sfx, add, put }) {
   const x = 78;
@@ -519,7 +630,7 @@ function scarecrow(scene, { sfx, add, put }) {
   };
 }
 
-function raincloud(scene, { sfx, add, put }) {
+function raincloud(scene, { sfx, add, put, water }) {
   const x = 560;
   const y = 86;
   const puffs = add.graphics();
@@ -536,15 +647,17 @@ function raincloud(scene, { sfx, add, put }) {
     bow.lineStyle(14, colour, 0.85);
     bow.beginPath();
     // Centred on the screen whatever part of the sky the cloud is in (see PLACE).
-    bow.arc(940, 336, 280 - i * 14, Math.PI, 0, false);
+    bow.arc(680, 336, 280 - i * 14, Math.PI, 0, false);
     bow.strokePath();
   });
   return {
     zone: rect(x - 120, y - 56, 240, 106),
-    // The cloud turns grey and rains, then a rainbow comes out for a while.
+    // The cloud turns grey and rains, the crops below get a drink, and then a rainbow
+    // comes out for a while.
     tap: oneAtATime(async () => {
       draw(0x9aa5b1);
       sfx.rain();
+      scene.time.delayedCall(900, () => water?.());
       for (let i = 0; i < 26; i++) {
         const drop = add.rectangle(cloud.x - 90 + ((i * 53) % 180), y + 30, 4, 16, 0x4fc3f7).setDepth(0.35);
         scene.tweens.add({ targets: drop, y: HORIZON + 40, alpha: 0.2, delay: i * 70, duration: 520, ease: 'Quad.in', onComplete: () => drop.destroy() });
@@ -562,7 +675,7 @@ function raincloud(scene, { sfx, add, put }) {
 const UPGRADES = {
   tent, cabin, farmhouse, bighouse,
   fence, barn, silo, windmill, tree, garage, coop,
-  pond, garden, well, beehive, scarecrow, raincloud,
+  pond, planter, garden, field, bigfield, well, beehive, scarecrow, raincloud,
 };
 
 // Where each upgrade stands on its page (rewards.json says which page that is).
@@ -585,14 +698,19 @@ const PLACE = {
   // Animals.
   coop: { anchor: [1178, 304], at: [330, 352], scale: 1.7 },
   barn: { anchor: [560, BASE], at: [800, 352], scale: 1.45 },
-  // Crops. The garden lies flat in the field, under anything he places.
+  // Crops. The plot of beds lies flat in the field, under anything he places.
   windmill: { anchor: [840, BASE], at: [270, 330], scale: 1.25 },
   scarecrow: { anchor: [806, 436], at: [560, 372], scale: 1.3 },
   beehive: { anchor: [1190, 446], at: [780, 366], scale: 1.4 },
   silo: { anchor: [717, BASE], at: [1010, 326], scale: 1.2 },
-  garden: { anchor: [640, 372], at: [470, 478], scale: 1.5, depth: 0.9 },
-  // In the sky, behind the hills, so the rainbow's feet are hidden.
-  raincloud: { anchor: [560, 86], at: [260, 56], scale: 1, depth: 0.3 },
+  // The four stages of the plot are drawn around their own middle, so each new one
+  // spreads out from the same spot.
+  planter: { anchor: [0, 0], at: [480, 467], scale: 1, depth: 0.9 },
+  garden: { anchor: [0, 0], at: [480, 467], scale: 1, depth: 0.9 },
+  field: { anchor: [0, 0], at: [480, 467], scale: 1, depth: 0.9 },
+  bigfield: { anchor: [0, 0], at: [480, 467], scale: 1, depth: 0.9 },
+  // In the sky over the beds, behind the hills, so the rainbow's feet are hidden.
+  raincloud: { anchor: [560, 86], at: [520, 56], scale: 1, depth: 0.3 },
   // The pond fills most of its page, and lies flat too.
   pond: { anchor: [400, 512], at: [520, 450], scale: 1.5, depth: 0.9 },
 };
@@ -616,10 +734,12 @@ function addInto(scene, layer) {
 }
 
 /**
- * Draw one upgrade on the farm and return { id, pivot, zone, depth, scale, tap }.
+ * Draw one upgrade on the farm and return { id, pivot, zone, depth, scale, parts, tap, water }.
  * `pivot` is the whole upgrade as one object, standing on its foot, so it can be
- * grown, shrunk or nudged as a unit. `api` is { sfx, openWardrobe }, and `left` is
- * where its page starts in the wide world.
+ * grown, shrunk or nudged as a unit. `parts` are its tap targets, each { zone, tap }:
+ * most buildings have one, and a builder with several returns its own `parts`. `tap`
+ * shows what the building does (its first part). `api` is { sfx, openWardrobe, water },
+ * and `left` is where its page starts in the wide world.
  */
 export function buildUpgrade(scene, id, api, left = 0) {
   const place = PLACE[id];
@@ -636,15 +756,16 @@ export function buildUpgrade(scene, id, api, left = 0) {
     return text;
   };
   const built = build(scene, { ...api, add: addInto(scene, layer), put });
-  const z = built.zone;
-  const zone = rect(
+  // From the builder's own coordinates to the wide world.
+  const toWorld = (z) => rect(
     left + place.at[0] + (z.x - place.anchor[0]) * scale,
     place.at[1] + (z.y - place.anchor[1]) * scale,
     z.width * scale,
     z.height * scale,
   );
+  const parts = (built.parts ?? [{ zone: built.zone, tap: built.tap }]).map((part) => ({ zone: toWorld(part.zone), tap: part.tap }));
   // A building is tapped in front of itself but behind anything he has placed.
-  return { id, pivot, zone, depth: depth + 0.5, scale, tap: built.tap };
+  return { id, pivot, zone: toWorld(built.zone), depth: depth + 0.5, scale, parts, tap: parts[0].tap, water: built.water };
 }
 
 /** Where an upgrade stands: { x, y } of its foot. `left` is where its page starts. */

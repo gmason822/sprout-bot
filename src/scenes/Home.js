@@ -87,7 +87,12 @@ export class Home extends Phaser.Scene {
     // The buildings he has earned, each with its own tap toy. If one has just been
     // earned, the farm is first shown as it was, and then it is built in front of him.
     this.upgrades = new Map();
-    this.api = { sfx: this.sfx, openWardrobe: () => this.openWardrobe() };
+    this.api = {
+      sfx: this.sfx,
+      openWardrobe: () => this.openWardrobe(),
+      // The rain cloud's rain falls on whatever is growing.
+      water: () => this.upgrades.forEach((upgrade) => upgrade.water?.()),
+    };
     const owned = ownedUpgrades(this.farm, content.rewards);
     const fresh = this.registry.get('justBuilt');
     this.registry.set('justBuilt', null);
@@ -124,9 +129,11 @@ export class Home extends Phaser.Scene {
     const upgrade = buildUpgrade(this, id, this.api, pageX(page));
     if (!upgrade) return null;
     upgrade.page = page;
-    const { x, y, width, height } = upgrade.zone;
-    upgrade.hit = this.add.zone(x + width / 2, y + height / 2, width, height).setDepth(upgrade.depth);
-    this.in.tappable(upgrade.hit, `up:${id}`);
+    // Most buildings are one thing to tap; a plot of beds is several.
+    upgrade.hits = upgrade.parts.map(({ zone }, i) => {
+      const hit = this.add.zone(zone.centerX, zone.centerY, zone.width, zone.height).setDepth(upgrade.depth);
+      return this.in.tappable(hit, `up:${id}:${i}`);
+    });
     this.upgrades.set(id, upgrade);
     return upgrade;
   }
@@ -135,7 +142,7 @@ export class Home extends Phaser.Scene {
     const upgrade = this.upgrades.get(id);
     if (!upgrade) return;
     this.tweens.killTweensOf(upgrade.pivot);
-    upgrade.hit.destroy();
+    upgrade.hits.forEach((hit) => hit.destroy());
     upgrade.pivot.destroy();
     this.upgrades.delete(id);
   }
@@ -218,12 +225,12 @@ export class Home extends Phaser.Scene {
     this.tweens.add({ targets: upgrade.pivot, scale: upgrade.scale * 1.05, duration: 160, yoyo: true, repeat: 1, ease: 'Sine.inOut' });
   }
 
-  tapUpgrade(id) {
+  tapUpgrade(id, part = 0) {
     if (this.pointer?.id === id) {
       this.pointer.finger.destroy();
       this.pointer = null;
     }
-    this.upgrades.get(id)?.tap();
+    this.upgrades.get(id)?.parts[part]?.tap();
   }
 
   // ---------- building the rest ----------
@@ -381,7 +388,10 @@ export class Home extends Phaser.Scene {
     }
     // Tapping anything else closes it.
     this.closeWardrobe();
-    if (id.startsWith('up:')) return this.tapUpgrade(id.slice(3));
+    if (id.startsWith('up:')) {
+      const [, upgrade, part] = id.split(':');
+      return this.tapUpgrade(upgrade, Number(part));
+    }
     if (id === 'go') return this.leave();
     if (id === 'nav:left') return this.go(neighbour(this.page, -1, this.pages));
     if (id === 'nav:right') return this.go(neighbour(this.page, 1, this.pages));

@@ -91,7 +91,7 @@ The home farm was one screen with a line of buildings. It is becoming one wide p
 
 Built in phases, each one played with before the next:
 1. **The wide farm** (built, waiting for its playtest). Pages, the road, the blue and orange arrows, the house button, a shelf per page, and the 17 existing buildings moved to their pages on a schedule that takes turns. No new drawings.
-2. **Crops.** The planter, corn field and big fields. A plot is rows, each one big tap target: water, grow, ripen, pick. The rain cloud waters every row.
+2. **Crops** (built, waiting for its playtest). The planter box grows into a vegetable patch, a corn field and big fields: one more bed and one more crop each time. A bed is one big tap target: water, grow, ripen, pick into the crate. The rain cloud waters every bed.
 3. **Animals.** Pig pen and stables. Each pen has a food bin that brings the animals trotting over. The coop's eggs roll out one by one while the voice counts them. Friends appear in their pens and wander.
 4. **Workshop and the truck.** Workshop and depot stages, each with its own door. New small rewards: wheels, horns, flags and trailers, all JSON only.
 5. **Pond and Yard.** The dock and boat; the tractor, digger and combine, each driving off to do its job.

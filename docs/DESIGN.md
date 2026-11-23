@@ -178,24 +178,29 @@ So that the buildings are not mistaken for scenery, they are drawn large, and ev
 | Day | Big reward | Page | When tapped |
 |---|---|---|---|
 | 1 | Tent (the first home) | Home | The flap lifts and a lantern glows inside |
-| 3 | Vegetable garden | Crops | Tap to plant, tap to ripen, tap to pick |
+| 3 | Planter box (the first crops) | Crops | One bed to water, grow, ripen and pick |
 | 5 | Hen house | Animals | A hen pops out and lays an egg, which hatches |
 | 8 | Garage | Home | The door rolls up and his paints and hats come out to choose from |
-| 11 | Fence and gate | Home | The gate swings open or shut |
-| 14 | Scarecrow | Crops | It wobbles and the crow flaps off, then sneaks back |
+| 11 | Vegetable patch (replaces the planter) | Crops | Two beds: carrots and tomatoes |
+| 14 | Fence and gate | Home | The gate swings open or shut |
 | 17 | Barn | Animals | The doors open and a cow comes out and moos |
-| 20 | Cabin (replaces the tent) | Home | Lights go on or off, the door opens, the chimney smokes |
-| 23 | Pond | Pond | A fish jumps and splashes |
-| 26 | Windmill | Crops | The sails spin fast, then settle |
-| 29 | Apple tree | Home | It shakes and apples drop and bounce |
-| 32 | Rain cloud | Crops | It rains, then a rainbow comes out for a while |
-| 35 | Well | Home | The bucket goes down, splashes and comes up |
-| 38 | Farmhouse (replaces the cabin, adds a path) | Home | Lights, door and chimney |
-| 41 | Silo | Crops | Grain pours out and two birds fly down for it |
-| 44 | Beehive | Crops | Bees fly out, loop around and come home |
-| 47 | Big farmhouse (replaces the farmhouse) | Home | Lights window by window, door, chimney, a flag |
+| 20 | Scarecrow | Crops | It wobbles and the crow flaps off, then sneaks back |
+| 23 | Cabin (replaces the tent) | Home | Lights go on or off, the door opens, the chimney smokes |
+| 26 | Pond | Pond | A fish jumps and splashes |
+| 29 | Corn field (replaces the patch) | Crops | Three beds: corn as well |
+| 32 | Apple tree | Home | It shakes and apples drop and bounce |
+| 35 | Windmill | Crops | The sails spin fast, then settle |
+| 38 | Well | Home | The bucket goes down, splashes and comes up |
+| 41 | Rain cloud | Crops | It rains on the beds, which all grow a step, then a rainbow comes out |
+| 44 | Farmhouse (replaces the cabin, adds a path) | Home | Lights, door and chimney |
+| 47 | Silo | Crops | Grain pours out and two birds fly down for it |
+| 50 | Big fields (replaces the corn field) | Crops | Four beds, with pumpkins, and wheat along the back |
+| 53 | Beehive | Crops | Bees fly out, loop around and come home |
+| 56 | Big farmhouse (replaces the farmhouse) | Home | Lights window by window, door, chimney, a flag |
 
-- A building can grow in stages: its `replaces` names the one it takes the place of. The tent, cabin, farmhouse and big farmhouse are four stages of one home. Only the best stage he owns is drawn, and an early stage is never given once he has a later one.
+**The crops are beds.** Each bed is one big thing to tap, and each tap takes it one step on: a watering can waters it and it sprouts, it grows, it ripens, and then he picks it and the crop hops into the crate beside the beds. Every bed keeps its own place in that round, so with four beds there is always something ready for a tap. The rain cloud takes every bed one step on at once, but leaves the picking to him. The beds start again bare on each visit.
+
+- A building can grow in stages: its `replaces` names the one it takes the place of. The tent, cabin, farmhouse and big farmhouse are four stages of one home, and the planter, vegetable patch, corn field and big fields are four stages of the crops. Only the best stage he owns is drawn, and an early stage is never given once he has a later one.
 - If a building's day has passed and he does not have it (the schedule was edited, or an older save is further on), the earliest one still owed is given, one per day.
 - A toy ignores taps while it is still doing its thing, so mashing cannot tangle it.
 
